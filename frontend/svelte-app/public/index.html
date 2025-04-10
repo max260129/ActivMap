@@ -1,15 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
 	<meta charset='utf-8'>
 	<meta name='viewport' content='width=device-width,initial-scale=1'>
 
-	<title>Svelte app</title>
+	<title>ActivMap</title>
 
 	<link rel='icon' type='image/png' href='/favicon.png'>
 	<link rel='stylesheet' href='/global.css'>
 	<link rel='stylesheet' href='/build/bundle.css'>
 
+	<script>
+		// Script pour corriger les problèmes d'URL du backend et d'authentification
+		window.addEventListener('DOMContentLoaded', function() {
+			console.log('Script de correction chargé');
+			
+			// Réinitialiser le localStorage au chargement de la page pour tester
+			localStorage.removeItem('auth_token');
+			localStorage.removeItem('user');
+			
+			// Fonction pour vérifier la validité d'un token JWT simple (format uniquement)
+			function isValidJwtFormat(token) {
+				const parts = token.split('.');
+				return parts.length === 3;
+			}
+			
+			// Intercepter toutes les requêtes fetch
+			const originalFetch = window.fetch;
+			window.fetch = function(url, options = {}) {
+				// Correction d'URL pour Docker
+				if (typeof url === 'string' && url.includes('backend:5000')) {
+					url = url.replace('backend:5000', 'localhost:5000');
+					console.log('URL modifiée pour fetch:', url);
+				}
+				
+				// Gestion spéciale pour la route login - stocker le token correctement
+				if (url.includes('/api/auth/login') && options.method === 'POST') {
+					return originalFetch(url, options)
+						.then(response => {
+							if (response.ok) {
+								// Cloner la réponse pour pouvoir la lire
+								const clonedResponse = response.clone();
+								clonedResponse.json().then(data => {
+									if (data && data.access_token) {
+										console.log('Token reçu du serveur:', data.access_token);
+										// Valider et stocker le token
+										if (isValidJwtFormat(data.access_token)) {
+											localStorage.setItem('auth_token', data.access_token);
+											localStorage.setItem('user', JSON.stringify(data.user));
+											console.log('Token et user stockés dans localStorage');
+										} else {
+											console.error('Format de token invalide reçu du serveur');
+										}
+									}
+								});
+							}
+							return response;
+						});
+				}
+				
+				// Gestion spéciale pour les requêtes authentifiées
+				if (url.includes('/api/auth/me') || url.includes('/api/auth/protected')) {
+					console.log('Requête authentifiée vers:', url);
+					
+					// Récupérer le token depuis localStorage
+					const token = localStorage.getItem('auth_token');
+					if (!token) {
+						console.warn('Pas de token dans localStorage');
+						return Promise.reject(new Error('No authentication token found'));
+					}
+					
+					// S'assurer que les options et headers existent
+					options = options || {};
+					options.headers = options.headers || {};
+					
+					// Format correct du header Authorization
+					options.headers['Authorization'] = `Bearer ${token}`;
+					options.headers['Content-Type'] = 'application/json';
+					
+					console.log('Envoi requête avec token:', options.headers.Authorization);
+				}
+				
+				return originalFetch(url, options);
+			};
+		});
+	</script>
 	<script defer src='/build/bundle.js'></script>
 </head>
 

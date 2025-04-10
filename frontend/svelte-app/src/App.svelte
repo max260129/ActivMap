@@ -1,6 +1,15 @@
 <script>
 	import { fade, fly, scale as scaleTransition } from 'svelte/transition';
+	import { onMount } from 'svelte';
+	import Login from './components/Login.svelte';
+	import { isAuthenticated, currentUser, checkAuth, logout, fetchWithAuth } from './services/auth';
 
+	// Configuration du backend
+	const API_URL = 'http://backend:5000';
+	
+	// État d'authentification forcé à false au démarrage
+	$: console.log("État d'authentification:", $isAuthenticated);
+	
 	let latitude = 49.444838;
 	let longitude = 1.094214;
 	let distance = 150;
@@ -24,6 +33,12 @@
 	// Transformation combinée : translation, rotation et zoom
 	$: transformValue = `translate(${translateX}px, ${translateY}px) rotate(${rotate}deg) scale(${scale})`;
   
+	// Vérifier l'authentification au démarrage
+	onMount(() => {
+		// Vérifier l'authentification sans forcer la déconnexion
+		checkAuth();
+	});
+
 	async function generateMap() {
 		loading = true;
 		error = "";
@@ -34,7 +49,7 @@
 		translateX = 0;
 		translateY = 0;
 		try {
-			const response = await fetch('http://backend:5000/generate', {
+			const response = await fetchWithAuth(`${API_URL}/generate`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -42,8 +57,13 @@
 				body: JSON.stringify({ latitude, longitude, distance })
 			});
 			if (!response.ok) {
-				const errData = await response.json();
-				error = errData.error || "Erreur lors de la génération de la carte.";
+				if (response.status === 401) {
+					error = "Vous devez être connecté pour générer une carte.";
+					$isAuthenticated = false;
+				} else {
+					const errData = await response.json();
+					error = errData.error || "Erreur lors de la génération de la carte.";
+				}
 			} else {
 				const blob = await response.blob();
 				svgUrl = URL.createObjectURL(blob);
@@ -96,6 +116,16 @@
   
 	function endDrag() {
 		isDragging = false;
+	}
+
+	function handleLogout() {
+		logout();
+		svgUrl = "";
+	}
+
+	function handleLoginSuccess() {
+		// Rafraîchir l'état d'authentification
+		checkAuth();
 	}
 </script>
 
@@ -265,58 +295,99 @@
 		text-align: center;
 		margin: 1rem 0;
 	}
+
+	/* Style pour la barre de navigation */
+	.navbar {
+		display: flex;
+		justify-content: flex-end;
+		padding: 1rem 2rem;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.user-info {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+
+	.logout-btn {
+		background: transparent;
+		border: 1px solid #cc5200;
+		padding: 0.5rem 1rem;
+	}
+
+	.logout-btn:hover {
+		background: rgba(204, 82, 0, 0.2);
+	}
 </style>
   
 <main>
-	<div class="card" transition:fly={{ y: -20, duration: 600 }}>
-		<h1>Générateur de carte stylisée</h1>
-		<form on:submit|preventDefault={generateMap}>
-			<label>
-				Latitude :
-				<input type="number" bind:value={latitude} step="0.000001" required />
-			</label>
-			<label>
-				Longitude :
-				<input type="number" bind:value={longitude} step="0.000001" required />
-			</label>
-			<label>
-				Distance (m) :
-				<input type="number" bind:value={distance} required />
-			</label>
-			<button type="submit">Générer la carte</button>
-		</form>
-		{#if loading}
-			<div class="loading-spinner"></div>
-			<p style="text-align: center;">Génération en cours...</p>
-		{/if}
-		{#if error}
-			<p class="error">{error}</p>
-		{/if}
-	</div>
-	
-	{#if svgUrl}
-		<h2 transition:fade style="text-align: center;">Carte générée :</h2>
-		<div class="card" transition:fly={{ y: 20, duration: 600 }}>
-			<div
-				class="svg-container"
-				on:wheel|preventDefault={handleWheel}
-				on:mousedown={startDrag}
-				on:mousemove={drag}
-				on:mouseup={endDrag}
-				on:mouseleave={endDrag}
-			>
-				<div class="zoom-controls">
-					<button on:click={zoomIn} aria-label="Zoom In">+</button>
-					<button on:click={zoomOut} aria-label="Zoom Out">–</button>
-					<button on:click={rotateMap} aria-label="Rotate">⟳</button>
-				</div>
-				<img src={svgUrl} alt="Carte stylisée" style:transform={transformValue} transition:scaleTransition={{ duration: 400 }}/>
+	{#if $isAuthenticated}
+		<!-- Barre de navigation avec infos utilisateur -->
+		<div class="navbar">
+			<div class="user-info">
+				<span>Connecté en tant que {$currentUser?.email}</span>
+				<button class="logout-btn" on:click={handleLogout}>Déconnexion</button>
 			</div>
 		</div>
-		<div class="download-container">
-			<a download="carte.svg" href={svgUrl}>
-				<button>Télécharger l'image SVG</button>
-			</a>
+		
+		<div class="card" transition:fly={{ y: -20, duration: 600 }}>
+			<h1>Générateur de carte stylisée</h1>
+			<form on:submit|preventDefault={generateMap}>
+				<label>
+					Latitude :
+					<input type="number" bind:value={latitude} step="0.000001" required />
+				</label>
+				<label>
+					Longitude :
+					<input type="number" bind:value={longitude} step="0.000001" required />
+				</label>
+				<label>
+					Distance (m) :
+					<input type="number" bind:value={distance} required />
+				</label>
+				<button type="submit">Générer la carte</button>
+			</form>
+			{#if loading}
+				<div class="loading-spinner"></div>
+				<p style="text-align: center;">Génération en cours...</p>
+			{/if}
+			{#if error}
+				<p class="error">{error}</p>
+			{/if}
+		</div>
+		
+		{#if svgUrl}
+			<h2 transition:fade style="text-align: center;">Carte générée :</h2>
+			<div class="card" transition:fly={{ y: 20, duration: 600 }}>
+				<div
+					class="svg-container"
+					on:wheel|preventDefault={handleWheel}
+					on:mousedown={startDrag}
+					on:mousemove={drag}
+					on:mouseup={endDrag}
+					on:mouseleave={endDrag}
+				>
+					<div class="zoom-controls">
+						<button on:click={zoomIn} aria-label="Zoom In">+</button>
+						<button on:click={zoomOut} aria-label="Zoom Out">–</button>
+						<button on:click={rotateMap} aria-label="Rotate">⟳</button>
+					</div>
+					<img src={svgUrl} alt="Carte stylisée" style:transform={transformValue} transition:scaleTransition={{ duration: 400 }}/>
+				</div>
+			</div>
+			<div class="download-container">
+				<a download="carte.svg" href={svgUrl}>
+					<button>Télécharger l'image SVG</button>
+				</a>
+			</div>
+		{/if}
+	{:else}
+		<!-- Page de connexion -->
+		<div class="card" transition:fly={{ y: -20, duration: 600 }}>
+			<h1>ActivMap</h1>
+			<Login on:login-success={handleLoginSuccess} />
 		</div>
 	{/if}
 </main>

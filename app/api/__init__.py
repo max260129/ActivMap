@@ -1,10 +1,20 @@
 from flask import Flask
 from flask_cors import CORS
-import os
 
+# Création de l'application Flask
 app = Flask(__name__, 
-            static_folder=os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static'), 
-            template_folder=os.path.join(os.path.dirname(os.path.dirname(__file__)), 'templates'))
-CORS(app)
+            static_folder='../static', 
+            template_folder='../templates')
 
-from api import routes 
+# Configurer CORS pour permettre les requêtes du frontend
+CORS(app, origins="*", supports_credentials=True)
+
+# Définition de la route principale
+@app.route('/')
+def index():
+    return "API ActivMap"
+
+# Import des autres modules en bas pour éviter les importations circulaires
+from . import routes
+
+# Ce fichier déclare le dossier api comme un package Python 
