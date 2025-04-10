@@ -1,0 +1,22 @@
+services:
+  backend:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./app:/app/app
+    environment:
+      - FLASK_ENV=production
+    restart: unless-stopped
+    command: python app/app.py
+
+  frontend:
+    build: ./frontend/svelte-app
+    ports:
+      - "3000:8080"
+    volumes:
+      - ./frontend/svelte-app/src:/app/src
+      - ./frontend/svelte-app/public:/app/public
+    restart: unless-stopped
+    depends_on:
+      - backend 
