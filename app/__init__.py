@@ -1,1 +1,0 @@
-# Ce fichier déclare le dossier app comme un package Python 

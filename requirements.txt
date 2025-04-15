@@ -13,3 +13,8 @@ flask-jwt-extended==4.6.0
 bcrypt==4.1.2
 flask-migrate==4.0.5
 python-dotenv==1.0.1
+werkzeug
+requests
+geojson
+Pillow
+geographiclib

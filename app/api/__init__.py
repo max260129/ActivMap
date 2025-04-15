@@ -6,8 +6,12 @@ app = Flask(__name__,
             static_folder='../static', 
             template_folder='../templates')
 
-# Configurer CORS pour permettre les requêtes du frontend
-CORS(app, origins="*", supports_credentials=True)
+# Configurer CORS pour permettre les requêtes du frontend avec des origines spécifiques
+CORS(app, 
+     origins=["http://localhost:3000", "http://localhost:8080"], 
+     supports_credentials=True,
+     allow_headers=["Content-Type", "Authorization"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
 # Définition de la route principale
 @app.route('/')

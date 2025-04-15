@@ -35,13 +35,13 @@ fi
 
 # Initialiser la base de données (migrations)
 echo "🔧 Initialisation de la base de données..."
-docker-compose exec backend flask db init || true
-docker-compose exec backend flask db migrate -m "Initial migration" || true
-docker-compose exec backend flask db upgrade || true
+docker-compose exec backend env FLASK_APP=app.py flask db init || true
+docker-compose exec backend env FLASK_APP=app.py flask db migrate -m "Initial migration" || true
+docker-compose exec backend env FLASK_APP=app.py flask db upgrade || true
 
 # Création de l'utilisateur par défaut
 echo "👤 Configuration de l'utilisateur par défaut..."
-docker-compose exec backend python -c "from api import app; from init_db import seed_default_user; seed_default_user(app)" || true
+docker-compose exec backend python -c "from app import app; from init_db import seed_default_user; seed_default_user(app)" || true
 
 # Affichage des informations
 echo ""

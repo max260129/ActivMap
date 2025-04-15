@@ -17,13 +17,9 @@ COPY requirements.txt .
 # Installer les dépendances Python
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Créer la structure de dossiers
-RUN mkdir -p app/api
-
 # Copier tous les fichiers nécessaires
-COPY app/ ./app/
+COPY app/ .
 COPY models.py middleware.py init_db.py ./
-COPY app/generate_map.py ./generate_map.py
 
 # Exposer le port
 EXPOSE 5000
@@ -32,4 +28,4 @@ EXPOSE 5000
 ENV PYTHONPATH="${PYTHONPATH}:/app"
 
 # Commande de lancement
-CMD ["python", "app/app.py"] 
+CMD ["python", "app.py"] 

@@ -7,6 +7,7 @@ from flask_migrate import Migrate
 import time
 import importlib.util
 import logging
+from flask_cors import CORS  # Importation de CORS
 
 # Configuration des logs
 logging.basicConfig(level=logging.DEBUG)
@@ -27,6 +28,7 @@ spec.loader.exec_module(api)
 
 # Récupération de l'application Flask
 app = api.app
+CORS(app, supports_credentials=True) # Initialisation CORS globale avec support des credentials
 
 # Import des modèles
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -48,6 +50,7 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600  # 1 heure
 # Initialisation des extensions
 db.init_app(app)
 jwt = JWTManager(app)
+migrate = Migrate(app, db)
 
 # Identity handling pour JWT
 @jwt.user_identity_loader

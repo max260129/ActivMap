@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import request, jsonify
+from flask import request, jsonify, make_response
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 import sys, os
 
@@ -32,8 +32,16 @@ def protect_route(fn):
     """Middleware pour protéger les routes avec JWT"""
     @wraps(fn)
     def wrapper(*args, **kwargs):
+        # Laisser flask_cors gérer les requêtes OPTIONS normalement.
+        # Si on arrive ici pour une requête OPTIONS, renvoyer OK pour débloquer le preflight.
+        if request.method == 'OPTIONS':
+            response = make_response()
+            # flask_cors ajoutera les bons en-têtes CORS
+            return response # Renvoie 200 OK
+            
         try:
             verify_jwt_in_request()
+            # Exécuter la fonction originale pour les autres méthodes
             return fn(*args, **kwargs)
         except Exception as e:
             return jsonify({"error": "Authentification requise"}), 401

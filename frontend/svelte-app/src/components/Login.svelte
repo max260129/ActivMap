@@ -5,8 +5,8 @@
     
     const dispatch = createEventDispatcher();
     
-    // Utilisez simplement une URL relative pour éviter les problèmes de CORS et d'environnement
-    const API_URL = '';
+    // Utiliser la même URL que dans auth.js
+    const API_URL = 'http://localhost:5000';
     
     let email = '';
     let password = '';
@@ -41,7 +41,7 @@
         }
         
         try {
-            const endpoint = isRegisterMode ? '/api/auth/register' : '/api/auth/login';
+            const endpoint = isRegisterMode ? `${API_URL}/api/auth/register` : `${API_URL}/api/auth/login`;
             console.log('Tentative de connexion à:', endpoint);
             
             const response = await fetch(endpoint, {
@@ -71,12 +71,16 @@
             }
             
             console.log('Connexion réussie, redirection...');
+            console.log('Token reçu du serveur:', data.access_token);
+            
+            // Sauvegarder le token et les infos utilisateur
+            localStorage.setItem('auth_token', data.access_token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            console.log('Token et user stockés dans localStorage');
             
             // Mettre à jour les stores
             isAuthenticated.set(true);
             currentUser.set(data.user);
-            
-            // L'intercepteur global fetch a déjà sauvegardé le token et l'user dans localStorage
             
             // Informer le composant parent de la connexion réussie
             dispatch('login-success');

@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 
-// Utiliser une URL relative pour éviter les problèmes de CORS et d'environnement
-const API_URL = '';
+// Définir l'URL de l'API pour éviter les problèmes de CORS
+const API_URL = 'http://localhost:5000';
 
 // Store pour l'état d'authentification - initialisation explicite à false
 export const isAuthenticated = writable(false);
@@ -30,7 +30,7 @@ export function checkAuth() {
         const user = JSON.parse(userStr);
         
         // Vérifier la validité du token avec le backend
-        fetch(`/api/auth/me`, {
+        fetch(`${API_URL}/api/auth/me`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -88,8 +88,17 @@ export function getToken() {
 export async function fetchWithAuth(url, options = {}) {
     const token = getToken();
     
-    // Assurer que l'URL est bien relative si elle commence par /api
-    const apiUrl = url.startsWith('/api') ? url : `/api${url.startsWith('/') ? url : `/${url}`}`;
+    // Adapter l'URL en fonction du type de requête
+    let apiUrl = url;
+    
+    // Si l'URL ne contient pas déjà http:// et ne commence pas par /api, ajuster le format
+    if (!url.includes('http://') && !url.startsWith('/api')) {
+        apiUrl = `${API_URL}/api${url.startsWith('/') ? url : `/${url}`}`;
+    } else if (url.startsWith('/api')) {
+        apiUrl = `${API_URL}${url}`;
+    }
+    
+    console.log("URL modifiée pour fetch:", apiUrl);
     
     if (token) {
         options.headers = {
@@ -97,6 +106,7 @@ export async function fetchWithAuth(url, options = {}) {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         };
+        console.log("Envoi requête avec token:", `Bearer ${token}`);
     }
     
     try {

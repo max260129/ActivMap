@@ -5,7 +5,7 @@
 	import { isAuthenticated, currentUser, checkAuth, logout, fetchWithAuth } from './services/auth';
 
 	// Configuration du backend
-	const API_URL = 'http://backend:5000';
+	const API_URL = 'http://localhost:5000';
 	
 	// État d'authentification forcé à false au démarrage
 	$: console.log("État d'authentification:", $isAuthenticated);
@@ -20,6 +20,8 @@
 	const minScale = 0.5;
 	const maxScale = 3.0;
 	let rotate = 0; // Angle de rotation en degrés
+	// Flag pour utiliser l'endpoint public (non-protégé)
+	let usePublicEndpoint = false;
   
 	// Variables pour le panning
 	let translateX = 0;
@@ -49,7 +51,11 @@
 		translateX = 0;
 		translateY = 0;
 		try {
-			const response = await fetchWithAuth(`${API_URL}/generate`, {
+			// Choisir l'endpoint en fonction du flag
+			const endpoint = usePublicEndpoint ? `${API_URL}/generate-public` : `${API_URL}/generate`;
+			console.log("Endpoint utilisé:", endpoint);
+			
+			const response = await fetchWithAuth(endpoint, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -320,6 +326,20 @@
 	.logout-btn:hover {
 		background: rgba(204, 82, 0, 0.2);
 	}
+
+	.checkbox-label {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.9rem;
+		color: #ccc;
+	}
+	
+	.checkbox-label input[type="checkbox"] {
+		width: auto;
+		margin: 0;
+	}
 </style>
   
 <main>
@@ -347,6 +367,13 @@
 					Distance (m) :
 					<input type="number" bind:value={distance} required />
 				</label>
+				
+				<!-- Option pour utiliser l'API non-protégée -->
+				<label class="checkbox-label">
+					<input type="checkbox" bind:checked={usePublicEndpoint}>
+					Utiliser la version non-protégée (debug)
+				</label>
+				
 				<button type="submit">Générer la carte</button>
 			</form>
 			{#if loading}
