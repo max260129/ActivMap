@@ -75,7 +75,7 @@ ActivMap/
 
 ## API
 
-- `POST /generate`: Génère une carte stylisée
+- `POST /generate-map`: Génère une carte stylisée
   - Payload:
     ```json
     {

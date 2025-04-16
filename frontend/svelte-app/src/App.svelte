@@ -52,7 +52,7 @@
 		translateY = 0;
 		try {
 			// Choisir l'endpoint en fonction du flag
-			const endpoint = usePublicEndpoint ? `${API_URL}/generate-public` : `${API_URL}/generate`;
+			const endpoint = usePublicEndpoint ? `${API_URL}/generate-public` : `${API_URL}/generate-map`;
 			console.log("Endpoint utilisé:", endpoint);
 			
 			const response = await fetchWithAuth(endpoint, {

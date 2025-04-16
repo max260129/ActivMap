@@ -13,14 +13,23 @@ import matplotlib.transforms as transforms
 from shapely.geometry import LineString
 import svgutils.compose as sc
 
+
+# Définir un répertoire absolu pour les cartes générées
+base_dir = os.path.dirname(os.path.abspath(__file__))
+generated_dir = os.path.join(base_dir, "generated_maps")
+if not os.path.exists(generated_dir):
+    os.makedirs(generated_dir)
+
+
 # Pour que le texte reste en format texte dans le SVG
 mpl.rcParams['svg.fonttype'] = 'none'
 
 def generate_map(latitude=43.832197, longitude=4.349661, distance=150):
     # --- Nettoyage des fichiers précédents ---
-    output_png1 = "map_stylized.png"
-    output_png2 = "map_stylized2.png"
-    output_svg = "map_stylized.svg"
+    output_png1 = os.path.join(generated_dir, "map_stylized.png")
+    output_png2 = os.path.join(generated_dir, "map_stylized2.png")
+    output_svg = os.path.join(generated_dir, "map_stylized.svg")
+
     for f in [output_png1, output_png2, output_svg]:
         if os.path.exists(f):
             os.remove(f)

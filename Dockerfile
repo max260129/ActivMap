@@ -28,4 +28,4 @@ EXPOSE 5000
 ENV PYTHONPATH="${PYTHONPATH}:/app"
 
 # Commande de lancement
-CMD ["python", "app.py"] 
+CMD ["python", "run.py"] 

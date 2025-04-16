@@ -15,11 +15,11 @@ services:
     env_file:
       - .env
     environment:
-      - FLASK_APP=app.app
+      - FLASK_APP=app.run
       - FLASK_ENV=development
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/activmap
       - JWT_SECRET_KEY=votre_cle_secrete_a_changer_en_production
-    command: python app/app.py
+    command: python app/run.py
 
   frontend:
     build: ./frontend/svelte-app
