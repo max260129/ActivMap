@@ -7,6 +7,7 @@ from app import app
 # Pour éviter la collision avec le nom de la fonction, renomme l'import de generate_map
 from generate_map import generate_map as gen_map
 
+
 @app.route('/generate-map', methods=['POST', 'OPTIONS'])
 @protect_route
 def generate_map_route():
@@ -15,7 +16,9 @@ def generate_map_route():
         response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
         response.headers.add('Access-Control-Allow-Methods', 'POST,OPTIONS')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')  # Ajout de cet en-tête !
         return response, 200
+
 
     data = request.get_json()
     latitude = data.get('latitude', 49.444838)
