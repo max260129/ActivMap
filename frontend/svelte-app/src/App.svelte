@@ -2,6 +2,7 @@
 	import { fade, fly, scale as scaleTransition } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import Login from './components/Login.svelte';
+	import Sidebar from './components/Sidebar.svelte';
 	import { isAuthenticated, currentUser, checkAuth, logout, fetchWithAuth } from './services/auth';
 
 	// Configuration du backend
@@ -302,31 +303,6 @@
 		margin: 1rem 0;
 	}
 
-	/* Style pour la barre de navigation */
-	.navbar {
-		display: flex;
-		justify-content: flex-end;
-		padding: 1rem 2rem;
-		width: 100%;
-		box-sizing: border-box;
-	}
-
-	.user-info {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-	}
-
-	.logout-btn {
-		background: transparent;
-		border: 1px solid #cc5200;
-		padding: 0.5rem 1rem;
-	}
-
-	.logout-btn:hover {
-		background: rgba(204, 82, 0, 0.2);
-	}
-
 	.checkbox-label {
 		display: flex;
 		flex-direction: row;
@@ -340,19 +316,21 @@
 		width: auto;
 		margin: 0;
 	}
+
+	/* Contenu principal décalé pour la sidebar */
+	.content-auth {
+		margin-left: 240px; /* largeur de la sidebar */
+		width: calc(100% - 240px);
+	}
 </style>
   
 <main>
 	{#if $isAuthenticated}
-		<!-- Barre de navigation avec infos utilisateur -->
-		<div class="navbar">
-			<div class="user-info">
-				<span>Connecté en tant que {$currentUser?.email}</span>
-				<button class="logout-btn" on:click={handleLogout}>Déconnexion</button>
-			</div>
-		</div>
-		
-		<div class="card" transition:fly={{ y: -20, duration: 600 }}>
+		<!-- Sidebar de navigation -->
+		<Sidebar />
+
+		<div class="content-auth">
+		<div id="carte" class="card" transition:fly={{ y: -20, duration: 600 }}>
 			<h1>Générateur de carte stylisée</h1>
 			<form on:submit|preventDefault={generateMap}>
 				<label>
@@ -388,8 +366,11 @@
 		{#if svgUrl}
 			<h2 transition:fade style="text-align: center;">Carte générée :</h2>
 			<div class="card" transition:fly={{ y: 20, duration: 600 }}>
+				<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 				<div
 					class="svg-container"
+					role="application"
+					aria-label="Carte stylisée"
 					on:wheel|preventDefault={handleWheel}
 					on:mousedown={startDrag}
 					on:mousemove={drag}
@@ -410,6 +391,7 @@
 				</a>
 			</div>
 		{/if}
+		</div> <!-- fin content-auth -->
 	{:else}
 		<!-- Page de connexion -->
 		<div class="card" transition:fly={{ y: -20, duration: 600 }}>

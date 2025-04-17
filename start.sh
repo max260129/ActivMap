@@ -18,6 +18,9 @@ docker system prune -f > /dev/null 2>&1
 echo "🏗️ Reconstruction des images..."
 docker-compose build --no-cache
 
+echo "🔨 Build du frontend pour que les modifications soient visibles..."
+docker-compose run --rm frontend npm run build
+
 # Lancement des conteneurs
 echo "🚀 Démarrage des conteneurs avec Docker Compose..."
 docker-compose up -d
@@ -41,7 +44,7 @@ docker-compose exec backend env FLASK_APP=run.py flask db upgrade || true
 
 # Création de l'utilisateur par défaut
 echo "👤 Configuration de l'utilisateur par défaut..."
-docker-compose exec backend python -c "from app import app; from init_db import seed_default_user; seed_default_user(app)" || true
+docker-compose exec backend python -c "from init_db import seed_default_user; seed_default_user()" || true
 
 # Affichage des informations
 echo ""
