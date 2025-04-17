@@ -1,11 +1,11 @@
 # app/api/routes.py
 from flask import request, jsonify, send_file, make_response
 from middleware import protect_route
-# Importer l'instance Flask défini dans ce package (app/api/__init__.py)
+# Importer l'instance Flask défini dans ce package (app/api/_init_.py)
 from app import app
 
 # Pour éviter la collision avec le nom de la fonction, renomme l'import de generate_map
-from generate_map import generate_map as gen_map
+from app.generate_map import generate_map
 
 
 @app.route('/generate-map', methods=['POST', 'OPTIONS'])
@@ -16,7 +16,7 @@ def generate_map_route():
         response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
         response.headers.add('Access-Control-Allow-Methods', 'POST,OPTIONS')
-        response.headers.add('Access-Control-Allow-Credentials', 'true')  # Ajout de cet en-tête !
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
         return response, 200
 
 
@@ -25,7 +25,7 @@ def generate_map_route():
     longitude = data.get('longitude', 1.094214)
     distance = data.get('distance', 150)
     try:
-        output_svg = gen_map(latitude, longitude, distance)
+        output_svg = generate_map(latitude, longitude, distance)
         response = make_response(send_file(output_svg, mimetype='image/svg+xml'))
         return response
     except Exception as e:

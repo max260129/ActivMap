@@ -321,6 +321,11 @@
 	.content-auth {
 		margin-left: 240px; /* largeur de la sidebar */
 		width: calc(100% - 240px);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 2rem;
+		gap: 2rem;
 	}
 </style>
   
@@ -344,12 +349,6 @@
 				<label>
 					Distance (m) :
 					<input type="number" bind:value={distance} required />
-				</label>
-				
-				<!-- Option pour utiliser l'API non-protégée -->
-				<label class="checkbox-label">
-					<input type="checkbox" bind:checked={usePublicEndpoint}>
-					Utiliser la version non-protégée (debug)
 				</label>
 				
 				<button type="submit">Générer la carte</button>
