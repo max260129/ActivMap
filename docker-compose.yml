@@ -4,11 +4,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./app:/app/app
-      - ./models.py:/app/models.py
-      - ./middleware.py:/app/middleware.py
-      - ./init_db.py:/app/init_db.py
-      - ./generate_map.py:/app/generate_map.py
+      - ./:/app
     restart: unless-stopped
     depends_on:
       - db
@@ -17,20 +13,24 @@ services:
     environment:
       - FLASK_APP=app.run
       - FLASK_ENV=development
+      - FLASK_DEBUG=1
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/activmap
       - JWT_SECRET_KEY=votre_cle_secrete_a_changer_en_production
-    command: python app/run.py
+    command: flask run --host=0.0.0.0 --reload
 
   frontend:
-    build: ./frontend/svelte-app
+    build:
+      context: ./frontend/svelte-app
+      dockerfile: Dockerfile.dev
     ports:
       - "3000:8080"
     volumes:
-      - ./frontend/svelte-app/src:/app/src
-      - ./frontend/svelte-app/public:/app/public
+      - ./frontend/svelte-app:/app
+      - /app/node_modules
     restart: unless-stopped
     depends_on:
-      - backend 
+      - backend
+    command: npm run dev
       
   db:
     image: postgres:14-alpine
