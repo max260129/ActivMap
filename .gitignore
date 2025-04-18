@@ -34,3 +34,6 @@ docker-compose.override.yml
 # Système d'exploitation
 .DS_Store
 Thumbs.db
+
+# Rollup / Svelte build artifacts
+frontend/svelte-app/public/build/
