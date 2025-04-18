@@ -42,7 +42,7 @@ export function checkAuth() {
             if (response.ok) {
                 console.log("Token validé par le backend");
                 isAuthenticated.set(true);
-                currentUser.set(user);
+                currentUser.set({ ...user });
                 return true;
             } else {
                 console.log("Token invalide, déconnexion");

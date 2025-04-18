@@ -84,6 +84,10 @@ def missing_token_callback(error_string):
 from app.api import auth
 app.register_blueprint(auth.auth_bp, url_prefix='/api/auth')
 
+# Blueprint équipe
+from app.api.team import team_bp
+app.register_blueprint(team_bp)
+
 # Pour le développement, attendre que la base de données soit prête
 print("Attente de la base de données...")
 time.sleep(3)

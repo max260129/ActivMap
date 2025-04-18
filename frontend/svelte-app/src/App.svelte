@@ -12,6 +12,7 @@
 	import Parametre from './pages/Parametre.svelte';
 	import Equipe from './pages/Equipe.svelte';
 	import Historique from './pages/Historique.svelte';
+	import AcceptInvite from './pages/AcceptInvite.svelte';
 	
 	// Configuration du backend
 	const API_URL = 'http://localhost:5000';
@@ -24,7 +25,7 @@
 	
 	// Fonction pour définir la page active
 	function setActivePage() {
-		const hash = window.location.hash.replace('#', '');
+		const hash = window.location.hash.replace('#', '').split('?')[0];
 		currentPage = hash || 'carte';
 	}
 	
@@ -471,12 +472,18 @@
 			<Equipe />
 		{:else if currentPage === 'historique'}
 			<Historique />
+		{:else if currentPage === 'invite'}
+			<AcceptInvite />
 		{/if}
 	{:else}
-		<!-- Page de connexion -->
-		<div class="card" transition:fly={{ y: -20, duration: 600 }}>
-			<h1>ActivMap</h1>
-			<Login on:login-success={handleLoginSuccess} />
-		</div>
+		{#if currentPage === 'invite'}
+			<AcceptInvite />
+		{:else}
+			<!-- Page de connexion -->
+			<div class="card" transition:fly={{ y: -20, duration: 600 }}>
+				<h1>ActivMap</h1>
+				<Login on:login-success={handleLoginSuccess} />
+			</div>
+		{/if}
 	{/if}
 </main>
