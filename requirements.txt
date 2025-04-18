@@ -19,3 +19,4 @@ geojson
 Pillow
 geographiclib
 watchdog
+python-dateutil==2.9.0
