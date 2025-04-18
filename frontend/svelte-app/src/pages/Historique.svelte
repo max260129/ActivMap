@@ -2,8 +2,11 @@
   import Sidebar from "../components/Sidebar.svelte";
   import { onMount } from 'svelte';
   import { getHistory, deleteHistory, fetchFile } from '../services/history.js';
+  import { historyItems as historyStore } from '../stores/history.js';
   
   let historyItems = [];
+  historyStore.subscribe(value => historyItems = value);
+
   let loading = true;
 
   async function loadHistory() {
@@ -30,6 +33,7 @@
           return el;
         })
       );
+      historyStore.set(historyItems);
     } catch (e) {
       console.error(e);
     } finally {

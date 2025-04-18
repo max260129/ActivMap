@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from models import db, User
 from middleware import admin_required
 from utils.mailer import send_email
+from app.run import socketio
 
 team_bp = Blueprint('team', __name__, url_prefix='/api/team')
 
@@ -68,6 +69,9 @@ def create_user():
 
         db.session.add(new_user)
         db.session.commit()
+
+        # --- Évènement temps‑réel : invitation envoyée ---
+        socketio.emit('team_member_invited', user_to_dict(new_user))
 
         # Envoi de l'e‑mail d'invitation
         invite_link = f"http://localhost:3000/#invite?token={raw_token}"

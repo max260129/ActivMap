@@ -6,6 +6,7 @@
 	import { isAuthenticated, currentUser, checkAuth, logout, fetchWithAuth } from './services/auth';
 	import { preferences } from './stores/preferences.js';
 	import { t, locale } from './i18n.js';
+	import { initSocket } from './services/socket.js';
 	
 	// Import des nouvelles pages
 	import Statistique from './pages/Statistique.svelte';
@@ -83,6 +84,8 @@
 		return () => {
 			window.removeEventListener('hashchange', setActivePage);
 		};
+		
+		initSocket();
 	});
 
 	// Mettre à jour la distance par défaut selon les préférences
@@ -189,6 +192,7 @@
 	function handleLoginSuccess() {
 		// Rafraîchir l'état d'authentification
 		checkAuth();
+		initSocket();
 	}
 </script>
 

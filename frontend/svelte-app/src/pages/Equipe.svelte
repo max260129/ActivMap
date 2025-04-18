@@ -3,6 +3,7 @@
   import { fly } from 'svelte/transition';
   import { onMount } from 'svelte';
   import { fetchWithAuth, currentUser } from '../services/auth.js';
+  import { socket } from '../services/socket.js';
   
   let teamMembers = [];
   let loading = false;
@@ -30,7 +31,20 @@
     loading = false;
   }
   
-  onMount(loadMembers);
+  onMount(() => {
+    loadMembers();
+
+    // Abonnement socket pour mise à jour temps réel
+    socket.subscribe(s => {
+      if (!s) return;
+      s.on('team_member_invited', (payload) => {
+        teamMembers = [...teamMembers, payload];
+      });
+      s.on('team_member_joined', (payload) => {
+        teamMembers = teamMembers.map(m => m.id === payload.id ? payload : m);
+      });
+    });
+  });
   
   // Redirection si non admin
   onMount(() => {

@@ -4,6 +4,7 @@
   import { getStats } from '../services/stats.js';
   import { Bar } from 'svelte-chartjs';
   import 'chart.js/auto';
+  import { socket } from '../services/socket.js';
 
   let stats = null;
   let loading = true;
@@ -18,6 +19,16 @@
     } finally {
       loading = false;
     }
+
+    // Abonnement temps réel
+    socket.subscribe(s => {
+      if (!s) return;
+      const refresh = async () => {
+        try { stats = await getStats(); } catch(e) { console.error(e); }
+      };
+      s.on('map_generated', refresh);
+      s.on('map_deleted', refresh);
+    });
   });
 
   $: chartData = stats ? {

@@ -14,6 +14,7 @@ from sqlalchemy import func, extract
 
 # Pour éviter la collision avec le nom de la fonction, renomme l'import de generate_map
 from app.generate_map import generate_map
+from app.run import socketio
 
 
 @app.route('/generate-map', methods=['POST', 'OPTIONS'])
@@ -65,6 +66,21 @@ def generate_map_route():
             )
             db.session.add(history_entry)
             db.session.commit()
+
+            # --- Émission évènement temps‑réel ---
+            svg_url = url_for('get_history_file', history_id=history_entry.id, _external=True)
+            socketio.emit(
+                'map_generated',
+                {
+                    'id': history_entry.id,
+                    'created_at': history_entry.created_at.isoformat(),
+                    'latitude': latitude,
+                    'longitude': longitude,
+                    'distance': distance,
+                    'svg_url': svg_url
+                },
+                room=f"user:{user.id}"
+            )
 
         response = make_response(send_file(final_svg_path, mimetype='image/svg+xml'))
         return response
@@ -150,6 +166,9 @@ def delete_history(history_id):
             os.remove(item.file_path)
         db.session.delete(item)
         db.session.commit()
+
+        # --- Évènement temps‑réel ---
+        socketio.emit('map_deleted', {'id': item.id}, room=f"user:{user_id}")
         return jsonify({'message': 'Supprimé'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -188,6 +207,21 @@ def regenerate_history(history_id):
         )
         db.session.add(new_entry)
         db.session.commit()
+
+        # --- Évènement temps‑réel ---
+        svg_url_new = url_for('get_history_file', history_id=new_entry.id, _external=True)
+        socketio.emit(
+            'map_generated',
+            {
+                'id': new_entry.id,
+                'created_at': new_entry.created_at.isoformat(),
+                'latitude': new_entry.latitude,
+                'longitude': new_entry.longitude,
+                'distance': new_entry.distance,
+                'svg_url': svg_url_new
+            },
+            room=f"user:{user_id}"
+        )
 
         return jsonify({'message': 'Regénéré', 'id': new_entry.id}), 201
     except Exception as e:
@@ -260,6 +294,9 @@ def update_settings():
 
     try:
         db.session.commit()
+
+        # --- Évènement temps‑réel préférences ---
+        socketio.emit('settings_changed', user.to_dict(), room=f"user:{user_id}")
         return jsonify({'message': 'Préférences mises à jour'}), 200
     except Exception as e:
         db.session.rollback()

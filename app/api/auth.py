@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 import hashlib
 import uuid
 from utils.mailer import send_email
+from app.run import socketio
+from app.api.team import user_to_dict
 
 # Ajout du répertoire parent au chemin Python
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -169,7 +171,10 @@ def accept_invite():
 
     db.session.commit()
 
-    return jsonify({'message': 'Mot de passe défini, vous pouvez vous connecter'}), 200 
+    # --- Évènement temps‑réel : membre rejoint ---
+    socketio.emit('team_member_joined', user_to_dict(user))
+
+    return jsonify({'message': 'Mot de passe défini, vous pouvez vous connecter'}), 200
 
 # ------------------------------------------------------------
 # Mot de passe oublié : demande de lien

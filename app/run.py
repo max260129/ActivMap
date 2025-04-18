@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from flask_cors import CORS
+from flask_socketio import SocketIO
 
 # Chargement des variables d'environnement
 load_dotenv()
@@ -20,6 +21,15 @@ from app import app  # Cette ligne récupère l'instance Flask définie dans app
 
 # Initialisation globale de CORS (support des credentials)
 CORS(app, supports_credentials=True)
+
+# --- Ajout SocketIO ---
+# Crée une instance SocketIO réutilisable dans le reste de l'application
+socketio = SocketIO(
+    app,
+    cors_allowed_origins="*",  # En développement ; restreindre en prod
+    ping_interval=25,
+    ping_timeout=60
+)
 
 # Import des routes (elles s'enregistrent déjà via l'import dans app/api/__init__.py, 
 # mais ici on peut forcer leur chargement si besoin)
@@ -103,4 +113,5 @@ with app.app_context():
         print(f"❌ Erreur lors de la création des tables: {str(e)}")
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    # Lancement via SocketIO pour supporter les WebSockets
+    socketio.run(app, host='0.0.0.0', debug=True)
