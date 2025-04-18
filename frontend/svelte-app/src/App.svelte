@@ -4,6 +4,7 @@
 	import Login from './components/Login.svelte';
 	import Sidebar from './components/Sidebar.svelte';
 	import { isAuthenticated, currentUser, checkAuth, logout, fetchWithAuth } from './services/auth';
+	import MapSelector from './components/MapSelector.svelte';
 
 	// Configuration du backend
 	const API_URL = 'http://localhost:5000';
@@ -303,7 +304,7 @@
 		margin: 1rem 0;
 	}
 
-	.checkbox-label {
+	/* .checkbox-label {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
@@ -315,7 +316,7 @@
 	.checkbox-label input[type="checkbox"] {
 		width: auto;
 		margin: 0;
-	}
+	} */
 
 	/* Contenu principal décalé pour la sidebar */
 	.content-auth {
@@ -345,12 +346,18 @@
 					Distance (m) :
 					<input type="number" bind:value={distance} required />
 				</label>
+
+				<MapSelector
+					bind:lat={latitude}
+					bind:lon={longitude}
+					bind:radius={distance}
+				/>
 				
 				<!-- Option pour utiliser l'API non-protégée -->
-				<label class="checkbox-label">
+				<!-- <label class="checkbox-label">
 					<input type="checkbox" bind:checked={usePublicEndpoint}>
 					Utiliser la version non-protégée (debug)
-				</label>
+				</label> -->
 				
 				<button type="submit">Générer la carte</button>
 			</form>
