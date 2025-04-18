@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { currentUser, logout } from "../services/auth";
+	import { t } from "../i18n.js";
   
 	/**
 	 * Menu configuration – easier to maintain
 	 */
 	const menu = [
-	  { id: "carte", label: "Générer une carte" },
-	  { id: "statistique", label: "Statistique" },
-	  { id: "parametre", label: "Paramètre" },
-	  { id: "equipe", label: "Équipe" },
-	  { id: "historique", label: "Historique" }
+	  { id: "carte", label: () => t('sidebar_map') },
+	  { id: "statistique", label: () => t('sidebar_stats') },
+	  { id: "parametre", label: () => t('sidebar_settings') },
+	  { id: "equipe", label: () => t('sidebar_team') },
+	  { id: "historique", label: () => t('sidebar_history') }
 	];
   
 	function handleLogout() {
@@ -35,13 +36,13 @@
 	<nav class="menu" aria-label="Navigation principale">
 	  {#each menu as item (item.id)}
 		<a href={`#${item.id}`} class="menu-item" aria-current="page">
-		  {item.label}
+		  {item.label()}
 		</a>
 	  {/each}
 	</nav>
   
 	<!-- LOGOUT BUTTON -->
-	<button class="logout" on:click={handleLogout}>Déconnexion</button>
+	<button class="logout" on:click={handleLogout}>{t('logout')}</button>
   </aside>
   
   <style>

@@ -4,6 +4,8 @@
 	import Login from './components/Login.svelte';
 	import Sidebar from './components/Sidebar.svelte';
 	import { isAuthenticated, currentUser, checkAuth, logout, fetchWithAuth } from './services/auth';
+	import { preferences } from './stores/preferences.js';
+	import { t, locale } from './i18n.js';
 	
 	// Import des nouvelles pages
 	import Statistique from './pages/Statistique.svelte';
@@ -57,6 +59,19 @@
 		// Vérifier l'authentification sans forcer la déconnexion
 		checkAuth();
 		
+		// Charger les préférences si déjà authentifié
+		const unsub = isAuthenticated.subscribe(async v => {
+			if (v) {
+				try {
+					const { getSettings } = await import('./services/settings.js');
+					const data = await getSettings();
+					preferences.set(data);
+				} catch (e) {
+					console.error('Erreur chargement préférences', e);
+				}
+			}
+		});
+		
 		// Configurer la navigation basée sur le hash
 		setActivePage();
 		window.addEventListener('hashchange', setActivePage);
@@ -65,6 +80,19 @@
 		return () => {
 			window.removeEventListener('hashchange', setActivePage);
 		};
+	});
+
+	// Mettre à jour la distance par défaut selon les préférences
+	preferences.subscribe(p => {
+		if (p && p.default_distance) {
+			distance = p.default_distance;
+		}
+
+		if (p && p.map_style) {
+			const isLight = p.map_style === 'light';
+			document.body.classList.toggle('theme-light', isLight);
+			document.body.classList.toggle('theme-dark', !isLight);
+		}
 	});
 
 	async function generateMap() {
@@ -352,6 +380,23 @@
 		padding: 2rem;
 		gap: 2rem;
 	}
+
+	:global(body.theme-light) {
+		background: #f3f3f3;
+		color: #000;
+	}
+
+	:global(body.theme-light) .card {
+		background: rgba(255,255,255,0.9);
+		color: #000;
+	}
+
+	:global(body.theme-light) input,
+	:global(body.theme-light) select {
+		background: #fff;
+		color: #000;
+		border-color: #ccc;
+	}
 </style>
   
 <main>
@@ -363,22 +408,22 @@
 		{#if currentPage === 'carte'}
 			<div class="content-auth">
 				<div id="carte" class="card" transition:fly={{ y: -20, duration: 600 }}>
-					<h1>Générateur de carte stylisée</h1>
+					<h1>{t('map_generator', $locale)}</h1>
 					<form on:submit|preventDefault={generateMap}>
 						<label>
-							Latitude :
+							{t('latitude', $locale)} :
 							<input type="number" bind:value={latitude} step="0.000001" required />
 						</label>
 						<label>
-							Longitude :
+							{t('longitude', $locale)} :
 							<input type="number" bind:value={longitude} step="0.000001" required />
 						</label>
 						<label>
-							Distance (m) :
+							{t('distance', $locale)} :
 							<input type="number" bind:value={distance} required />
 						</label>
 						
-						<button type="submit">Générer la carte</button>
+						<button type="submit">{t('generate_map', $locale)}</button>
 					</form>
 					{#if loading}
 						<div class="loading-spinner"></div>
@@ -390,7 +435,7 @@
 				</div>
 				
 				{#if svgUrl}
-					<h2 transition:fade style="text-align: center;">Carte générée :</h2>
+					<h2 transition:fade style="text-align: center;">{t('generated_map', $locale)}</h2>
 					<div class="card" transition:fly={{ y: 20, duration: 600 }}>
 						<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 						<div
@@ -413,7 +458,7 @@
 					</div>
 					<div class="download-container">
 						<a download="carte.svg" href={svgUrl}>
-							<button>Télécharger l'image SVG</button>
+							<button>{t('download_svg', $locale)}</button>
 						</a>
 					</div>
 				{/if}
