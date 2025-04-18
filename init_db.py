@@ -1,15 +1,13 @@
-import sys, os
-
-# Ajout du répertoire parent au chemin Python
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from models import db, User
 
-def seed_default_user(app):
+# Je supprime l'appel redondant à db.init_app et j'importe l'app configurée
+def seed_default_user(app=None):
     """
     Crée un utilisateur par défaut si aucun utilisateur n'existe encore
     """
-    with app.app_context():
+    # Charger l'application Flask configurée depuis run.py
+    from app.run import app as flask_app
+    with flask_app.app_context():
         users_count = User.query.count()
         
         if users_count == 0:
@@ -22,4 +20,7 @@ def seed_default_user(app):
             db.session.commit()
             print("Utilisateur par défaut créé : admin@activmap.fr / adminPassword123")
         else:
-            print("Base de données déjà initialisée avec des utilisateurs") 
+            print("Base de données déjà initialisée avec des utilisateurs")
+
+if __name__ == "__main__":
+    seed_default_user() 

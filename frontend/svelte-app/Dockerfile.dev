@@ -1,0 +1,16 @@
+FROM node:16-slim
+
+WORKDIR /app
+
+# Copier uniquement les fichiers de dépendances
+COPY package*.json ./
+
+# Installer les dépendances
+RUN npm install --no-optional
+
+# Exposer le port
+EXPOSE 8080
+
+# Le code sera monté depuis l'hôte via les volumes
+# Command pour le hot-reload
+CMD ["npm", "run", "dev"] 

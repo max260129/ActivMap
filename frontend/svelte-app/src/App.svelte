@@ -2,14 +2,31 @@
 	import { fade, fly, scale as scaleTransition } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import Login from './components/Login.svelte';
+	import Sidebar from './components/Sidebar.svelte';
 	import { isAuthenticated, currentUser, checkAuth, logout, fetchWithAuth } from './services/auth';
-
+	
+	// Import des nouvelles pages
+	import Statistique from './pages/Statistique.svelte';
+	import Parametre from './pages/Parametre.svelte';
+	import Equipe from './pages/Equipe.svelte';
+	import Historique from './pages/Historique.svelte';
+	
 	// Configuration du backend
 	const API_URL = 'http://localhost:5000';
 	
 	// État d'authentification forcé à false au démarrage
 	$: console.log("État d'authentification:", $isAuthenticated);
 	
+	// Navigation
+	let currentPage = 'carte';
+	
+	// Fonction pour définir la page active
+	function setActivePage() {
+		const hash = window.location.hash.replace('#', '');
+		currentPage = hash || 'carte';
+	}
+	
+	// Variables pour la carte
 	let latitude = 49.444838;
 	let longitude = 1.094214;
 	let distance = 150;
@@ -35,10 +52,19 @@
 	// Transformation combinée : translation, rotation et zoom
 	$: transformValue = `translate(${translateX}px, ${translateY}px) rotate(${rotate}deg) scale(${scale})`;
   
-	// Vérifier l'authentification au démarrage
+	// Vérifier l'authentification au démarrage et configurer la navigation
 	onMount(() => {
 		// Vérifier l'authentification sans forcer la déconnexion
 		checkAuth();
+		
+		// Configurer la navigation basée sur le hash
+		setActivePage();
+		window.addEventListener('hashchange', setActivePage);
+		
+		// Nettoyage lors du démontage du composant
+		return () => {
+			window.removeEventListener('hashchange', setActivePage);
+		};
 	});
 
 	async function generateMap() {
@@ -302,31 +328,6 @@
 		margin: 1rem 0;
 	}
 
-	/* Style pour la barre de navigation */
-	.navbar {
-		display: flex;
-		justify-content: flex-end;
-		padding: 1rem 2rem;
-		width: 100%;
-		box-sizing: border-box;
-	}
-
-	.user-info {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-	}
-
-	.logout-btn {
-		background: transparent;
-		border: 1px solid #cc5200;
-		padding: 0.5rem 1rem;
-	}
-
-	.logout-btn:hover {
-		background: rgba(204, 82, 0, 0.2);
-	}
-
 	.checkbox-label {
 		display: flex;
 		flex-direction: row;
@@ -340,75 +341,91 @@
 		width: auto;
 		margin: 0;
 	}
+
+	/* Contenu principal décalé pour la sidebar */
+	.content-auth {
+		margin-left: 240px; /* largeur de la sidebar */
+		width: calc(100% - 240px);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 2rem;
+		gap: 2rem;
+	}
 </style>
   
 <main>
 	{#if $isAuthenticated}
-		<!-- Barre de navigation avec infos utilisateur -->
-		<div class="navbar">
-			<div class="user-info">
-				<span>Connecté en tant que {$currentUser?.email}</span>
-				<button class="logout-btn" on:click={handleLogout}>Déconnexion</button>
-			</div>
-		</div>
+		<!-- Sidebar de navigation -->
+		<Sidebar />
 		
-		<div class="card" transition:fly={{ y: -20, duration: 600 }}>
-			<h1>Générateur de carte stylisée</h1>
-			<form on:submit|preventDefault={generateMap}>
-				<label>
-					Latitude :
-					<input type="number" bind:value={latitude} step="0.000001" required />
-				</label>
-				<label>
-					Longitude :
-					<input type="number" bind:value={longitude} step="0.000001" required />
-				</label>
-				<label>
-					Distance (m) :
-					<input type="number" bind:value={distance} required />
-				</label>
-				
-				<!-- Option pour utiliser l'API non-protégée -->
-				<label class="checkbox-label">
-					<input type="checkbox" bind:checked={usePublicEndpoint}>
-					Utiliser la version non-protégée (debug)
-				</label>
-				
-				<button type="submit">Générer la carte</button>
-			</form>
-			{#if loading}
-				<div class="loading-spinner"></div>
-				<p style="text-align: center;">Génération en cours...</p>
-			{/if}
-			{#if error}
-				<p class="error">{error}</p>
-			{/if}
-		</div>
-		
-		{#if svgUrl}
-			<h2 transition:fade style="text-align: center;">Carte générée :</h2>
-			<div class="card" transition:fly={{ y: 20, duration: 600 }}>
-				<div
-					class="svg-container"
-					on:wheel|preventDefault={handleWheel}
-					on:mousedown={startDrag}
-					on:mousemove={drag}
-					on:mouseup={endDrag}
-					on:mouseleave={endDrag}
-				>
-					<div class="zoom-controls">
-						<button on:click={zoomIn} aria-label="Zoom In">+</button>
-						<button on:click={zoomOut} aria-label="Zoom Out">–</button>
-						<button on:click={rotateMap} aria-label="Rotate">⟳</button>
-					</div>
-					<img src={svgUrl} alt="Carte stylisée" style:transform={transformValue} transition:scaleTransition={{ duration: 400 }}/>
+		<!-- Afficher la page en fonction de currentPage -->
+		{#if currentPage === 'carte'}
+			<div class="content-auth">
+				<div id="carte" class="card" transition:fly={{ y: -20, duration: 600 }}>
+					<h1>Générateur de carte stylisée</h1>
+					<form on:submit|preventDefault={generateMap}>
+						<label>
+							Latitude :
+							<input type="number" bind:value={latitude} step="0.000001" required />
+						</label>
+						<label>
+							Longitude :
+							<input type="number" bind:value={longitude} step="0.000001" required />
+						</label>
+						<label>
+							Distance (m) :
+							<input type="number" bind:value={distance} required />
+						</label>
+						
+						<button type="submit">Générer la carte</button>
+					</form>
+					{#if loading}
+						<div class="loading-spinner"></div>
+						<p style="text-align: center;">Génération en cours...</p>
+					{/if}
+					{#if error}
+						<p class="error">{error}</p>
+					{/if}
 				</div>
+				
+				{#if svgUrl}
+					<h2 transition:fade style="text-align: center;">Carte générée :</h2>
+					<div class="card" transition:fly={{ y: 20, duration: 600 }}>
+						<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+						<div
+							class="svg-container"
+							role="application"
+							aria-label="Carte stylisée"
+							on:wheel|preventDefault={handleWheel}
+							on:mousedown={startDrag}
+							on:mousemove={drag}
+							on:mouseup={endDrag}
+							on:mouseleave={endDrag}
+						>
+							<div class="zoom-controls">
+								<button on:click={zoomIn} aria-label="Zoom In">+</button>
+								<button on:click={zoomOut} aria-label="Zoom Out">–</button>
+								<button on:click={rotateMap} aria-label="Rotate">⟳</button>
+							</div>
+							<img src={svgUrl} alt="Carte stylisée" style:transform={transformValue} transition:scaleTransition={{ duration: 400 }}/>
+						</div>
+					</div>
+					<div class="download-container">
+						<a download="carte.svg" href={svgUrl}>
+							<button>Télécharger l'image SVG</button>
+						</a>
+					</div>
+				{/if}
 			</div>
-			<div class="download-container">
-				<a download="carte.svg" href={svgUrl}>
-					<button>Télécharger l'image SVG</button>
-				</a>
-			</div>
+		{:else if currentPage === 'statistique'}
+			<Statistique />
+		{:else if currentPage === 'parametre'}
+			<Parametre />
+		{:else if currentPage === 'equipe'}
+			<Equipe />
+		{:else if currentPage === 'historique'}
+			<Historique />
 		{/if}
 	{:else}
 		<!-- Page de connexion -->
