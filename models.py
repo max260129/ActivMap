@@ -24,4 +24,29 @@ class User(db.Model):
             'id': self.id,
             'email': self.email,
             'created_at': self.created_at
+        }
+
+# Ajout du modèle pour l'historique des cartes
+class MapHistory(db.Model):
+    __tablename__ = 'map_history'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    distance = db.Column(db.Integer, nullable=False)
+    file_path = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relation vers l'utilisateur
+    user = db.relationship('User', backref=db.backref('maps', lazy=True))
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'latitude': self.latitude,
+            'longitude': self.longitude,
+            'distance': self.distance,
+            'file_path': self.file_path,
+            'created_at': self.created_at
         } 

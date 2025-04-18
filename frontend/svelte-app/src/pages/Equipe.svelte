@@ -1,5 +1,6 @@
 <script>
   import Sidebar from "../components/Sidebar.svelte";
+  import { fly } from 'svelte/transition';
   
   // Données factices pour les membres de l'équipe
   const teamMembers = [
@@ -44,7 +45,7 @@
 
 <Sidebar />
 
-<div class="content-auth">
+<div class="content-auth" transition:fly={{ y: 20, duration: 600 }}>
   <div class="team-page">
     <div class="header-section">
       <h1>Notre équipe</h1>

@@ -1,49 +1,53 @@
 <script>
   import Sidebar from "../components/Sidebar.svelte";
+  import { onMount } from 'svelte';
+  import { getHistory, deleteHistory, regenerateHistory, fetchFile } from '../services/history.js';
   
-  // Données factices pour l'historique
-  const historyItems = [
-    {
-      id: 1,
-      date: "2023-11-15 14:30",
-      location: "Paris, France",
-      coordinates: "48.8566, 2.3522",
-      distance: 250,
-      thumbnail: "https://via.placeholder.com/100x100.png?text=Paris"
-    },
-    {
-      id: 2,
-      date: "2023-11-10 09:15",
-      location: "Lyon, France",
-      coordinates: "45.7640, 4.8357",
-      distance: 180,
-      thumbnail: "https://via.placeholder.com/100x100.png?text=Lyon"
-    },
-    {
-      id: 3,
-      date: "2023-11-05 16:20",
-      location: "Marseille, France", 
-      coordinates: "43.2965, 5.3698",
-      distance: 300,
-      thumbnail: "https://via.placeholder.com/100x100.png?text=Marseille"
-    },
-    {
-      id: 4,
-      date: "2023-10-28 11:45",
-      location: "Bordeaux, France",
-      coordinates: "44.8378, -0.5792",
-      distance: 200,
-      thumbnail: "https://via.placeholder.com/100x100.png?text=Bordeaux"
-    },
-    {
-      id: 5,
-      date: "2023-10-20 13:10",
-      location: "Lille, France",
-      coordinates: "50.6292, 3.0573",
-      distance: 150,
-      thumbnail: "https://via.placeholder.com/100x100.png?text=Lille"
+  let historyItems = [];
+  let loading = true;
+
+  async function loadHistory() {
+    try {
+      const data = await getHistory();
+      // Téléchargement des blobs en parallèle
+      const itemsWithMeta = data.items.map((it) => ({
+        id: it.id,
+        date: new Date(it.created_at).toLocaleString(),
+        location: `${it.latitude.toFixed(4)}, ${it.longitude.toFixed(4)}`,
+        coordinates: `${it.latitude}, ${it.longitude}`,
+        distance: it.distance,
+      }));
+
+      // Récupérer les blobs protégés
+      historyItems = await Promise.all(
+        itemsWithMeta.map(async (el) => {
+          try {
+            el.blobUrl = await fetchFile(el.id);
+          } catch (e) {
+            console.error('Erreur fetchFile', e);
+            el.blobUrl = '';
+          }
+          return el;
+        })
+      );
+    } catch (e) {
+      console.error(e);
+    } finally {
+      loading = false;
     }
-  ];
+  }
+
+  onMount(loadHistory);
+
+  async function handleDelete(id) {
+    await deleteHistory(id);
+    historyItems = historyItems.filter((h) => h.id !== id);
+  }
+
+  async function handleRegenerate(id) {
+    await regenerateHistory(id);
+    loadHistory();
+  }
   
   // État pour les filtres
   let searchQuery = "";
@@ -98,7 +102,7 @@
       {#if filteredHistory.length > 0}
         {#each filteredHistory as item}
           <div class="history-item">
-            <img src={item.thumbnail} alt="Miniature de la carte" class="history-thumbnail" />
+            <img src={item.blobUrl} alt="Miniature de la carte" class="history-thumbnail" />
             <div class="history-details">
               <h3>{item.location}</h3>
               <p class="coordinates">Coordonnées: {item.coordinates}</p>
@@ -108,9 +112,9 @@
               </p>
             </div>
             <div class="history-actions">
-              <button class="btn-view">Voir</button>
-              <button class="btn-regenerate">Regénérer</button>
-              <button class="btn-delete">Supprimer</button>
+              <button class="btn-view" on:click={() => window.open(item.blobUrl, '_blank')}>Voir</button>
+              <button class="btn-regenerate" on:click={() => handleRegenerate(item.id)}>Regénérer</button>
+              <button class="btn-delete" on:click={() => handleDelete(item.id)}>Supprimer</button>
             </div>
           </div>
         {/each}
