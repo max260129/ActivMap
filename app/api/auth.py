@@ -3,6 +3,7 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 import sys, os
 import re
 import traceback
+import bcrypt
 
 # Ajout du répertoire parent au chemin Python
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -101,3 +102,31 @@ def get_current_user():
         
         # Réponse d'erreur
         return jsonify({'error': str(e)}), 401 
+
+@auth_bp.route('/change-password', methods=['POST'])
+@jwt_required()
+def change_password():
+    data = request.get_json() or {}
+    old_pwd = data.get('old_password')
+    new_pwd = data.get('new_password')
+
+    if not old_pwd or not new_pwd:
+        return jsonify({'error': 'Champs manquants'}), 400
+
+    user_id = get_jwt_identity()
+    user = User.query.get_or_404(int(user_id))
+
+    if not user.check_password(old_pwd):
+        return jsonify({'error': 'Ancien mot de passe incorrect'}), 403
+
+    if len(new_pwd) < 6:
+        return jsonify({'error': 'Le nouveau mot de passe est trop court'}), 400
+
+    # Mise à jour mot de passe
+    user.password = bcrypt.hashpw(new_pwd.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    try:
+        db.session.commit()
+        return jsonify({'message': 'Mot de passe mis à jour'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500 

@@ -11,6 +11,13 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # Préférences utilisateur
+    username = db.Column(db.String(64), nullable=True)
+    map_style = db.Column(db.String(20), default='dark')  # dark, light, satellite
+    default_distance = db.Column(db.Integer, default=150)
+    max_points = db.Column(db.Integer, default=5000)
+    language = db.Column(db.String(10), default='fr')
+    notifications_enabled = db.Column(db.Boolean, default=True)
     
     def __init__(self, email, password):
         self.email = email
@@ -23,6 +30,12 @@ class User(db.Model):
         return {
             'id': self.id,
             'email': self.email,
+            'username': self.username,
+            'map_style': self.map_style,
+            'default_distance': self.default_distance,
+            'max_points': self.max_points,
+            'language': self.language,
+            'notifications_enabled': self.notifications_enabled,
             'created_at': self.created_at
         }
 

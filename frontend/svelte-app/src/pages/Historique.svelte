@@ -1,7 +1,7 @@
 <script>
   import Sidebar from "../components/Sidebar.svelte";
   import { onMount } from 'svelte';
-  import { getHistory, deleteHistory, regenerateHistory, fetchFile } from '../services/history.js';
+  import { getHistory, deleteHistory, fetchFile } from '../services/history.js';
   
   let historyItems = [];
   let loading = true;
@@ -42,11 +42,6 @@
   async function handleDelete(id) {
     await deleteHistory(id);
     historyItems = historyItems.filter((h) => h.id !== id);
-  }
-
-  async function handleRegenerate(id) {
-    await regenerateHistory(id);
-    loadHistory();
   }
   
   // État pour les filtres
@@ -113,7 +108,6 @@
             </div>
             <div class="history-actions">
               <button class="btn-view" on:click={() => window.open(item.blobUrl, '_blank')}>Voir</button>
-              <button class="btn-regenerate" on:click={() => handleRegenerate(item.id)}>Regénérer</button>
               <button class="btn-delete" on:click={() => handleDelete(item.id)}>Supprimer</button>
             </div>
           </div>
@@ -287,11 +281,6 @@
 
   .btn-view {
     background: #444;
-    color: white;
-  }
-
-  .btn-regenerate {
-    background: #cc5200;
     color: white;
   }
 

@@ -189,3 +189,75 @@ def regenerate_history(history_id):
         return jsonify({'message': 'Regénéré', 'id': new_entry.id}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+# ------------------------------------------------------------
+# Paramètres utilisateur
+# ------------------------------------------------------------
+
+
+@app.route('/api/settings', methods=['GET'])
+@protect_route
+def get_settings():
+    """Renvoie les préférences de l'utilisateur authentifié."""
+    user_id = int(get_jwt_identity())
+    user = User.query.get_or_404(user_id)
+
+    prefs = {
+        'email': user.email,
+        'username': user.username,
+        'map_style': user.map_style,
+        'default_distance': user.default_distance,
+        'max_points': user.max_points,
+        'language': user.language,
+        'notifications_enabled': user.notifications_enabled,
+    }
+    return jsonify(prefs), 200
+
+
+@app.route('/api/settings', methods=['PUT'])
+@protect_route
+def update_settings():
+    """Met à jour les préférences utilisateur."""
+    user_id = int(get_jwt_identity())
+    user = User.query.get_or_404(user_id)
+
+    data = request.get_json() or {}
+
+    # Mapping champ -> (type, min, max) pour validation simple
+    validators = {
+        'map_style': (str, None, None),
+        'default_distance': (int, 50, 1000),
+        'max_points': (int, 1000, 10000),
+        'language': (str, None, None),
+        'notifications_enabled': (bool, None, None),
+        'username': (str, None, None),
+        'email': (str, None, None),
+    }
+
+    for field, value in data.items():
+        if field not in validators:
+            continue  # Ignore champs inconnus
+
+        expected_type, vmin, vmax = validators[field]
+
+        # Convert JSON bool/int correctly
+        if expected_type == bool:
+            value = bool(value)
+        elif expected_type == int:
+            try:
+                value = int(value)
+            except (ValueError, TypeError):
+                return jsonify({'error': f'{field} doit être un entier'}), 400
+
+        # Bornes numériques
+        if isinstance(value, int) and vmin is not None and (value < vmin or value > vmax):
+            return jsonify({'error': f'{field} hors limites'}), 400
+
+        setattr(user, field, value)
+
+    try:
+        db.session.commit()
+        return jsonify({'message': 'Préférences mises à jour'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
