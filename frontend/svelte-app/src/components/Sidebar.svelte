@@ -142,7 +142,7 @@
 	  border-left-color: var(--accent-color);
 	}
   
-	/* LOGOUT BUTTON */
+	/* LOGOUT BUTTON */ 
 	.logout {
 	  background: var(--accent-color);
 	  border: none;

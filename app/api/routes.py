@@ -8,6 +8,9 @@ from models import db, MapHistory, User
 import os
 import uuid
 import shutil
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
+from sqlalchemy import func, extract
 
 # Pour éviter la collision avec le nom de la fonction, renomme l'import de generate_map
 from app.generate_map import generate_map
@@ -261,3 +264,74 @@ def update_settings():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+
+# ------------------------------------------------------------
+# Statistiques utilisateur
+# ------------------------------------------------------------
+
+@app.route('/api/stats', methods=['GET'])
+@protect_route
+def user_stats():
+    """Retourne des statistiques d'utilisation pour l'utilisateur courant."""
+    user_id = int(get_jwt_identity())
+
+    # Nombre total de cartes
+    total_maps = db.session.query(func.count(MapHistory.id)) \
+                         .filter_by(user_id=user_id).scalar() or 0
+
+    # Distance totale cumulée
+    total_distance = db.session.query(func.coalesce(func.sum(MapHistory.distance), 0)) \
+                             .filter_by(user_id=user_id).scalar() or 0
+
+    # Activité hebdomadaire
+    today = datetime.utcnow()
+    start_week = today - timedelta(days=today.weekday())  # lundi 00:00 UTC
+    week_count = db.session.query(func.count(MapHistory.id)) \
+                         .filter(MapHistory.user_id == user_id,
+                                 MapHistory.created_at >= start_week).scalar() or 0
+
+    prev_start = start_week - timedelta(days=7)
+    prev_end = start_week
+    prev_week_count = db.session.query(func.count(MapHistory.id)) \
+                                  .filter(MapHistory.user_id == user_id,
+                                          MapHistory.created_at >= prev_start,
+                                          MapHistory.created_at < prev_end).scalar() or 0
+
+    weekly_growth = None
+    if prev_week_count:
+        weekly_growth = ((week_count - prev_week_count) / prev_week_count) * 100.0
+
+    # Activité mensuelle (12 mois glissants)
+    twelve_months_ago = today - relativedelta(months=11)
+    monthly_raw = db.session.query(
+        extract('year', MapHistory.created_at).label('year'),
+        extract('month', MapHistory.created_at).label('month'),
+        func.count(MapHistory.id).label('count')
+    ).filter(MapHistory.user_id == user_id,
+             MapHistory.created_at >= datetime(twelve_months_ago.year, twelve_months_ago.month, 1)) \
+     .group_by('year', 'month') \
+     .order_by('year', 'month').all()
+
+    # Convertir en dict {(year,month): count}
+    monthly_dict = { (int(r.year), int(r.month)): r.count for r in monthly_raw }
+
+    # Générer la série complète sur 12 mois, même si 0
+    series = []
+    current = datetime(today.year, today.month, 1)
+    for i in range(12):
+        y, m = current.year, current.month
+        series.append({
+            'year': y,
+            'month': m,
+            'count': monthly_dict.get((y, m), 0)
+        })
+        current = current - relativedelta(months=1)
+    series.reverse()  # ordre chronologique
+
+    return jsonify({
+        'total_maps': total_maps,
+        'total_distance': total_distance,
+        'week_count': week_count,
+        'weekly_growth': weekly_growth,  # peut être None
+        'monthly_activity': series
+    }), 200
