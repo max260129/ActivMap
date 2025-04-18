@@ -13,6 +13,8 @@
 	import Equipe from './pages/Equipe.svelte';
 	import Historique from './pages/Historique.svelte';
 	import AcceptInvite from './pages/AcceptInvite.svelte';
+	import ForgotPassword from './pages/ForgotPassword.svelte';
+	import ResetPassword from './pages/ResetPassword.svelte';
 	
 	// Configuration du backend
 	const API_URL = 'http://localhost:5000';
@@ -474,10 +476,18 @@
 			<Historique />
 		{:else if currentPage === 'invite'}
 			<AcceptInvite />
+		{:else if currentPage === 'forgot'}
+			<ForgotPassword />
+		{:else if currentPage === 'reset'}
+			<ResetPassword />
 		{/if}
 	{:else}
 		{#if currentPage === 'invite'}
 			<AcceptInvite />
+		{:else if currentPage === 'forgot'}
+			<ForgotPassword />
+		{:else if currentPage === 'reset'}
+			<ResetPassword />
 		{:else}
 			<!-- Page de connexion -->
 			<div class="card" transition:fly={{ y: -20, duration: 600 }}>

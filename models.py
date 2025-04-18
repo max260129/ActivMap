@@ -23,6 +23,9 @@ class User(db.Model):
     # Invitation : token hash + expiration
     invite_token = db.Column(db.String(64), nullable=True)
     invite_expires = db.Column(db.DateTime, nullable=True)
+    # Réinitialisation mot de passe : token hash + expiration
+    reset_token = db.Column(db.String(64), nullable=True)
+    reset_expires = db.Column(db.DateTime, nullable=True)
     # Indique si l'utilisateur doit changer son mot de passe au premier login
     reset_required = db.Column(db.Boolean, default=False)
     joined_at = db.Column(db.DateTime, nullable=True)

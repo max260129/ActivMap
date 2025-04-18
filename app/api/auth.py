@@ -4,8 +4,10 @@ import sys, os
 import re
 import traceback
 import bcrypt
-from datetime import datetime
+from datetime import datetime, timedelta
 import hashlib
+import uuid
+from utils.mailer import send_email
 
 # Ajout du répertoire parent au chemin Python
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -168,3 +170,81 @@ def accept_invite():
     db.session.commit()
 
     return jsonify({'message': 'Mot de passe défini, vous pouvez vous connecter'}), 200 
+
+# ------------------------------------------------------------
+# Mot de passe oublié : demande de lien
+# ------------------------------------------------------------
+
+@auth_bp.route('/forgot-password', methods=['POST'])
+def forgot_password():
+    data = request.get_json() or {}
+    email = data.get('email')
+
+    if not email:
+        return jsonify({'error': 'Email requis'}), 400
+
+    # Chercher l'utilisateur
+    user = User.query.filter_by(email=email).first()
+
+    # Réponse générique pour éviter la divulgation d'existence de compte
+    generic_msg = {'message': 'Si un compte existe, un email de réinitialisation a été envoyé.'}
+
+    if not user:
+        return jsonify(generic_msg), 200
+
+    # Génération du token unique
+    raw_token = uuid.uuid4().hex
+    hashed_token = hashlib.sha256(raw_token.encode()).hexdigest()
+
+    user.reset_token = hashed_token
+    user.reset_expires = datetime.utcnow() + timedelta(hours=1)
+    db.session.commit()
+
+    # Envoi de l'e‑mail
+    reset_link = f"http://localhost:3000/#reset?token={raw_token}"
+    send_email(
+        to=email,
+        subject="Réinitialisation de votre mot de passe ActivMap",
+        html_content=f"""
+        <p>Bonjour,</p>
+        <p>Vous avez demandé la réinitialisation de votre mot de passe. Cliquez sur le lien ci‑dessous pour définir un nouveau mot de passe :</p>
+        <p><a href='{reset_link}'>{reset_link}</a></p>
+        <p>Ce lien expirera dans 1 heure.</p>
+        <p>Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer ce message.</p>
+        """
+    )
+
+    return jsonify(generic_msg), 200
+
+# ------------------------------------------------------------
+# Mot de passe oublié : définition du nouveau mot de passe
+# ------------------------------------------------------------
+
+@auth_bp.route('/reset-password', methods=['POST'])
+def reset_password():
+    data = request.get_json() or {}
+    raw_token = data.get('token')
+    password = data.get('password')
+
+    if not raw_token or not password:
+        return jsonify({'error': 'Données manquantes'}), 400
+
+    if len(password) < 6:
+        return jsonify({'error': 'Mot de passe trop court'}), 400
+
+    hashed = hashlib.sha256(raw_token.encode()).hexdigest()
+    user = User.query.filter_by(reset_token=hashed).first()
+
+    if not user:
+        return jsonify({'error': 'Token invalide'}), 400
+
+    if user.reset_expires and datetime.utcnow() > user.reset_expires:
+        return jsonify({'error': 'Lien expiré'}), 410
+
+    # Mise à jour du mot de passe
+    user.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    user.reset_token = None
+    user.reset_expires = None
+    db.session.commit()
+
+    return jsonify({'message': 'Mot de passe mis à jour'}), 200 

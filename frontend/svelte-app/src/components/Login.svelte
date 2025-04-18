@@ -188,6 +188,10 @@
     </form>
     
     <div class="toggle-mode">
+        <a class="toggle-link" href="#forgot">Mot de passe oublié ?</a>
+    </div>
+    
+    <div class="toggle-mode">
         {#if isRegisterMode}
             Déjà inscrit ? <span class="toggle-link" on:click={toggleMode}>Se connecter</span>
         {:else}
