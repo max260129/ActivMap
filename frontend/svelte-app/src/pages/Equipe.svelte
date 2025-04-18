@@ -1,46 +1,78 @@
 <script>
   import Sidebar from "../components/Sidebar.svelte";
   import { fly } from 'svelte/transition';
+  import { onMount } from 'svelte';
+  import { fetchWithAuth, currentUser } from '../services/auth.js';
   
-  // Données factices pour les membres de l'équipe
-  const teamMembers = [
-    {
-      id: 1,
-      name: "Maxence Dupont",
-      role: "Chef de projet",
-      avatar: "https://www.gravatar.com/avatar/1?d=identicon",
-      email: "maxence@activmap.fr",
-      joined: "2022"
-    },
-    {
-      id: 2,
-      name: "Sophie Martin",
-      role: "Développeuse frontend",
-      avatar: "https://www.gravatar.com/avatar/2?d=identicon",
-      email: "sophie@activmap.fr",
-      joined: "2023"
-    },
-    {
-      id: 3,
-      name: "Lucas Bernard",
-      role: "Développeur backend",
-      avatar: "https://www.gravatar.com/avatar/3?d=identicon",
-      email: "lucas@activmap.fr",
-      joined: "2022"
-    },
-    {
-      id: 4,
-      name: "Emma Petit",
-      role: "Graphiste UI/UX",
-      avatar: "https://www.gravatar.com/avatar/4?d=identicon",
-      email: "emma@activmap.fr",
-      joined: "2023"
+  let teamMembers = [];
+  let loading = false;
+  let error = '';
+  
+  // Formulaire
+  let inviteEmail = '';
+  let inviteRole = 'EMPLOYE';
+  
+  const roleLabels = {
+    'ADMIN': 'Administrateur',
+    'CHEF': 'Chef de projet',
+    'EMPLOYE': 'Employé'
+  };
+  
+  async function loadMembers() {
+    loading = true;
+    const resp = await fetchWithAuth('/team/', { method: 'GET' });
+    if (resp.ok) {
+      const data = await resp.json();
+      teamMembers = data.users;
+    } else {
+      error = (await resp.json()).error || 'Erreur de chargement';
     }
-  ];
+    loading = false;
+  }
   
-  // État pour le formulaire d'invitation
-  let inviteEmail = "";
-  let inviteRole = "Membre";
+  onMount(loadMembers);
+  
+  // Redirection si non admin
+  onMount(() => {
+    if ($currentUser?.role !== 'ADMIN') {
+      window.location.hash = '#carte';
+    }
+  });
+  
+  async function sendInvite() {
+    if (!inviteEmail) return;
+    const resp = await fetchWithAuth('/team/', {
+      method: 'POST',
+      body: JSON.stringify({ email: inviteEmail, role: inviteRole })
+    });
+    if (resp.ok) {
+      inviteEmail = '';
+      inviteRole = 'EMPLOYE';
+      const { user } = await resp.json();
+      teamMembers = [...teamMembers, user];
+    } else {
+      error = (await resp.json()).error;
+    }
+  }
+  
+  async function changeRole(member, newRole) {
+    const resp = await fetchWithAuth(`/team/${member.id}/role`, {
+      method: 'PUT',
+      body: JSON.stringify({ role: newRole })
+    });
+    if (resp.ok) {
+      const { user } = await resp.json();
+      teamMembers = teamMembers.map(m => m.id === user.id ? user : m);
+    }
+  }
+  
+  async function removeMember(id) {
+    if (!confirm('Supprimer cet utilisateur ?')) return;
+    const resp = await fetchWithAuth(`/team/${id}`, { method: 'DELETE' });
+    if (resp.ok) {
+      teamMembers = teamMembers.filter(m => m.id !== id);
+    }
+  }
 </script>
 
 <Sidebar />
@@ -55,13 +87,22 @@
     <div class="team-grid">
       {#each teamMembers as member}
         <div class="team-card">
-          <img src={member.avatar} alt="Avatar de {member.name}" class="member-avatar">
-          <h3>{member.name}</h3>
-          <p class="member-role">{member.role}</p>
+          <img src={member.avatar || 'https://www.gravatar.com/avatar/?d=identicon'} alt="Avatar de {member.email}" class="member-avatar">
+          <h3>{member.username || member.email}</h3>
+          <p class="member-role">{roleLabels[member.role]}</p>
+          {#if member.invite_pending}
+            <p class="member-status">Invitation envoyée</p>
+          {:else}
+            <p class="member-status success">Rejoint ✔</p>
+          {/if}
           <p class="member-email">{member.email}</p>
           <div class="member-footer">
-            <span class="joined">Depuis {member.joined}</span>
-            <button class="btn-contact">Contact</button>
+            <select bind:value={member.role} on:change={(e)=>changeRole(member, e.target.value)} disabled={member.id === $currentUser?.id}>
+              {#each Object.keys(roleLabels) as r}
+                <option value={r} disabled={r==='ADMIN' && member.role!=='ADMIN' && teamMembers.some(u=>u.role==='ADMIN')} >{roleLabels[r]}</option>
+              {/each}
+            </select>
+            <button class="btn-contact" on:click={()=>removeMember(member.id)} disabled={member.id === $currentUser?.id}>Supprimer</button>
           </div>
         </div>
       {/each}
@@ -77,13 +118,12 @@
         <div class="form-group">
           <label for="inviteRole">Rôle</label>
           <select id="inviteRole" bind:value={inviteRole}>
-            <option value="Membre">Membre</option>
-            <option value="Administrateur">Administrateur</option>
-            <option value="Éditeur">Éditeur</option>
-            <option value="Visualiseur">Visualiseur</option>
+            {#each Object.keys(roleLabels) as r}
+              <option value={r}>{roleLabels[r]}</option>
+            {/each}
           </select>
         </div>
-        <button class="btn-invite">Envoyer une invitation</button>
+        <button class="btn-invite" on:click={sendInvite}>Envoyer une invitation</button>
       </div>
     </div>
   </div>

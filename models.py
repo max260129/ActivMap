@@ -18,12 +18,30 @@ class User(db.Model):
     max_points = db.Column(db.Integer, default=5000)
     language = db.Column(db.String(10), default='fr')
     notifications_enabled = db.Column(db.Boolean, default=True)
+    # Rôle de l'utilisateur : ADMIN, CHEF, EMPLOYE
+    role = db.Column(db.String(10), default='EMPLOYE')
+    # Invitation : token hash + expiration
+    invite_token = db.Column(db.String(64), nullable=True)
+    invite_expires = db.Column(db.DateTime, nullable=True)
+    # Indique si l'utilisateur doit changer son mot de passe au premier login
+    reset_required = db.Column(db.Boolean, default=False)
+    joined_at = db.Column(db.DateTime, nullable=True)
     
-    def __init__(self, email, password):
+    def __init__(self, email, password=None):
         self.email = email
-        self.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        if password is not None:
+            self.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            self.reset_required = False
+        else:
+            self.password = None
+            self.reset_required = True
+        # Si aucun admin n'existe encore, le premier utilisateur devient ADMIN
+        if not User.query.filter_by(role='ADMIN').first():
+            self.role = 'ADMIN'
     
     def check_password(self, password):
+        if not self.password:
+            return False
         return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
     
     def to_dict(self):
@@ -36,7 +54,10 @@ class User(db.Model):
             'max_points': self.max_points,
             'language': self.language,
             'notifications_enabled': self.notifications_enabled,
-            'created_at': self.created_at
+            'role': self.role,
+            'reset_required': self.reset_required,
+            'created_at': self.created_at,
+            'joined_at': self.joined_at
         }
 
 # Ajout du modèle pour l'historique des cartes

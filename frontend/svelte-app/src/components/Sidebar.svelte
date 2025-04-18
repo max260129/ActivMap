@@ -5,13 +5,16 @@
 	/**
 	 * Menu configuration – easier to maintain
 	 */
-	const menu = [
-	  { id: "carte", label: () => t('sidebar_map') },
-	  { id: "statistique", label: () => t('sidebar_stats') },
-	  { id: "parametre", label: () => t('sidebar_settings') },
-	  { id: "equipe", label: () => t('sidebar_team') },
-	  { id: "historique", label: () => t('sidebar_history') }
+	const rawMenu = [
+	  { id: "carte", label: () => t('sidebar_map'), show: role => true },
+	  { id: "statistique", label: () => t('sidebar_stats'), show: role => role !== 'EMPLOYE' },
+	  { id: "parametre", label: () => t('sidebar_settings'), show: role => true },
+	  { id: "equipe", label: () => t('sidebar_team'), show: role => role === 'ADMIN' },
+	  { id: "historique", label: () => t('sidebar_history'), show: role => true }
 	];
+  
+	$: userRole = ($currentUser)?.role || 'EMPLOYE';
+	$: menu = rawMenu.filter(item => item.show(userRole));
   
 	function handleLogout() {
 	  logout();

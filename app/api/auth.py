@@ -4,6 +4,8 @@ import sys, os
 import re
 import traceback
 import bcrypt
+from datetime import datetime
+import hashlib
 
 # Ajout du répertoire parent au chemin Python
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -129,4 +131,40 @@ def change_password():
         return jsonify({'message': 'Mot de passe mis à jour'}), 200
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500 
+        return jsonify({'error': str(e)}), 500
+
+# ------------------------------------------------------------
+# Accept invitation (définir le mot de passe via token)
+# ------------------------------------------------------------
+
+@auth_bp.route('/accept-invite', methods=['POST'])
+def accept_invite():
+    data = request.get_json() or {}
+    raw_token = data.get('token')
+    password = data.get('password')
+
+    if not raw_token or not password:
+        return jsonify({'error': 'Données manquantes'}), 400
+
+    if len(password) < 6:
+        return jsonify({'error': 'Mot de passe trop court'}), 400
+
+    hashed = hashlib.sha256(raw_token.encode()).hexdigest()
+    user = User.query.filter_by(invite_token=hashed).first()
+
+    if not user:
+        return jsonify({'error': 'Token invalide'}), 400
+
+    if user.invite_expires and datetime.utcnow() > user.invite_expires:
+        return jsonify({'error': 'Invitation expirée'}), 410
+
+    # Définir le mot de passe
+    user.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    user.invite_token = None
+    user.invite_expires = None
+    user.reset_required = False
+    user.joined_at = datetime.utcnow()
+
+    db.session.commit()
+
+    return jsonify({'message': 'Mot de passe défini, vous pouvez vous connecter'}), 200 

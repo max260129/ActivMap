@@ -20,12 +20,11 @@
     }
   });
 
-  // Préparer les données du graphique lorsque stats est disponible
   $: chartData = stats ? {
     labels: stats.monthly_activity.map(m => `${m.month}/${m.year.toString().slice(-2)}`),
     datasets: [{
       label: 'Cartes générées',
-      backgroundColor: '#cc5200',
+      backgroundColor: 'var(--accent)',
       data: stats.monthly_activity.map(m => m.count)
     }]
   } : null;
@@ -33,106 +32,143 @@
 
 <Sidebar />
 
-<div class="content-auth">
-  <div class="card">
+<main class="container">
+  <section class="header">
     <h1>Statistiques</h1>
+  </section>
 
-    {#if loading}
-      <p style="text-align:center">Chargement...</p>
-    {:else if error}
-      <p style="text-align:center;color:red">{error}</p>
-    {:else if stats}
-      <div class="stats-container">
-        <div class="stat-card">
-          <h3>Cartes générées</h3>
-          <p class="stat-value">{stats.total_maps}</p>
-        </div>
-        <div class="stat-card">
-          <h3>Distance totale</h3>
-          <p class="stat-value">{stats.total_distance} km</p>
-        </div>
-        <div class="stat-card">
-          <h3>Cette semaine</h3>
-          <p class="stat-value">{stats.week_count}</p>
-        </div>
-        <div class="stat-card">
-          <h3>Évolution hebdo</h3>
-          <p class="stat-value">{stats.weekly_growth === null ? 'N/A' : stats.weekly_growth.toFixed(1) + '%'}</p>
-        </div>
+  {#if loading}
+    <div class="message loading"><p>Chargement...</p></div>
+  {:else if error}
+    <div class="message error"><p>{error}</p></div>
+  {:else}
+    <section class="stats-grid">
+      <div class="stat-card">
+        <h3>Cartes générées</h3>
+        <p class="value">{stats.total_maps}</p>
       </div>
+      <div class="stat-card">
+        <h3>Distance totale</h3>
+        <p class="value">{stats.total_distance} km</p>
+      </div>
+      <div class="stat-card">
+        <h3>Cette semaine</h3>
+        <p class="value">{stats.week_count}</p>
+      </div>
+      <div class="stat-card">
+        <h3>Évolution hebdo</h3>
+        <p class="value">{stats.weekly_growth === null ? 'N/A' : stats.weekly_growth.toFixed(1) + '%'}</p>
+      </div>
+    </section>
 
-      <div class="graph-container">
-        <h2>Activité mensuelle</h2>
-        {#if chartData}
-          <Bar {chartData} />
-        {/if}
-      </div>
-    {/if}
-  </div>
-</div>
+    <section class="chart-section">
+      <h2>Activité mensuelle</h2>
+      {#if chartData}
+        <Bar {chartData} />
+      {/if}
+    </section>
+  {/if}
+</main>
 
 <style>
-  .content-auth {
+  :root {
+    --bg-dark: #000000;
+    --bg-card: rgba(30,30,30,0.85);
+    --accent: #cc5200;
+    --text-light: #ffffff;
+    --error-color: #f44336;
+  }
+
+  .container {
     margin-left: var(--sidebar-width);
     width: calc(100% - var(--sidebar-width));
+    padding: 2rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 2rem;
+    background: var(--bg-dark);
   }
 
-  .card {
-    background: rgba(0, 0, 0, 0.8);
-    border: 1px solid #cc5200;
-    padding: 2rem;
-    border-radius: 16px;
-    box-shadow: 0 8px 20px rgba(204, 82, 0, 0.5);
+  .header h1 {
+    color: var(--text-light);
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .message {
     width: 100%;
     max-width: 900px;
-  }
-
-  h1, h2 {
+    padding: 2rem;
+    background: var(--bg-card);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
     text-align: center;
-    margin-bottom: 1.5rem;
-    color: #fff;
   }
 
-  .stats-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 1rem;
+  .message.error p {
+    color: var(--error-color);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 900px;
     margin-bottom: 2rem;
   }
 
   .stat-card {
-    background: rgba(20, 20, 20, 0.8);
-    border-radius: 8px;
+    background: var(--bg-card);
     padding: 1.5rem;
-    flex: 1 1 calc(50% - 1rem);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    border-top: 4px solid var(--accent);
     text-align: center;
-    border-left: 3px solid #cc5200;
+    transition: transform 0.2s;
   }
 
-  .stat-value {
+  .stat-card:hover {
+    transform: translateY(-4px);
+  }
+
+  .stat-card h3 {
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+  }
+
+  .stat-card .value {
     font-size: 2rem;
+    color: var(--accent);
     font-weight: bold;
-    color: #cc5200;
   }
 
-  .graph-container {
-    background: rgba(20, 20, 20, 0.8);
-    border-radius: 8px;
+  .chart-section {
+    width: 100%;
+    max-width: 900px;
+    background: var(--bg-card);
     padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
   }
 
-  .graph-placeholder {
-    height: 250px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px dashed #444;
-    border-radius: 8px;
-    color: #999;
+  .chart-section h2 {
+    color: var(--text-light);
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+    text-align: center;
   }
-</style> 
+
+  /* Responsive adjustments */
+  @media (max-width: 600px) {
+    .header h1 {
+      font-size: 2rem;
+    }
+
+    .stat-card .value {
+      font-size: 1.75rem;
+    }
+  }
+</style>
