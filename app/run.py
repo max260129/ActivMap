@@ -4,7 +4,7 @@ import sys
 import time
 import logging
 from dotenv import load_dotenv
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, get_jwt
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_socketio import SocketIO
@@ -37,7 +37,7 @@ from app.api import routes
 
 # Ajout du chemin parent pour importer les modèles (si "models" se trouve à la racine)
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from models import db, User
+from models import db, User, RevokedToken
 
 # Configuration de la base de données
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
@@ -48,7 +48,7 @@ app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
 app.config['JWT_TOKEN_LOCATION'] = ['headers']
 app.config['JWT_HEADER_NAME'] = 'Authorization'
 app.config['JWT_HEADER_TYPE'] = 'Bearer'
-app.config['JWT_COOKIE_SECURE'] = False         # À mettre à True en production (HTTPS)
+app.config['JWT_COOKIE_SECURE'] = True   # Secure en prod (HTTPS)
 app.config['JWT_COOKIE_CSRF_PROTECT'] = False     # Désactivé pour simplifier les tests
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600     # 1 heure
 
@@ -72,7 +72,19 @@ def user_lookup_callback(_jwt_header, jwt_data):
 
 @jwt.token_in_blocklist_loader
 def check_if_token_revoked(jwt_header, jwt_payload):
-    logger.debug(f"Vérification du token: {jwt_payload}")
+    jti = jwt_payload["jti"]
+    if RevokedToken.query.filter_by(jti=jti).first():
+        logger.debug(f"Token {jti} révoqué (liste noire)")
+        return True
+    # Vérifier si l'utilisateur est supprimé
+    try:
+        user_id = int(jwt_payload["sub"])
+        user = User.query.get(user_id)
+        if user and user.deleted_at is not None:
+            logger.debug(f"Token refusé : utilisateur {user_id} supprimé")
+            return True
+    except Exception as e:
+        logger.error("Erreur vérif utilisateur supprimé", e)
     return False
 
 @jwt.expired_token_loader
@@ -113,5 +125,5 @@ with app.app_context():
         print(f"❌ Erreur lors de la création des tables: {str(e)}")
 
 if __name__ == '__main__':
-    # Lancement via SocketIO pour supporter les WebSockets
-    socketio.run(app, host='0.0.0.0', debug=True)
+    # Forcer HTTPS en production si derrière proxy — ici on part en debug False
+    socketio.run(app, host='0.0.0.0', debug=False, ssl_context='adhoc')

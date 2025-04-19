@@ -29,6 +29,7 @@ class User(db.Model):
     # Indique si l'utilisateur doit changer son mot de passe au premier login
     reset_required = db.Column(db.Boolean, default=False)
     joined_at = db.Column(db.DateTime, nullable=True)
+    deleted_at = db.Column(db.DateTime, nullable=True)
     # Champ confirmation email
     email_confirmed = db.Column(db.Boolean, default=False)
     confirm_token = db.Column(db.String(64), nullable=True)
@@ -65,7 +66,8 @@ class User(db.Model):
             'reset_required': self.reset_required,
             'email_confirmed': self.email_confirmed,
             'created_at': self.created_at,
-            'joined_at': self.joined_at
+            'joined_at': self.joined_at,
+            'deleted_at': self.deleted_at
         }
 
 # Ajout du modèle pour l'historique des cartes
@@ -110,4 +112,13 @@ class Consent(db.Model):
             'user_id': self.user_id,
             'text': self.text,
             'given_at': self.given_at,
-        } 
+        }
+
+class RevokedToken(db.Model):
+    __tablename__ = 'revoked_tokens'
+
+    jti = db.Column(db.String(36), primary_key=True)
+    revoked_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<RevokedToken {self.jti}>' 

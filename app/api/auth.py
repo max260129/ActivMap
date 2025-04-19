@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 import sys, os
 import re
 import traceback
@@ -10,11 +10,11 @@ import uuid
 from utils.mailer import send_email
 from app.run import socketio
 from app.api.team import user_to_dict
+from models import db, User, Consent, RevokedToken
+import time
 
 # Ajout du répertoire parent au chemin Python
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from models import db, User, Consent
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -22,6 +22,39 @@ auth_bp = Blueprint('auth', __name__)
 def is_valid_email(email):
     pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
     return re.match(pattern, email) is not None
+
+# ------------------------------------------------------------
+# AuditLog – journalisation des actions sensibles
+# ------------------------------------------------------------
+
+class AuditLog(db.Model):
+    __tablename__ = 'audit_logs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=True)
+    action = db.Column(db.String(50), nullable=False)
+    ip = db.Column(db.String(45))
+    user_agent = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Audit {self.action} user={self.user_id}>'
+
+
+def log_event(user_id, action):
+    """Enregistre une entrée d'audit sans interrompre la requête en cas d'erreur."""
+    try:
+        entry = AuditLog(
+            user_id=user_id,
+            action=action,
+            ip=request.remote_addr,
+            user_agent=request.headers.get('User-Agent')[:250]
+        )
+        db.session.add(entry)
+        db.session.commit()
+    except Exception as e:
+        # Ne pas bloquer l'application si l'audit échoue
+        print('Erreur audit', e)
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
@@ -78,6 +111,8 @@ def register():
         """
     )
 
+    log_event(new_user.id, 'register')
+
     return jsonify({'message': 'Inscription réussie. Vérifie tes e‑mails pour confirmer votre adresse.'}), 201
 
 @auth_bp.route('/login', methods=['POST'])
@@ -103,6 +138,7 @@ def login():
     # Générer le token JWT
     access_token = create_access_token(identity=user.id)
     
+    log_event(user.id, 'login')
     return jsonify({
         'access_token': access_token,
         'user': user.to_dict()
@@ -373,3 +409,92 @@ def get_privacy_policy():
         # Fallback texte statique si le fichier n'existe pas
         content = "Politique de confidentialité non disponible."
     return jsonify({'content': content}), 200 
+
+# ------------------------------------------------------------
+# Déconnexion : ajout du token à la blacklist
+# ------------------------------------------------------------
+
+@auth_bp.route('/logout', methods=['POST'])
+@jwt_required()
+def logout():
+    jti = get_jwt()["jti"]
+    revoked = RevokedToken(jti=jti)
+    db.session.add(revoked)
+    db.session.commit()
+    log_event(get_jwt_identity(), 'logout')
+    return jsonify({"message": "Déconnexion réussie"}), 200 
+
+# ------------------------------------------------------------
+# Export des données du compte
+# ------------------------------------------------------------
+
+@auth_bp.route('/me/export', methods=['GET'])
+@jwt_required()
+def export_me():
+    user_id = get_jwt_identity()
+    user = User.query.get_or_404(int(user_id))
+    if user.deleted_at is not None:
+        return jsonify({'error': 'Compte supprimé'}), 410
+    data = user.to_dict()
+    # Ajout de l'historique des cartes
+    data['maps'] = [m.to_dict() for m in user.maps]
+    log_event(user.id, 'export')
+    return jsonify({'export': data}), 200
+
+# ------------------------------------------------------------
+# Mise à jour des infos du compte
+# ------------------------------------------------------------
+
+@auth_bp.route('/me', methods=['PUT'])
+@jwt_required()
+def update_me():
+    user_id = get_jwt_identity()
+    user = User.query.get_or_404(int(user_id))
+    if user.deleted_at is not None:
+        return jsonify({'error': 'Compte supprimé'}), 410
+
+    data = request.get_json() or {}
+    email = data.get('email')
+    username = data.get('username')
+
+    if email and email != user.email:
+        if not is_valid_email(email):
+            return jsonify({'error': 'Email invalide'}), 400
+        if User.query.filter(User.email == email, User.id != user.id).first():
+            return jsonify({'error': 'Email déjà utilisé'}), 409
+        user.email = email
+
+    if username is not None:
+        user.username = username.strip() or None
+
+    db.session.commit()
+    log_event(user.id, 'update')
+    return jsonify({'user': user.to_dict()}), 200
+
+# ------------------------------------------------------------
+# Suppression (soft-delete) du compte
+# ------------------------------------------------------------
+
+@auth_bp.route('/me', methods=['DELETE'])
+@jwt_required()
+def delete_me():
+    jti = get_jwt()["jti"]
+    user_id = get_jwt_identity()
+    user = User.query.get_or_404(int(user_id))
+    if user.deleted_at is not None:
+        return jsonify({'error': 'Compte déjà supprimé'}), 410
+
+    # Soft delete
+    user.deleted_at = datetime.utcnow()
+    # Anonymisation minimale
+    user.email = f"deleted_{user.id}_{int(time.time())}@deleted"
+    user.username = None
+
+    # Révoquer le token courant
+    revoked = RevokedToken(jti=jti)
+    db.session.add(revoked)
+    db.session.commit()
+
+    log_event(user.id, 'delete')
+
+    return jsonify({'message': 'Compte supprimé'}), 200 
