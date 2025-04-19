@@ -29,6 +29,10 @@ class User(db.Model):
     # Indique si l'utilisateur doit changer son mot de passe au premier login
     reset_required = db.Column(db.Boolean, default=False)
     joined_at = db.Column(db.DateTime, nullable=True)
+    # Champ confirmation email
+    email_confirmed = db.Column(db.Boolean, default=False)
+    confirm_token = db.Column(db.String(64), nullable=True)
+    confirm_expires = db.Column(db.DateTime, nullable=True)
     
     def __init__(self, email, password=None):
         self.email = email
@@ -59,6 +63,7 @@ class User(db.Model):
             'notifications_enabled': self.notifications_enabled,
             'role': self.role,
             'reset_required': self.reset_required,
+            'email_confirmed': self.email_confirmed,
             'created_at': self.created_at,
             'joined_at': self.joined_at
         }
@@ -86,4 +91,23 @@ class MapHistory(db.Model):
             'distance': self.distance,
             'file_path': self.file_path,
             'created_at': self.created_at
+        }
+
+class Consent(db.Model):
+    __tablename__ = 'consents'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    text = db.Column(db.String(255), nullable=False, default='Politique de confidentialité v1')
+    given_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relation vers l'utilisateur
+    user = db.relationship('User', backref=db.backref('consents', lazy=True))
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'text': self.text,
+            'given_at': self.given_at,
         } 

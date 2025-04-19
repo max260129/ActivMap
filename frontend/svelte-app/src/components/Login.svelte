@@ -13,6 +13,7 @@
     let error = '';
     let loading = false;
     let isRegisterMode = false;
+    let consentChecked = false;
     
     async function handleSubmit() {
         error = '';
@@ -44,18 +45,36 @@
             const endpoint = isRegisterMode ? `${API_URL}/api/auth/register` : `${API_URL}/api/auth/login`;
             console.log('Tentative de connexion à:', endpoint);
             
+            // Construction du payload
+            const payload = { email, password };
+            if (isRegisterMode) {
+                // Vérifier le consentement
+                if (!consentChecked) {
+                    error = 'Vous devez accepter la politique de confidentialité.';
+                    loading = false;
+                    return;
+                }
+                payload.consent = true;
+            }
+
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify(payload)
             });
             
             const data = await response.json();
             
             if (!response.ok) {
-                error = data.error || `Erreur de connexion: ${response.status} ${response.statusText}`;
+                if (response.status === 403 && data.error && data.error.includes('non confirmé')) {
+                    error = 'Compte non confirmé.';
+                    // Proposer le renvoi
+                    error += ' <a href="#resend">Renvoyer l\'e‑mail de confirmation</a>';
+                } else {
+                    error = data.error || `Erreur de connexion: ${response.status} ${response.statusText}`;
+                }
                 loading = false;
                 return;
             }
@@ -107,6 +126,17 @@
     
     .form-group {
         margin-bottom: 1rem;
+    }
+    
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+    }
+    
+    .checkbox-label a {
+        color: #cc5200;
     }
     
     .error-message {
@@ -184,6 +214,13 @@
         
         {#if error}
             <p class="error-message" in:fade>{error}</p>
+        {/if}
+        
+        {#if isRegisterMode}
+            <div class="form-group checkbox-label">
+                <input type="checkbox" id="consent" bind:checked={consentChecked} />
+                <label for="consent">J'accepte la <a href="#privacy" target="_blank">Politique de confidentialité</a></label>
+            </div>
         {/if}
     </form>
     

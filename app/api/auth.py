@@ -14,7 +14,7 @@ from app.api.team import user_to_dict
 # Ajout du répertoire parent au chemin Python
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from models import db, User
+from models import db, User, Consent
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -25,32 +25,60 @@ def is_valid_email(email):
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
-    data = request.get_json()
-    
-    if not data or not data.get('email') or not data.get('password'):
-        return jsonify({'error': 'Email et mot de passe requis'}), 400
-    
+    """Inscription puis envoi d'un e‑mail de confirmation."""
+    data = request.get_json() or {}
+
     email = data.get('email')
     password = data.get('password')
-    
-    # Validation
+    consent = data.get('consent')
+
+    if not email or not password:
+        return jsonify({'error': 'Email et mot de passe requis'}), 400
+
+    # Consentement obligatoire
+    if consent is not True:
+        return jsonify({'error': 'Le consentement à la politique de confidentialité est requis'}), 400
+
+    # Validation basique
     if not is_valid_email(email):
-        return jsonify({'error': 'Format d\'email invalide'}), 400
-    
+        return jsonify({'error': "Format d'email invalide"}), 400
     if len(password) < 6:
         return jsonify({'error': 'Le mot de passe doit contenir au moins 6 caractères'}), 400
-    
-    # Vérifier si l'utilisateur existe déjà
-    existing_user = User.query.filter_by(email=email).first()
-    if existing_user:
+
+    # Existence
+    if User.query.filter_by(email=email).first():
         return jsonify({'error': 'Cet email est déjà utilisé'}), 409
-    
-    # Créer un nouvel utilisateur
+
+    # Création utilisateur
     new_user = User(email=email, password=password)
+
+    # Génération du token de confirmation
+    raw_token = uuid.uuid4().hex
+    hashed_token = hashlib.sha256(raw_token.encode()).hexdigest()
+    new_user.confirm_token = hashed_token
+    new_user.confirm_expires = datetime.utcnow() + timedelta(hours=24)
+
     db.session.add(new_user)
+    # Enregistrer le consentement dans la table consents
+    consent_record = Consent(user=new_user)
+    db.session.add(consent_record)
     db.session.commit()
-    
-    return jsonify({'message': 'Utilisateur créé avec succès'}), 201
+
+    # Envoi e‑mail
+    confirm_link = f"http://localhost:3000/#confirm?token={raw_token}"
+    send_email(
+        to=email,
+        subject="Confirmation de votre adresse e‑mail ActivMap",
+        html_content=f"""
+        <p>Bonjour,</p>
+        <p>Merci de votre inscription. Cliquez sur le lien ci‑dessous pour confirmer votre adresse e‑mail :</p>
+        <p><a href='{confirm_link}'>{confirm_link}</a></p>
+        <p>Ce lien expirera dans 24 heures.</p>
+        <p>À bientôt sur ActivMap !</p>
+        """
+    )
+
+    return jsonify({'message': 'Inscription réussie. Vérifie tes e‑mails pour confirmer votre adresse.'}), 201
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
@@ -67,6 +95,10 @@ def login():
     
     if not user or not user.check_password(password):
         return jsonify({'error': 'Email ou mot de passe incorrect'}), 401
+    
+    # Compte non confirmé
+    if not user.email_confirmed:
+        return jsonify({'error': 'Compte non confirmé. Vérifie tes e‑mails.'}), 403
     
     # Générer le token JWT
     access_token = create_access_token(identity=user.id)
@@ -168,6 +200,7 @@ def accept_invite():
     user.invite_expires = None
     user.reset_required = False
     user.joined_at = datetime.utcnow()
+    user.email_confirmed = True
 
     db.session.commit()
 
@@ -252,4 +285,91 @@ def reset_password():
     user.reset_expires = None
     db.session.commit()
 
-    return jsonify({'message': 'Mot de passe mis à jour'}), 200 
+    return jsonify({'message': 'Mot de passe mis à jour'}), 200
+
+# ------------------------------------------------------------
+# Confirmation d'email après inscription
+# ------------------------------------------------------------
+
+@auth_bp.route('/confirm-email', methods=['POST'])
+def confirm_email():
+    data = request.get_json() or {}
+    raw_token = data.get('token')
+
+    if not raw_token:
+        return jsonify({'error': 'Token manquant'}), 400
+
+    hashed = hashlib.sha256(raw_token.encode()).hexdigest()
+    user = User.query.filter_by(confirm_token=hashed).first()
+
+    if not user:
+        return jsonify({'error': 'Token invalide'}), 400
+
+    if user.email_confirmed:
+        return jsonify({'message': 'Compte déjà confirmé'}), 200
+
+    if user.confirm_expires and datetime.utcnow() > user.confirm_expires:
+        return jsonify({'error': 'Lien expiré'}), 410
+
+    user.email_confirmed = True
+    user.confirm_token = None
+    user.confirm_expires = None
+    user.joined_at = user.joined_at or datetime.utcnow()
+    db.session.commit()
+
+    return jsonify({'message': 'Adresse e‑mail confirmée, vous pouvez maintenant vous connecter.'}), 200
+
+# ------------------------------------------------------------
+# Renvoyer l'e‑mail de confirmation
+# ------------------------------------------------------------
+
+@auth_bp.route('/resend-confirmation', methods=['POST'])
+def resend_confirmation():
+    data = request.get_json() or {}
+    email = data.get('email')
+
+    generic_msg = {'message': 'Si le compte existe et n\'est pas confirmé, un e‑mail a été envoyé.'}
+
+    if not email:
+        return jsonify(generic_msg), 200
+
+    user = User.query.filter_by(email=email).first()
+
+    if not user or user.email_confirmed:
+        return jsonify(generic_msg), 200
+
+    raw_token = uuid.uuid4().hex
+    hashed_token = hashlib.sha256(raw_token.encode()).hexdigest()
+    user.confirm_token = hashed_token
+    user.confirm_expires = datetime.utcnow() + timedelta(hours=24)
+    db.session.commit()
+
+    confirm_link = f"http://localhost:3000/#confirm?token={raw_token}"
+    send_email(
+        to=email,
+        subject="Confirmation de votre adresse e‑mail ActivMap",
+        html_content=f"""
+        <p>Bonjour,</p>
+        <p>Vous avez demandé un nouvel e‑mail de confirmation. Cliquez sur le lien ci‑dessous :</p>
+        <p><a href='{confirm_link}'>{confirm_link}</a></p>
+        <p>Ce lien expirera dans 24 heures.</p>
+        """
+    )
+
+    return jsonify(generic_msg), 200
+
+# ------------------------------------------------------------
+# Politique de confidentialité (public)
+# ------------------------------------------------------------
+
+@auth_bp.route('/legal/privacy', methods=['GET'])
+def get_privacy_policy():
+    """Renvoie la politique de confidentialité au format texte brut."""
+    policy_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'docs', 'privacy_policy.md')
+    try:
+        with open(policy_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except FileNotFoundError:
+        # Fallback texte statique si le fichier n'existe pas
+        content = "Politique de confidentialité non disponible."
+    return jsonify({'content': content}), 200 

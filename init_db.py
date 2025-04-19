@@ -16,6 +16,7 @@ def seed_default_user(app=None):
                 email="admin@activmap.fr",
                 password="adminPassword123"
             )
+            default_user.email_confirmed = True
             db.session.add(default_user)
             db.session.commit()
             print("Utilisateur par défaut créé : admin@activmap.fr / adminPassword123")

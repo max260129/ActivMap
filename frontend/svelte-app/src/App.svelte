@@ -16,6 +16,10 @@
 	import AcceptInvite from './pages/AcceptInvite.svelte';
 	import ForgotPassword from './pages/ForgotPassword.svelte';
 	import ResetPassword from './pages/ResetPassword.svelte';
+	import ConfirmEmail from './pages/ConfirmEmail.svelte';
+	import ResendConfirmation from './pages/ResendConfirmation.svelte';
+	import Privacy from './pages/Privacy.svelte';
+	import CookieBanner from './components/CookieBanner.svelte';
 	
 	// Configuration du backend
 	const API_URL = 'http://localhost:5000';
@@ -480,18 +484,30 @@
 			<Historique />
 		{:else if currentPage === 'invite'}
 			<AcceptInvite />
+		{:else if currentPage === 'confirm'}
+			<ConfirmEmail />
+		{:else if currentPage === 'resend'}
+			<ResendConfirmation />
 		{:else if currentPage === 'forgot'}
 			<ForgotPassword />
 		{:else if currentPage === 'reset'}
 			<ResetPassword />
+		{:else if currentPage === 'privacy'}
+			<Privacy />
 		{/if}
 	{:else}
 		{#if currentPage === 'invite'}
 			<AcceptInvite />
+		{:else if currentPage === 'confirm'}
+			<ConfirmEmail />
+		{:else if currentPage === 'resend'}
+			<ResendConfirmation />
 		{:else if currentPage === 'forgot'}
 			<ForgotPassword />
 		{:else if currentPage === 'reset'}
 			<ResetPassword />
+		{:else if currentPage === 'privacy'}
+			<Privacy />
 		{:else}
 			<!-- Page de connexion -->
 			<div class="card" transition:fly={{ y: -20, duration: 600 }}>
@@ -501,3 +517,6 @@
 		{/if}
 	{/if}
 </main>
+
+<!-- Bandeau cookies toujours présent -->
+<CookieBanner />
