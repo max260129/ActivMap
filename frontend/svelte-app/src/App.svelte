@@ -4,7 +4,23 @@
 	import Login from './components/Login.svelte';
 	import Sidebar from './components/Sidebar.svelte';
 	import { isAuthenticated, currentUser, checkAuth, logout, fetchWithAuth } from './services/auth';
-	import MapSelector from './components/MapSelector.svelte';
+	import { preferences } from './stores/preferences.js';
+	import { t, locale } from './i18n.js';
+	import { initSocket } from './services/socket.js';
+	
+	// Import des nouvelles pages
+	import Statistique from './pages/Statistique.svelte';
+	import Parametre from './pages/Parametre.svelte';
+	import Equipe from './pages/Equipe.svelte';
+	import Historique from './pages/Historique.svelte';
+	import AcceptInvite from './pages/AcceptInvite.svelte';
+	import ForgotPassword from './pages/ForgotPassword.svelte';
+	import ResetPassword from './pages/ResetPassword.svelte';
+	import ConfirmEmail from './pages/ConfirmEmail.svelte';
+	import ResendConfirmation from './pages/ResendConfirmation.svelte';
+	import Privacy from './pages/Privacy.svelte';
+	import CookieBanner from './components/CookieBanner.svelte';
+		import MapSelector from './components/MapSelector.svelte';
 
 	// Configuration du backend
 	const API_URL = 'http://localhost:5000';
@@ -12,6 +28,16 @@
 	// État d'authentification forcé à false au démarrage
 	$: console.log("État d'authentification:", $isAuthenticated);
 	
+	// Navigation
+	let currentPage = 'carte';
+	
+	// Fonction pour définir la page active
+	function setActivePage() {
+		const hash = window.location.hash.replace('#', '').split('?')[0];
+		currentPage = hash || 'carte';
+	}
+	
+	// Variables pour la carte
 	let latitude = 49.444838;
 	let longitude = 1.094214;
 	let distance = 150;
@@ -37,10 +63,47 @@
 	// Transformation combinée : translation, rotation et zoom
 	$: transformValue = `translate(${translateX}px, ${translateY}px) rotate(${rotate}deg) scale(${scale})`;
   
-	// Vérifier l'authentification au démarrage
+	// Vérifier l'authentification au démarrage et configurer la navigation
 	onMount(() => {
 		// Vérifier l'authentification sans forcer la déconnexion
 		checkAuth();
+		
+		// Charger les préférences si déjà authentifié
+		const unsub = isAuthenticated.subscribe(async v => {
+			if (v) {
+				try {
+					const { getSettings } = await import('./services/settings.js');
+					const data = await getSettings();
+					preferences.set(data);
+				} catch (e) {
+					console.error('Erreur chargement préférences', e);
+				}
+			}
+		});
+		
+		// Configurer la navigation basée sur le hash
+		setActivePage();
+		window.addEventListener('hashchange', setActivePage);
+		
+		// Nettoyage lors du démontage du composant
+		return () => {
+			window.removeEventListener('hashchange', setActivePage);
+		};
+		
+		initSocket();
+	});
+
+	// Mettre à jour la distance par défaut selon les préférences
+	preferences.subscribe(p => {
+		if (p && p.default_distance) {
+			distance = p.default_distance;
+		}
+
+		if (p && p.map_style) {
+			const isLight = p.map_style === 'light';
+			document.body.classList.toggle('theme-light', isLight);
+			document.body.classList.toggle('theme-dark', !isLight);
+		}
 	});
 
 	async function generateMap() {
@@ -134,6 +197,7 @@
 	function handleLoginSuccess() {
 		// Rafraîchir l'état d'authentification
 		checkAuth();
+		initSocket();
 	}
 </script>
 
@@ -322,6 +386,28 @@
 	.content-auth {
 		margin-left: 240px; /* largeur de la sidebar */
 		width: calc(100% - 240px);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 2rem;
+		gap: 2rem;
+	}
+
+	:global(body.theme-light) {
+		background: #f3f3f3;
+		color: #000;
+	}
+
+	:global(body.theme-light) .card {
+		background: rgba(255,255,255,0.9);
+		color: #000;
+	}
+
+	:global(body.theme-light) input,
+	:global(body.theme-light) select {
+		background: #fff;
+		color: #000;
+		border-color: #ccc;
 	}
 </style>
   
@@ -329,81 +415,109 @@
 	{#if $isAuthenticated}
 		<!-- Sidebar de navigation -->
 		<Sidebar />
-
-		<div class="content-auth">
-		<div id="carte" class="card" transition:fly={{ y: -20, duration: 600 }}>
-			<h1>Générateur de carte stylisée</h1>
-			<form on:submit|preventDefault={generateMap}>
-				<label>
-					Latitude :
-					<input type="number" bind:value={latitude} step="0.000001" required />
-				</label>
-				<label>
-					Longitude :
-					<input type="number" bind:value={longitude} step="0.000001" required />
-				</label>
-				<label>
-					Distance (m) :
-					<input type="number" bind:value={distance} required />
-				</label>
-
-				<MapSelector
-					bind:lat={latitude}
-					bind:lon={longitude}
-					bind:radius={distance}
-				/>
-				
-				<!-- Option pour utiliser l'API non-protégée -->
-				<!-- <label class="checkbox-label">
-					<input type="checkbox" bind:checked={usePublicEndpoint}>
-					Utiliser la version non-protégée (debug)
-				</label> -->
-				
-				<button type="submit">Générer la carte</button>
-			</form>
-			{#if loading}
-				<div class="loading-spinner"></div>
-				<p style="text-align: center;">Génération en cours...</p>
-			{/if}
-			{#if error}
-				<p class="error">{error}</p>
-			{/if}
-		</div>
 		
-		{#if svgUrl}
-			<h2 transition:fade style="text-align: center;">Carte générée :</h2>
-			<div class="card" transition:fly={{ y: 20, duration: 600 }}>
-				<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-				<div
-					class="svg-container"
-					role="application"
-					aria-label="Carte stylisée"
-					on:wheel|preventDefault={handleWheel}
-					on:mousedown={startDrag}
-					on:mousemove={drag}
-					on:mouseup={endDrag}
-					on:mouseleave={endDrag}
-				>
-					<div class="zoom-controls">
-						<button on:click={zoomIn} aria-label="Zoom In">+</button>
-						<button on:click={zoomOut} aria-label="Zoom Out">–</button>
-						<button on:click={rotateMap} aria-label="Rotate">⟳</button>
-					</div>
-					<img src={svgUrl} alt="Carte stylisée" style:transform={transformValue} transition:scaleTransition={{ duration: 400 }}/>
+		<!-- Afficher la page en fonction de currentPage -->
+		{#if currentPage === 'carte'}
+			<div class="content-auth">
+				<div id="carte" class="card" transition:fly={{ y: -20, duration: 600 }}>
+					<h1>{t('map_generator', $locale)}</h1>
+					<form on:submit|preventDefault={generateMap}>
+						<label>
+							{t('latitude', $locale)} :
+							<input type="number" bind:value={latitude} step="0.000001" required />
+						</label>
+						<label>
+							{t('longitude', $locale)} :
+							<input type="number" bind:value={longitude} step="0.000001" required />
+						</label>
+						<label>
+							{t('distance', $locale)} :
+							<input type="number" bind:value={distance} required />
+						</label>
+						
+						<button type="submit">{t('generate_map', $locale)}</button>
+					</form>
+					{#if loading}
+						<div class="loading-spinner"></div>
+						<p style="text-align: center;">Génération en cours...</p>
+					{/if}
+					{#if error}
+						<p class="error">{error}</p>
+					{/if}
 				</div>
+				
+				{#if svgUrl}
+					<h2 transition:fade style="text-align: center;">{t('generated_map', $locale)}</h2>
+					<div class="card" transition:fly={{ y: 20, duration: 600 }}>
+						<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+						<div
+							class="svg-container"
+							role="application"
+							aria-label="Carte stylisée"
+							on:wheel|preventDefault={handleWheel}
+							on:mousedown={startDrag}
+							on:mousemove={drag}
+							on:mouseup={endDrag}
+							on:mouseleave={endDrag}
+						>
+							<div class="zoom-controls">
+								<button on:click={zoomIn} aria-label="Zoom In">+</button>
+								<button on:click={zoomOut} aria-label="Zoom Out">–</button>
+								<button on:click={rotateMap} aria-label="Rotate">⟳</button>
+							</div>
+							<img src={svgUrl} alt="Carte stylisée" style:transform={transformValue} transition:scaleTransition={{ duration: 400 }}/>
+						</div>
+					</div>
+					<div class="download-container">
+						<a download="carte.svg" href={svgUrl}>
+							<button>{t('download_svg', $locale)}</button>
+						</a>
+					</div>
+				{/if}
 			</div>
-			<div class="download-container">
-				<a download="carte.svg" href={svgUrl}>
-					<button>Télécharger l'image SVG</button>
-				</a>
+		{:else if currentPage === 'statistique'}
+			<Statistique />
+		{:else if currentPage === 'parametre'}
+			<Parametre />
+		{:else if currentPage === 'equipe'}
+			<Equipe />
+		{:else if currentPage === 'historique'}
+			<Historique />
+		{:else if currentPage === 'invite'}
+			<AcceptInvite />
+		{:else if currentPage === 'confirm'}
+			<ConfirmEmail />
+		{:else if currentPage === 'resend'}
+			<ResendConfirmation />
+		{:else if currentPage === 'forgot'}
+			<ForgotPassword />
+		{:else if currentPage === 'reset'}
+			<ResetPassword />
+		{:else if currentPage === 'privacy'}
+			<Privacy />
+		{/if}
+	{:else}
+		{#if currentPage === 'invite'}
+			<AcceptInvite />
+		{:else if currentPage === 'confirm'}
+			<ConfirmEmail />
+		{:else if currentPage === 'resend'}
+			<ResendConfirmation />
+		{:else if currentPage === 'forgot'}
+			<ForgotPassword />
+		{:else if currentPage === 'reset'}
+			<ResetPassword />
+		{:else if currentPage === 'privacy'}
+			<Privacy />
+		{:else}
+			<!-- Page de connexion -->
+			<div class="card" transition:fly={{ y: -20, duration: 600 }}>
+				<h1>ActivMap</h1>
+				<Login on:login-success={handleLoginSuccess} />
 			</div>
 		{/if}
-		</div> <!-- fin content-auth -->
-	{:else}
-		<!-- Page de connexion -->
-		<div class="card" transition:fly={{ y: -20, duration: 600 }}>
-			<h1>ActivMap</h1>
-			<Login on:login-success={handleLoginSuccess} />
-		</div>
 	{/if}
 </main>
+
+<!-- Bandeau cookies toujours présent -->
+<CookieBanner />

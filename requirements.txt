@@ -19,3 +19,6 @@ geojson
 Pillow
 geographiclib
 watchdog
+python-dateutil==2.9.0
+flask-socketio==5.3.5
+eventlet==0.35.2

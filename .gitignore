@@ -9,7 +9,8 @@ __pycache__/
 app/static/*.png
 app/static/*.svg
 
-# Fichiers de configuration locale
+# Fichiers de configuration locale (ne pas versionner les secrets)
+.env
 .env.local
 .env.development.local
 .env.test.local

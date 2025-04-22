@@ -5,6 +5,9 @@ WORKDIR /app
 # Copier les fichiers de dépendances
 COPY package*.json ./
 
+# Utiliser un cache npm temporaire pour éviter les problèmes d'accès
+ENV npm_config_cache=/tmp/.npm-cache
+
 # Installer les dépendances
 RUN npm install --no-optional
 
