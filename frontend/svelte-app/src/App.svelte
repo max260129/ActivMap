@@ -167,6 +167,38 @@
 		rotate = rotate + 15;
 	}
   
+	// Contrôles clavier pour la carte
+	function handleKeydownMap(e) {
+		switch (e.key) {
+			case 'ArrowUp':
+				translateY += 20;
+				break;
+			case 'ArrowDown':
+				translateY -= 20;
+				break;
+			case 'ArrowLeft':
+				translateX += 20;
+				break;
+			case 'ArrowRight':
+				translateX -= 20;
+				break;
+			case '+':
+			case '=':
+				zoomIn();
+				break;
+			case '-':
+				zoomOut();
+				break;
+			case 'r':
+			case 'R':
+				rotateMap();
+				break;
+			default:
+				return;
+		}
+		e.preventDefault(); // Empêche le scroll de page
+	}
+  
 	function startDrag(e) {
 		isDragging = true;
 		initialDragX = e.clientX;
@@ -343,7 +375,8 @@
 		background-color: rgba(204, 82, 0, 0.7);
 	}
   
-	.zoom-controls button:hover {
+	.zoom-controls button:hover,
+	.zoom-controls button:focus-visible {
 		background-color: rgba(204, 82, 0, 0.8);
 	}
   
@@ -408,9 +441,47 @@
 		color: #000;
 		border-color: #ccc;
 	}
+
+	/* Lien d'évitement (skip link) */
+	.skip-link {
+		position: absolute;
+		top: -40px;
+		left: 0;
+		background: #cc5200;
+		color: #fff;
+		padding: 0.5rem 1rem;
+		z-index: 1000;
+		transition: top 0.3s ease;
+	}
+
+	.skip-link:focus {
+		top: 0;
+		outline: 2px solid #fff;
+	}
+
+	/* Style focus pour boutons et liens personnalisés */
+	.logout:focus-visible,
+	.menu-item:focus-visible,
+	button:focus-visible {
+		outline: 3px solid #fff;
+		outline-offset: 2px;
+	}
+
+	/* Classe sr-only pour contenu uniquement vocal */
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
 </style>
   
-<main>
+<main id="main" tabindex="-1">
 	{#if $isAuthenticated}
 		<!-- Sidebar de navigation -->
 		<Sidebar />
@@ -453,11 +524,14 @@
 							class="svg-container"
 							role="application"
 							aria-label="Carte stylisée"
+							aria-describedby="map-instructions"
 							on:wheel|preventDefault={handleWheel}
 							on:mousedown={startDrag}
 							on:mousemove={drag}
 							on:mouseup={endDrag}
 							on:mouseleave={endDrag}
+							on:keydown={handleKeydownMap}
+							tabindex="0"
 						>
 							<div class="zoom-controls">
 								<button on:click={zoomIn} aria-label="Zoom In">+</button>
@@ -466,6 +540,7 @@
 							</div>
 							<img src={svgUrl} alt="Carte stylisée" style:transform={transformValue} transition:scaleTransition={{ duration: 400 }}/>
 						</div>
+						<p id="map-instructions" class="sr-only">Utilisez les flèches pour déplacer la carte, les touches plus et moins pour zoomer et la touche R pour faire pivoter.</p>
 					</div>
 					<div class="download-container">
 						<a download="carte.svg" href={svgUrl}>

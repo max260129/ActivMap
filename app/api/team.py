@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 import uuid, hashlib
 from datetime import datetime, timedelta
 
-from models import db, User
+from models import db, User, MapHistory, Consent
 from middleware import admin_required
 from utils.mailer import send_email
 from app.run import socketio
@@ -126,6 +126,16 @@ def delete_user(user_id):
     if user.role == 'ADMIN' and User.query.filter_by(role='ADMIN').count() <= 1:
         return jsonify({'error': 'Il doit rester au moins un administrateur'}), 400
 
+    # ------------------------------------------------------------------
+    # Nettoyage des données liées pour éviter les contraintes d'intégrité
+    # ------------------------------------------------------------------
+    # Supprimer l'historique des cartes associé
+    MapHistory.query.filter_by(user_id=user.id).delete()
+    # Supprimer les consentements liés
+    Consent.query.filter_by(user_id=user.id).delete()
+
     db.session.delete(user)
     db.session.commit()
+    # Évènement temps‑réel : membre supprimé
+    socketio.emit('team_member_deleted', {'id': user.id})
     return jsonify({'message': 'Utilisateur supprimé'}), 200 

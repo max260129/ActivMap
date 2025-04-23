@@ -189,6 +189,8 @@
                 required 
                 autocomplete="email" 
                 placeholder="votre@email.com"
+                aria-invalid={error ? 'true' : 'false'}
+                aria-describedby={error ? 'error-message' : undefined}
             />
         </div>
         
@@ -201,6 +203,8 @@
                 required 
                 autocomplete={isRegisterMode ? 'new-password' : 'current-password'}
                 placeholder="Votre mot de passe"
+                aria-invalid={error ? 'true' : 'false'}
+                aria-describedby={error ? 'error-message' : undefined}
             />
         </div>
         
@@ -213,7 +217,7 @@
         {/if}
         
         {#if error}
-            <p class="error-message" in:fade>{error}</p>
+            <p id="error-message" class="error-message" role="alert" in:fade>{@html error}</p>
         {/if}
         
         {#if isRegisterMode}

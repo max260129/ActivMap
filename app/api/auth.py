@@ -23,6 +23,22 @@ def is_valid_email(email):
     pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
     return re.match(pattern, email) is not None
 
+# Ajout de la validation du mot de passe fort
+def is_strong_password(pwd: str) -> bool:
+    '''
+    Vérifie qu'un mot de passe contient :
+    - au moins 8 caractères
+    - au moins un chiffre
+    - au moins un caractère spécial
+    '''
+    if len(pwd) < 8:
+        return False
+    if not any(c.isdigit() for c in pwd):
+        return False
+    if not any(not c.isalnum() for c in pwd):
+        return False
+    return True
+
 # ------------------------------------------------------------
 # AuditLog – journalisation des actions sensibles
 # ------------------------------------------------------------
@@ -75,8 +91,10 @@ def register():
     # Validation basique
     if not is_valid_email(email):
         return jsonify({'error': "Format d'email invalide"}), 400
-    if len(password) < 6:
-        return jsonify({'error': 'Le mot de passe doit contenir au moins 6 caractères'}), 400
+    if not is_strong_password(password):
+        return jsonify({
+            'error': 'Le mot de passe doit contenir au moins 8 caractères, inclure au moins un chiffre et un caractère spécial'
+        }), 400
 
     # Existence
     if User.query.filter_by(email=email).first():
@@ -193,8 +211,10 @@ def change_password():
     if not user.check_password(old_pwd):
         return jsonify({'error': 'Ancien mot de passe incorrect'}), 403
 
-    if len(new_pwd) < 6:
-        return jsonify({'error': 'Le nouveau mot de passe est trop court'}), 400
+    if not is_strong_password(new_pwd):
+        return jsonify({
+            'error': 'Le mot de passe doit contenir au moins 8 caractères, inclure au moins un chiffre et un caractère spécial'
+        }), 400
 
     # Mise à jour mot de passe
     user.password = bcrypt.hashpw(new_pwd.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')

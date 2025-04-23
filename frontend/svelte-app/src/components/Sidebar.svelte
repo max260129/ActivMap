@@ -16,6 +16,19 @@
 	$: userRole = ($currentUser)?.role || 'EMPLOYE';
 	$: menu = rawMenu.filter(item => item.show(userRole));
   
+	// Identifier la page active via le hash
+	let activeId = window.location.hash.replace('#', '').split('?')[0] || 'carte';
+  
+	function updateActive() {
+	  activeId = window.location.hash.replace('#', '').split('?')[0] || 'carte';
+	}
+  
+	// Mettre à jour lors du changement de hash
+	window.addEventListener('hashchange', updateActive);
+	// Nettoyer lors de la destruction du composant
+	import { onDestroy } from 'svelte';
+	onDestroy(() => window.removeEventListener('hashchange', updateActive));
+  
 	function handleLogout() {
 	  logout();
 	}
@@ -38,7 +51,11 @@
 	<!-- MENU -->
 	<nav class="menu" aria-label="Navigation principale">
 	  {#each menu as item (item.id)}
-		<a href={`#${item.id}`} class="menu-item" aria-current="page">
+		<a
+		  href={`#${item.id}`}
+		  class="menu-item"
+		  aria-current={item.id === activeId ? 'page' : undefined}
+		>
 		  {item.label()}
 		</a>
 	  {/each}
