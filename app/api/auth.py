@@ -9,6 +9,7 @@ import hashlib
 import uuid
 from utils.mailer import send_email
 from app.run import socketio
+from app.run import limiter
 from app.api.team import user_to_dict
 from models import db, User, Consent, RevokedToken
 import time
@@ -73,6 +74,7 @@ def log_event(user_id, action):
         print('Erreur audit', e)
 
 @auth_bp.route('/register', methods=['POST'])
+@limiter.limit("5 per minute")
 def register():
     """Inscription puis envoi d'un e‑mail de confirmation."""
     data = request.get_json() or {}
@@ -134,6 +136,7 @@ def register():
     return jsonify({'message': 'Inscription réussie. Vérifie tes e‑mails pour confirmer votre adresse.'}), 201
 
 @auth_bp.route('/login', methods=['POST'])
+@limiter.limit("5 per minute")
 def login():
     data = request.get_json()
     
@@ -274,6 +277,7 @@ def accept_invite():
 # ------------------------------------------------------------
 
 @auth_bp.route('/forgot-password', methods=['POST'])
+@limiter.limit("3 per minute")
 def forgot_password():
     data = request.get_json() or {}
     email = data.get('email')
@@ -319,6 +323,7 @@ def forgot_password():
 # ------------------------------------------------------------
 
 @auth_bp.route('/reset-password', methods=['POST'])
+@limiter.limit("3 per minute")
 def reset_password():
     data = request.get_json() or {}
     raw_token = data.get('token')
@@ -352,6 +357,7 @@ def reset_password():
 # ------------------------------------------------------------
 
 @auth_bp.route('/confirm-email', methods=['POST'])
+@limiter.limit("5 per hour")
 def confirm_email():
     data = request.get_json() or {}
     raw_token = data.get('token')
@@ -384,6 +390,7 @@ def confirm_email():
 # ------------------------------------------------------------
 
 @auth_bp.route('/resend-confirmation', methods=['POST'])
+@limiter.limit("3 per minute")
 def resend_confirmation():
     data = request.get_json() or {}
     email = data.get('email')
@@ -439,6 +446,7 @@ def get_privacy_policy():
 # ------------------------------------------------------------
 
 @auth_bp.route('/logout', methods=['POST'])
+@limiter.limit("10 per minute")
 @jwt_required()
 def logout():
     jti = get_jwt()["jti"]

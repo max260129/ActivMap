@@ -24,3 +24,4 @@ flask-socketio==5.3.5
 eventlet==0.35.2
 bleach==6.1.0
 flask-talisman==1.0.0
+flask-limiter[redis]==3.11.0

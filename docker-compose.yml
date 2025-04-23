@@ -49,6 +49,14 @@ services:
       retries: 5
     restart: unless-stopped
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
   proxy:
     image: nginx:stable-alpine
     ports:
@@ -62,4 +70,5 @@ services:
       - frontend
 
 volumes:
-  postgres_data: 
+  postgres_data:
+  redis_data: 

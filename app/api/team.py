@@ -8,6 +8,7 @@ from models import db, User, MapHistory, Consent
 from middleware import admin_required
 from utils.mailer import send_email
 from app.run import socketio
+from app.run import limiter
 
 team_bp = Blueprint('team', __name__, url_prefix='/api/team')
 
@@ -31,6 +32,7 @@ def user_to_dict(user: User):
 # ------------------------------
 
 @team_bp.route('/', methods=['GET'])
+@limiter.limit("60 per minute")
 @admin_required
 def list_users():
     users = User.query.order_by(User.created_at).all()
@@ -38,6 +40,7 @@ def list_users():
 
 
 @team_bp.route('/', methods=['POST'])
+@limiter.limit("20 per minute")
 @admin_required
 def create_user():
     data = request.get_json() or {}
@@ -94,6 +97,7 @@ def create_user():
 
 
 @team_bp.route('/<int:user_id>/role', methods=['PUT'])
+@limiter.limit("20 per minute")
 @admin_required
 def update_role(user_id):
     data = request.get_json() or {}
@@ -118,6 +122,7 @@ def update_role(user_id):
 
 
 @team_bp.route('/<int:user_id>', methods=['DELETE'])
+@limiter.limit("10 per minute")
 @admin_required
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)

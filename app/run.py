@@ -8,6 +8,9 @@ from flask_jwt_extended import JWTManager, get_jwt
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_socketio import SocketIO
+from flask import jsonify
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 # Chargement des variables d'environnement
 load_dotenv()
@@ -35,6 +38,18 @@ Talisman(app, content_security_policy=csp)
 
 # Initialisation globale de CORS (support des credentials)
 CORS(app, supports_credentials=True)
+
+# --- Rate Limiting ---
+limiter = Limiter(
+    key_func=get_remote_address,
+    storage_uri=os.environ.get('REDIS_URL', 'redis://redis:6379/0'),
+    default_limits=["200 per day", "50 per hour"]
+)
+limiter.init_app(app)
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return jsonify({'error': 'Trop de requêtes, réessayez plus tard.'}), 429
 
 # --- Ajout SocketIO ---
 # Crée une instance SocketIO réutilisable dans le reste de l'application
