@@ -1,0 +1,51 @@
+name: 'Security & Vulnerability Scan'
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+
+jobs:
+  npm-audit:
+    name: 'npm audit (frontend)'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout repository'
+        uses: actions/checkout@v3
+
+      - name: 'Setup Node.js'
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: 'Install frontend dependencies'
+        run: |
+          cd frontend/svelte-app
+          npm ci
+
+      - name: 'Run npm audit'
+        run: |
+          cd frontend/svelte-app
+          npm audit --audit-level=moderate
+
+  pip-audit:
+    name: 'pip-audit (backend)'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout repository'
+        uses: actions/checkout@v3
+
+      - name: 'Setup Python'
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: 'Install pip-audit and dependencies'
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-audit
+          pip install -r requirements.txt
+
+      - name: 'Run pip-audit'
+        run: |
+          pip-audit 

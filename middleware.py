@@ -14,11 +14,6 @@ def role_required(*allowed_roles):
         @wraps(fn)
         def wrapper(*args, **kwargs):
             try:
-                # Laisser passer les requêtes preflight CORS sans authentification
-                if request.method == 'OPTIONS':
-                    resp = make_response()
-                    return resp
-
                 verify_jwt_in_request()
                 user_id = get_jwt_identity()
                 user = User.query.get(int(user_id))

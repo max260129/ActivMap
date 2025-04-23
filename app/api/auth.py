@@ -9,6 +9,7 @@ import hashlib
 import uuid
 from utils.mailer import send_email
 from app.run import socketio
+from app.run import limiter
 from app.api.team import user_to_dict
 from models import db, User, Consent, RevokedToken
 import time
