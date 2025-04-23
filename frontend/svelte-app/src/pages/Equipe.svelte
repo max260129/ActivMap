@@ -63,7 +63,9 @@
       inviteEmail = '';
       inviteRole = 'EMPLOYE';
       const { user } = await resp.json();
-      teamMembers = [...teamMembers, user];
+      if (!teamMembers.some(m => m.id === user.id)) {
+        teamMembers = [...teamMembers, user];
+      }
     } else {
       error = (await resp.json()).error;
     }

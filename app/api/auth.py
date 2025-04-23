@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt, set_access_cookies, get_csrf_token, unset_jwt_cookies
 import sys, os
 import re
 import traceback
@@ -156,11 +156,15 @@ def login():
     # Générer le token JWT
     access_token = create_access_token(identity=user.id)
     
-    log_event(user.id, 'login')
-    return jsonify({
+    response = jsonify({
         'access_token': access_token,
+        'csrf_token': get_csrf_token(access_token),
         'user': user.to_dict()
-    }), 200
+    })
+    # Déposer le JWT dans un cookie HttpOnly
+    set_access_cookies(response, access_token)
+    log_event(user.id, 'login')
+    return response, 200
 
 @auth_bp.route('/me', methods=['GET'])
 @jwt_required()
@@ -441,8 +445,10 @@ def logout():
     revoked = RevokedToken(jti=jti)
     db.session.add(revoked)
     db.session.commit()
+    response = jsonify({"message": "Déconnexion réussie"})
+    unset_jwt_cookies(response)
     log_event(get_jwt_identity(), 'logout')
-    return jsonify({"message": "Déconnexion réussie"}), 200 
+    return response, 200
 
 # ------------------------------------------------------------
 # Export des données du compte

@@ -19,6 +19,20 @@ logger = logging.getLogger(__name__)
 # Importation de l'application Flask depuis le package app.api
 from app import app  # Cette ligne récupère l'instance Flask définie dans app/api/__init__.py
 
+# --- Protection sécurité/csp ---
+from flask_talisman import Talisman
+
+# Politique CSP de base (peut être ajustée)
+csp = {
+    'default-src': ["'self'"],
+    'img-src': ["'self'", 'data:'],
+    'style-src': ["'self'", "'unsafe-inline'"],
+    'script-src': ["'self'"]
+}
+
+# Activation de Talisman (sécurise aussi HSTS, nosniff, etc.)
+Talisman(app, content_security_policy=csp)
+
 # Initialisation globale de CORS (support des credentials)
 CORS(app, supports_credentials=True)
 
@@ -45,12 +59,17 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Configuration JWT
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
-app.config['JWT_TOKEN_LOCATION'] = ['headers']
+app.config['JWT_TOKEN_LOCATION'] = ['headers', 'cookies']
 app.config['JWT_HEADER_NAME'] = 'Authorization'
 app.config['JWT_HEADER_TYPE'] = 'Bearer'
-app.config['JWT_COOKIE_SECURE'] = True   # Secure en prod (HTTPS)
-app.config['JWT_COOKIE_CSRF_PROTECT'] = False     # Désactivé pour simplifier les tests
+app.config['JWT_ACCESS_COOKIE_NAME'] = 'access_token'
+app.config['JWT_COOKIE_SECURE'] = False  # True en production (HTTPS)
+app.config['JWT_COOKIE_SAMESITE'] = 'Lax'
+app.config['JWT_COOKIE_CSRF_PROTECT'] = True
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600     # 1 heure
+
+# Configuration globale Flask
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'CHANGE_ME_SECRET')
 
 # Initialisation des extensions
 db.init_app(app)

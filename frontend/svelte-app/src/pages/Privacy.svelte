@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { marked } from 'marked';
+  import DOMPurify from 'dompurify';
   let content = '';
   let container;
 
@@ -8,7 +9,8 @@
     try {
       const res = await fetch('http://localhost:5000/api/auth/legal/privacy');
       const data = await res.json();
-      content = marked.parse(data.content);
+      const rawHtml = marked.parse(data.content);
+      content = DOMPurify.sanitize(rawHtml);
     } catch (e) {
       content = '<p>Impossible de charger la politique de confidentialité.</p>';
     }

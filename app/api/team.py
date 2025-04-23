@@ -21,8 +21,8 @@ def user_to_dict(user: User):
         'email': user.email,
         'username': user.username,
         'role': user.role,
-        'created_at': user.created_at,
-        'joined_at': user.joined_at,
+        'created_at': user.created_at.isoformat(),
+        'joined_at': user.joined_at.isoformat() if user.joined_at else None,
         'invite_pending': user.invite_token is not None
     }
 

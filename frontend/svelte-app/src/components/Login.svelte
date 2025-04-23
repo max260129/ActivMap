@@ -217,7 +217,7 @@
         {/if}
         
         {#if error}
-            <p id="error-message" class="error-message" role="alert" in:fade>{@html error}</p>
+            <p id="error-message" class="error-message" role="alert" in:fade>{error}</p>
         {/if}
         
         {#if isRegisterMode}
