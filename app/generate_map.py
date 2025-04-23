@@ -10,8 +10,10 @@ from matplotlib.path import Path
 import numpy as np
 import pandas as pd
 import matplotlib.transforms as transforms
-from shapely.geometry import LineString
+from shapely.geometry import LineString, Point
+from pyproj import CRS
 import svgutils.compose as sc
+from flask import send_file
 
 
 # Définir un répertoire absolu pour les cartes générées
@@ -25,6 +27,11 @@ if not os.path.exists(generated_dir):
 mpl.rcParams['svg.fonttype'] = 'none'
 
 def generate_map(latitude=43.832197, longitude=4.349661, distance=150):
+
+    latitude   = float(latitude)
+    longitude  = float(longitude)
+    distance   = float(distance) 
+
     # --- Nettoyage des fichiers précédents ---
     output_png1 = os.path.join(generated_dir, "map_stylized.png")
     output_png2 = os.path.join(generated_dir, "map_stylized2.png")
@@ -142,6 +149,14 @@ def generate_map(latitude=43.832197, longitude=4.349661, distance=150):
     def add_crossing_symbol(ax, point, edges_gdf, width=0.00008, height=0.00008, color="#ff6600"):
         try:
             x, y = point.x, point.y
+
+            utm = CRS.from_epsg(3857)              # projection métrique simple
+            point_wgs  = Point(longitude, latitude)
+            point_proj = gpd.GeoSeries([point_wgs], crs="EPSG:4326").to_crs(utm).iloc[0]
+            edges_proj = edges.to_crs(utm)
+
+            mask      = edges_proj.distance(point_proj) <= distance
+            edges_near = edges[mask]
             distances = edges_gdf.geometry.distance(point)
             if distances.empty:
                 angle_radians = 0
@@ -253,7 +268,12 @@ def generate_map(latitude=43.832197, longitude=4.349661, distance=150):
         print(f"{layer_name}: {len(poi_subset)} éléments")
         if not poi_subset.empty:
             poi_subset = poi_subset.copy()
-            poi_subset['geometry'] = poi_subset['geometry'].centroid
+
+            utm = CRS.from_epsg(3857)
+            poi_subset = poi_subset.to_crs(utm)
+            poi_subset['geometry'] = poi_subset.geometry.centroid
+            poi_subset = poi_subset.to_crs("EPSG:4326")
+
             for point in poi_subset['geometry']:
                 try:
                     ellipse = Ellipse((point.x, point.y), width=ellipse_width,
@@ -451,7 +471,7 @@ def generate_map(latitude=43.832197, longitude=4.349661, distance=150):
     print(f"Carte SVG générée : {output_svg}")
     plt.close()
     
-    return output_svg
+    return output_svg   
 
 if __name__ == "__main__":
     generate_map() 

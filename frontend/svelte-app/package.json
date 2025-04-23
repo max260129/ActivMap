@@ -19,11 +19,13 @@
     "svelte": "^3.55.0"
   },
   "dependencies": {
-    "sirv-cli": "^2.0.0",
     "chart.js": "^3.9.1",
-    "svelte-chartjs": "^2.1.1",
+    "leaflet": "^1.9.4",
+    "leaflet-draw": "^1.0.4",
+    "marked": "^8.0.0",
+    "sirv-cli": "^2.0.0",
     "socket.io-client": "^4.7.5",
-    "marked": "^8.0.0"
+    "svelte-chartjs": "^2.1.1"
   },
   "proxy": "http://backend:5000"
 }

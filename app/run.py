@@ -19,6 +19,13 @@ logger = logging.getLogger(__name__)
 # Importation de l'application Flask depuis le package app.api
 from app import app  # Cette ligne récupère l'instance Flask définie dans app/api/__init__.py
 
+import logging
+logging.basicConfig(level=logging.DEBUG)   # logge les exceptions complètes
+app.config["PROPAGATE_EXCEPTIONS"] = True  # Flask montre la trace en log
+
+# Configuration des logs pour l'application Flask
+app.logger.setLevel(logging.DEBUG)
+
 # Initialisation globale de CORS (support des credentials)
 CORS(app, supports_credentials=True)
 

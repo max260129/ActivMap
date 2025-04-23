@@ -3,6 +3,7 @@ services:
     build: .
     ports:
       - "5000:5000"
+      - "35729:35729"
     volumes:
       - ./:/app
     restart: unless-stopped
@@ -16,6 +17,13 @@ services:
       - FLASK_DEBUG=1
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/activmap
       - JWT_SECRET_KEY=votre_cle_secrete_a_changer_en_production
+      # - SMTP_HOST=smtp.gmail.com
+      # - SMTP_PORT=587
+      # - SMTP_USER=votre_email@gmail.com
+      # - SMTP_PASS=votre_mot_de_passe_app
+      # - SMTP_USE_SSL=true
+      # - SMTP_USE_TLS=false
+      - FROM_EMAIL=no-reply@activmap.fr
     command: flask run --host=0.0.0.0 --reload
 
   frontend:
@@ -50,4 +58,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  postgres_data: 
+  postgres_data:

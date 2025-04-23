@@ -58,62 +58,57 @@ def log_event(user_id, action):
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
-    """Inscription puis envoi d'un e‑mail de confirmation."""
-    data = request.get_json() or {}
+    data = request.get_json()
+    email     = data.get('email')
+    password  = data.get('password')
+    consent   = data.get('consent')
 
-    email = data.get('email')
-    password = data.get('password')
-    consent = data.get('consent')
-
+    # ---- validations raccourcies pour la lisibilité ----
     if not email or not password:
         return jsonify({'error': 'Email et mot de passe requis'}), 400
-
-    # Consentement obligatoire
     if consent is not True:
-        return jsonify({'error': 'Le consentement à la politique de confidentialité est requis'}), 400
-
-    # Validation basique
-    if not is_valid_email(email):
-        return jsonify({'error': "Format d'email invalide"}), 400
-    if len(password) < 6:
-        return jsonify({'error': 'Le mot de passe doit contenir au moins 6 caractères'}), 400
-
-    # Existence
+        return jsonify({'error': 'Le consentement est requis'}), 400
     if User.query.filter_by(email=email).first():
         return jsonify({'error': 'Cet email est déjà utilisé'}), 409
 
-    # Création utilisateur
-    new_user = User(email=email, password=password)
-
-    # Génération du token de confirmation
-    raw_token = uuid.uuid4().hex
-    hashed_token = hashlib.sha256(raw_token.encode()).hexdigest()
-    new_user.confirm_token = hashed_token
+    # ---- création utilisateur (mot de passe hashé !) ----
+    new_user = User(
+        email=email,
+        password=password    # werkzeug.security
+    )
+    raw_token           = uuid.uuid4().hex
+    new_user.confirm_token   = hashlib.sha256(raw_token.encode()).hexdigest()
     new_user.confirm_expires = datetime.utcnow() + timedelta(hours=24)
 
     db.session.add(new_user)
-    # Enregistrer le consentement dans la table consents
-    consent_record = Consent(user=new_user)
-    db.session.add(consent_record)
+    db.session.add(Consent(user=new_user))
+
+    # ---- envoi d’e‑mail AVANT commit ou rollback si erreur ----
+    FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    confirm_link = f"{FRONTEND_URL}/#confirm?token={raw_token}"
+
+    try:
+        send_email(
+            to=email,
+            subject="Confirmation de votre adresse e‑mail ActivMap",
+            html_content=f"""
+              <p>Bonjour,</p>
+              <p>Clique sur ce lien pour confirmer ton adresse :</p>
+              <p><a href='{confirm_link}'>{confirm_link}</a></p>
+              <p>Le lien expire dans 24 h.</p>
+            """
+        )
+    except Exception as e:
+        current_app.logger.error("Erreur SMTP : %s", e)
+        db.session.rollback()
+        return jsonify({'error': 'Impossible d’envoyer le mail de confirmation'}), 502
+
+    # ---- tout est OK -> commit ----
     db.session.commit()
-
-    # Envoi e‑mail
-    confirm_link = f"http://localhost:3000/#confirm?token={raw_token}"
-    send_email(
-        to=email,
-        subject="Confirmation de votre adresse e‑mail ActivMap",
-        html_content=f"""
-        <p>Bonjour,</p>
-        <p>Merci de votre inscription. Cliquez sur le lien ci‑dessous pour confirmer votre adresse e‑mail :</p>
-        <p><a href='{confirm_link}'>{confirm_link}</a></p>
-        <p>Ce lien expirera dans 24 heures.</p>
-        <p>À bientôt sur ActivMap !</p>
-        """
-    )
-
     log_event(new_user.id, 'register')
 
-    return jsonify({'message': 'Inscription réussie. Vérifie tes e‑mails pour confirmer votre adresse.'}), 201
+    return jsonify({'message': 'Inscription réussie ! Vérifie tes e‑mails.'}), 201
+
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
@@ -497,4 +492,4 @@ def delete_me():
 
     log_event(user.id, 'delete')
 
-    return jsonify({'message': 'Compte supprimé'}), 200 
+    return jsonify({'message': 'Compte supprimé'}), 200

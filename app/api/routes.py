@@ -1,5 +1,5 @@
 # app/api/routes.py
-from flask import request, jsonify, send_file, make_response, url_for
+from flask import request, jsonify, send_file, make_response, url_for, current_app
 from middleware import protect_route
 # Importer l'instance Flask défini dans ce package (app/api/_init_.py)
 from app import app
@@ -11,6 +11,7 @@ import shutil
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from sqlalchemy import func, extract
+from app.utils.mailer import send_email
 
 # Pour éviter la collision avec le nom de la fonction, renomme l'import de generate_map
 from app.generate_map import generate_map
@@ -20,45 +21,40 @@ from app.run import socketio
 @app.route('/generate-map', methods=['POST', 'OPTIONS'])
 @protect_route
 def generate_map_route():
+    # --- pré-vol CORS inchangé -----------------------------------------
     if request.method == 'OPTIONS':
-        response = make_response()
-        response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-        response.headers.add('Access-Control-Allow-Methods', 'POST,OPTIONS')
-        response.headers.add('Access-Control-Allow-Credentials', 'true')
-        return response, 200
-
+        resp = make_response()
+        resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
+        resp.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        resp.headers.add('Access-Control-Allow-Methods', 'POST,OPTIONS')
+        resp.headers.add('Access-Control-Allow-Credentials', 'true')
+        return resp, 200
+    # -------------------------------------------------------------------
 
     data = request.get_json()
-    latitude = data.get('latitude', 49.444838)
-    longitude = data.get('longitude', 1.094214)
-    distance = data.get('distance', 150)
-    try:
-        output_svg = generate_map(latitude, longitude, distance)
-        response = make_response(send_file(output_svg, mimetype='image/svg+xml'))
-        # Génération de la carte temporaire
-        temp_svg = generate_map(latitude, longitude, distance)
+    latitude  = float(data.get('latitude', 49.444838))
+    longitude = float(data.get('longitude', 1.094214))
+    distance  = float(data.get('distance', 150))
 
-        # Récupération de l'utilisateur courant
+    try:
+        # 1) Génère UNE fois la carte, récupère le chemin du SVG
+        temp_svg = generate_map(latitude, longitude, distance)   # ← retourne un chemin
+
+        # 2) Prépare le chemin final (sera le même si l’utilisateur n’est pas connecté)
+        final_svg_path = temp_svg
+
+        # 3) Si l’utilisateur est connecté, copie dans son dossier + historise
         user_id = get_jwt_identity()
         user = User.query.get(int(user_id)) if user_id else None
 
-        # Par défaut, on prépare le chemin de sortie final vers la carte temporaire
-        final_svg_path = temp_svg
-
         if user:
-            # Dossier dédié à l'utilisateur
             user_dir = os.path.join(os.path.dirname(temp_svg), str(user.id))
             os.makedirs(user_dir, exist_ok=True)
 
-            # Nom de fichier unique
             unique_filename = f"{uuid.uuid4().hex}.svg"
             final_svg_path = os.path.join(user_dir, unique_filename)
-
-            # Copie vers le dossier utilisateur
             shutil.copy(temp_svg, final_svg_path)
 
-            # Création d'une entrée d'historique
             history_entry = MapHistory(
                 user_id=user.id,
                 latitude=latitude,
@@ -69,8 +65,8 @@ def generate_map_route():
             db.session.add(history_entry)
             db.session.commit()
 
-            # --- Émission évènement temps‑réel ---
-            svg_url = url_for('get_history_file', history_id=history_entry.id, _external=True)
+            svg_url = url_for('get_history_file',
+                              history_id=history_entry.id, _external=True)
             socketio.emit(
                 'map_generated',
                 {
@@ -84,11 +80,12 @@ def generate_map_route():
                 room=f"user:{user.id}"
             )
 
-        response = make_response(send_file(final_svg_path, mimetype='image/svg+xml'))
-        return response
+        # 4) Retourne le fichier (UN seul send_file, pas de make_response inutile)
+        return send_file(final_svg_path, mimetype='image/svg+xml')
+
     except Exception as e:
-        error_response = jsonify({"error": str(e)})
-        return error_response, 500
+        current_app.logger.exception("Erreur generate-map")      # trace complète
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/health', methods=['GET'])
 def health_check():
@@ -374,3 +371,11 @@ def user_stats():
         'weekly_growth': weekly_growth,  # peut être None
         'monthly_activity': series
     }), 200
+
+@app.route('/test-email')
+def test_email():
+    try:
+        send_email("votre_email@example.com", "Test email", "<p>Ceci est un test</p>")
+        return "Email envoyé", 200
+    except Exception as e:
+        return f"Erreur: {str(e)}", 500

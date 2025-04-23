@@ -1,76 +1,52 @@
 <script>
-    import { onMount } from 'svelte';
-    import L from 'leaflet';
-    import 'leaflet-draw';
-  
-    /* variables liées à App.svelte */
-    export let lat;      // ex. 49.444838
-    export let lon;      // ex. 1.094214
-    export let radius;   // ex. 150  (m)
-  
-    let mapEl, map, circle;
-    let internal = false;      // évite la boucle infinie
-  
-    onMount(() => {
-      map = L.map(mapEl).setView([lat, lon], zoomFor(radius));
-  
-      L.tileLayer(
-        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        { attribution: '© OpenStreetMap' }
-      ).addTo(map);
-  
-      circle = L.circle([lat, lon], { radius, color: '#cc5200' }).addTo(map);
-  
-      /* — centre par simple clic — */
-      map.on('click', e => {
-        internal = true;
-        lat = +e.latlng.lat.toFixed(6);
-        lon = +e.latlng.lng.toFixed(6);
-        circle.setLatLng(e.latlng);
-        internal = false;
-      });
-  
-      /* — déplacement / redimension via Leaflet‑Draw — */
-      const ctl = new L.Control.Draw({
-        edit: { featureGroup: L.featureGroup([circle]), edit: true, remove: false },
-        draw: false
-      });
-      map.addControl(ctl);
-  
-      const sync = e => {
-        internal = true;
-        const c = e.layer || e.target;           // selon l’événement
-        radius = Math.round(c.getRadius());
-        ({ lat, lng: lon } = c.getLatLng());
-        internal = false;
-      };
-  
-      map.on('draw:editmove',   sync);   // drag du centre
-      map.on('draw:editresize', sync);   // poignée de rayon
+  import { onMount } from 'svelte';
+  import L from 'leaflet';
+
+  // props envoyées par le parent (Login /  page d’extraction)
+  export let lat = 49.4448;
+  export let lon = 1.0939;
+  export let radius = 200;   // en mètres
+
+  let map;            // référence à la carte
+  let circle;         // référence au cercle
+
+  // --- met à jour le cercle quand les props changent --------------
+  $: if (map) {
+        circle.setLatLng([lat, lon]).setRadius(radius);
+        map.panTo([lat, lon], { animate: false });
+     }
+
+  onMount(() => {
+    map = L.map('osm-map').setView([lat, lon], 16);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    circle = L.circle([lat, lon], {
+      radius,
+      color: 'red',
+      weight: 2,
+      fillOpacity: 0.2
+    }).addTo(map);
+
+    // 1. clic sur la carte → met à jour lat/lon (binding réactif)
+    map.on('click', e => {
+      lat = e.latlng.lat.toFixed(6);
+      lon = e.latlng.lng.toFixed(6);
     });
-  
-    /* — inputs → carte — */
-    $: if (!internal && circle) {
-      circle.setLatLng([lat, lon]);
-      circle.setRadius(+radius);
-    }
-  
-    /* zoom de départ très simple */
-    const zoomFor = r =>
-      r > 5000 ? 11 :
-      r > 2000 ? 12 :
-      r > 1000 ? 13 :
-      r >  500 ? 14 : 15;
-  </script>
-  
-  <style>
-    .map {
-      width: 100%;
-      height: 400px;
-      border: 2px solid #cc5200;
-      border-radius: 8px;
-    }
-  </style>
-  
-  <div bind:this={mapEl} class="map"></div>
-  
+
+    // 2. molette ou ctrl-drag sur le cercle → redimensionner
+    circle.on('mousewheel', e => {
+      e.originalEvent.preventDefault();
+      const delta = e.originalEvent.deltaY;
+      radius = Math.max(50, Number(radius) + delta * 2);   // zoom in/out
+    });
+  });
+</script>
+
+<style>
+  #osm-map { height: 380px; }
+</style>
+
+<div id="osm-map"></div>
