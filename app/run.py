@@ -3,134 +3,99 @@ import os
 import sys
 import time
 import logging
+
 from dotenv import load_dotenv
-from flask_jwt_extended import JWTManager, get_jwt
-from flask_migrate import Migrate
+from flask import Flask
 from flask_cors import CORS
-from flask_socketio import SocketIO
+from flask_jwt_extended import JWTManager, get_jwt_identity
+from flask_migrate import Migrate
+
+# extensions centralisées
+from app.extensions import limiter, socketio
+from models import db, User, RevokedToken
 
 # Chargement des variables d'environnement
 load_dotenv()
 
+# Création de l'app
+app = Flask(__name__, instance_relative_config=False)
+
 # Configuration des logs
 logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
-# Importation de l'application Flask depuis le package app.api
-from app import app  # Cette ligne récupère l'instance Flask définie dans app/api/__init__.py
-
-import logging
-logging.basicConfig(level=logging.DEBUG)   # logge les exceptions complètes
-app.config["PROPAGATE_EXCEPTIONS"] = True  # Flask montre la trace en log
-
-# Configuration des logs pour l'application Flask
 app.logger.setLevel(logging.DEBUG)
+app.config["PROPAGATE_EXCEPTIONS"] = True
 
-# Initialisation globale de CORS (support des credentials)
-CORS(app, supports_credentials=True)
-
-# --- Ajout SocketIO ---
-# Crée une instance SocketIO réutilisable dans le reste de l'application
-socketio = SocketIO(
-    app,
-    cors_allowed_origins="*",  # En développement ; restreindre en prod
-    ping_interval=25,
-    ping_timeout=60
+# Chargement de la config depuis .env
+app.config.from_mapping(
+    SQLALCHEMY_DATABASE_URI=os.getenv("DATABASE_URL"),
+    SQLALCHEMY_TRACK_MODIFICATIONS=False,
+    JWT_SECRET_KEY=os.getenv("JWT_SECRET_KEY"),
+    JWT_TOKEN_LOCATION=["headers"],
+    JWT_HEADER_NAME="Authorization",
+    JWT_HEADER_TYPE="Bearer",
+    JWT_COOKIE_SECURE=False,            # en dev HTTP
+    JWT_COOKIE_CSRF_PROTECT=False,
+    JWT_ACCESS_TOKEN_EXPIRES=3600       # 1h
 )
-
-# Import des routes (elles s'enregistrent déjà via l'import dans app/api/__init__.py, 
-# mais ici on peut forcer leur chargement si besoin)
-from app.api import routes
-
-# Ajout du chemin parent pour importer les modèles (si "models" se trouve à la racine)
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from models import db, User, RevokedToken
-
-# Configuration de la base de données
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-# Configuration JWT
-app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
-app.config['JWT_TOKEN_LOCATION'] = ['headers']
-app.config['JWT_HEADER_NAME'] = 'Authorization'
-app.config['JWT_HEADER_TYPE'] = 'Bearer'
-app.config['JWT_COOKIE_SECURE'] = True   # Secure en prod (HTTPS)
-app.config['JWT_COOKIE_CSRF_PROTECT'] = False     # Désactivé pour simplifier les tests
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600     # 1 heure
 
 # Initialisation des extensions
 db.init_app(app)
-jwt = JWTManager(app)
 migrate = Migrate(app, db)
 
+jwt = JWTManager(app)
+
+# Limiter & SocketIO
+limiter.init_app(app)
+socketio.init_app(app, cors_allowed_origins="*")
+
+# Activer CORS sur tout /api/*
+CORS(app, resources={r"/api/*": {"origins": os.getenv("FRONTEND_URL", "*")}}, supports_credentials=True)
+
+# Import et enregistrement des blueprints
+from app.api.auth import auth_bp
+# from app.api.routes import api_bp
+from app.api.team import team_bp
+
+app.register_blueprint(auth_bp, url_prefix="/api/auth")
+# app.register_blueprint(api_bp,  url_prefix="/api")
+app.register_blueprint(team_bp)
+
+# JWT callbacks
 @jwt.user_identity_loader
 def user_identity_lookup(user):
-    return str(user)
+    return str(user.id)
 
 @jwt.user_lookup_loader
 def user_lookup_callback(_jwt_header, jwt_data):
-    identity = jwt_data["sub"]
     try:
-        user_id = int(identity)
-        return User.query.filter_by(id=user_id).one_or_none()
-    except (ValueError, TypeError):
+        return User.query.get(int(jwt_data["sub"]))
+    except Exception:
         return None
 
 @jwt.token_in_blocklist_loader
 def check_if_token_revoked(jwt_header, jwt_payload):
     jti = jwt_payload["jti"]
     if RevokedToken.query.filter_by(jti=jti).first():
-        logger.debug(f"Token {jti} révoqué (liste noire)")
+        app.logger.debug(f"Token {jti} révoqué")
         return True
-    # Vérifier si l'utilisateur est supprimé
-    try:
-        user_id = int(jwt_payload["sub"])
-        user = User.query.get(user_id)
-        if user and user.deleted_at is not None:
-            logger.debug(f"Token refusé : utilisateur {user_id} supprimé")
-            return True
-    except Exception as e:
-        logger.error("Erreur vérif utilisateur supprimé", e)
     return False
 
 @jwt.expired_token_loader
 def expired_token_callback(jwt_header, jwt_payload):
-    logger.debug("Token expiré")
     return {"error": "Le token a expiré"}, 401
 
 @jwt.invalid_token_loader
-def invalid_token_callback(error_string):
-    logger.debug(f"Token invalide: {error_string}")
-    return {"error": f"Token invalide: {error_string}"}, 401
+def invalid_token_callback(err):
+    return {"error": f"Token invalide: {err}"}, 401
 
 @jwt.unauthorized_loader
-def missing_token_callback(error_string):
-    logger.debug(f"Token manquant: {error_string}")
+def missing_token_callback(err):
     return {"error": "Authentification requise"}, 401
 
-# Import et enregistrement du blueprint d'authentification depuis app/api/auth.py
-from app.api import auth
-app.register_blueprint(auth.auth_bp, url_prefix='/api/auth')
-
-# Blueprint équipe
-from app.api.team import team_bp
-app.register_blueprint(team_bp)
-
-# Pour le développement, attendre que la base de données soit prête
-print("Attente de la base de données...")
-time.sleep(3)
-
-# Création des tables (en développement uniquement)
-with app.app_context():
-    try:
+# Pour dev : attendre la DB et créer les tables
+if __name__ == "__main__":
+    print("Attente de la base de données…")
+    time.sleep(3)
+    with app.app_context():
         db.create_all()
-        print("✅ Tables de base de données créées avec succès!")
-        from init_db import seed_default_user
-        seed_default_user(app)
-    except Exception as e:
-        print(f"❌ Erreur lors de la création des tables: {str(e)}")
-
-if __name__ == '__main__':
-    # Forcer HTTPS en production si derrière proxy — ici on part en debug False
-    socketio.run(app, host='0.0.0.0', debug=False, ssl_context='adhoc')
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True)

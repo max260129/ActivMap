@@ -13,11 +13,13 @@ from app.run import limiter
 from app.api.team import user_to_dict
 from models import db, User, Consent, RevokedToken
 import time
+from flask_cors import cross_origin
 
 # Ajout du répertoire parent au chemin Python
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 auth_bp = Blueprint('auth', __name__)
+FRONTEND = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
 # Validation de l'email simple
 def is_valid_email(email):
@@ -85,8 +87,7 @@ def register():
     db.session.add(Consent(user=new_user))
 
     # ---- envoi d’e‑mail AVANT commit ou rollback si erreur ----
-    FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
-    confirm_link = f"{FRONTEND_URL}/#confirm?token={raw_token}"
+    confirm_link = f"{FRONTEND}/#confirm?token={raw_token}"
 
     try:
         send_email(
@@ -111,7 +112,10 @@ def register():
     return jsonify({'message': 'Inscription réussie ! Vérifie tes e‑mails.'}), 201
 
 
-@auth_bp.route('/login', methods=['POST'])
+@auth_bp.route('/login', methods=['POST', 'OPTIONS'])
+@cross_origin(origins=FRONTEND,
+              supports_credentials=True,
+              allow_headers=["Content-Type", "Authorization"])
 def login():
     data = request.get_json()
     

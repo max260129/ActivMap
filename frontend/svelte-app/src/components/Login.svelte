@@ -57,13 +57,14 @@
                 payload.consent = true;
             }
 
-            const response = await fetch(endpoint, {
+            const response = await fetch(`${API_URL}/api/auth/login`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload)
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+                mode: 'cors',              // explicite, par défaut déjà 'cors'
+                credentials: 'include'     // indispensable car le backend envoie les cookies
             });
+
             
             const data = await response.json();
             

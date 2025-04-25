@@ -15,7 +15,7 @@ from app.utils.mailer import send_email
 
 # Pour éviter la collision avec le nom de la fonction, renomme l'import de generate_map
 from app.generate_map import generate_map
-from app.run import socketio
+from app.extensions import socketio
 
 
 @app.route('/generate-map', methods=['POST', 'OPTIONS'])
