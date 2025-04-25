@@ -20,6 +20,7 @@
 	import ResendConfirmation from './pages/ResendConfirmation.svelte';
 	import Privacy from './pages/Privacy.svelte';
 	import CookieBanner from './components/CookieBanner.svelte';
+	import MapSelector from './components/MapSelector.svelte';
 	
 	// Configuration du backend
 	const API_URL = 'http://localhost:5000';
@@ -144,6 +145,7 @@
 			loading = false;
 		}
 	}
+
   
 	function handleWheel(e) {
 		e.preventDefault();
@@ -493,20 +495,26 @@
 					<h1>{t('map_generator', $locale)}</h1>
 					<form on:submit|preventDefault={generateMap}>
 						<label>
-							{t('latitude', $locale)} :
-							<input type="number" bind:value={latitude} step="0.000001" required />
+						  {t('latitude', $locale)} :
+						  <input type="number" step="0.000001" bind:value={latitude} required />
 						</label>
 						<label>
-							{t('longitude', $locale)} :
-							<input type="number" bind:value={longitude} step="0.000001" required />
+						  {t('longitude', $locale)} :
+						  <input type="number" step="0.000001" bind:value={longitude} required />
 						</label>
 						<label>
-							{t('distance', $locale)} :
-							<input type="number" bind:value={distance} required />
+						  {t('distance', $locale)} :
+						  <input type="number" bind:value={distance} required />
 						</label>
-						
+					  
+						<!-- 🌍 carte interactive -->
+						<MapSelector bind:lat={latitude}
+									 bind:lon={longitude}
+									 bind:radius={distance} />
+					  
 						<button type="submit">{t('generate_map', $locale)}</button>
-					</form>
+					  </form>
+					
 					{#if loading}
 						<div class="loading-spinner"></div>
 						<p style="text-align: center;">Génération en cours...</p>
@@ -515,6 +523,7 @@
 						<p class="error">{error}</p>
 					{/if}
 				</div>
+
 				
 				{#if svgUrl}
 					<h2 transition:fade style="text-align: center;">{t('generated_map', $locale)}</h2>
