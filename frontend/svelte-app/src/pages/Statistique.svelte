@@ -163,7 +163,7 @@
     padding: 1.5rem;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-  }
+  } 
 
   .chart-section h2 {
     color: var(--text-light);
