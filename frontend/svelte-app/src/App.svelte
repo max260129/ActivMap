@@ -7,6 +7,7 @@
 	import { preferences } from './stores/preferences.js';
 	import { t, locale } from './i18n.js';
 	import { initSocket } from './services/socket.js';
+	import { geocode } from './services/geocode.js';
 	
 	// Import des nouvelles pages
 	import Statistique from './pages/Statistique.svelte';
@@ -50,6 +51,11 @@
 	let rotate = 0; // Angle de rotation en degrés
 	// Flag pour utiliser l'endpoint public (non-protégé)
 	let usePublicEndpoint = false;
+
+	let query = '';
+	let suggestions = [];
+	let activeIdx = -1;
+	let suggestTimer;
   
 	// Variables pour le panning
 	let translateX = 0;
@@ -231,6 +237,29 @@
 		// Rafraîchir l'état d'authentification
 		checkAuth();
 		initSocket();
+	}
+
+	function onQueryInput(e) {
+	query = e.target.value;
+	clearTimeout(suggestTimer);
+	suggestTimer = setTimeout(async () => {
+		suggestions = await geocode(query);
+		activeIdx = -1;
+	}, 300);                       // debounce 300 ms
+	}
+
+	function chooseSuggestion(s) {
+	latitude  = parseFloat(s.lat);
+	longitude = parseFloat(s.lon);
+	suggestions = [];
+	query = s.display_name;        // garde le texte
+	}
+
+	function handleKeydownSuggest(e) {
+	if (!suggestions.length) return;
+	if (e.key === 'ArrowDown') { activeIdx = (activeIdx + 1) % suggestions.length; e.preventDefault(); }
+	else if (e.key === 'ArrowUp') { activeIdx = (activeIdx - 1 + suggestions.length) % suggestions.length; e.preventDefault(); }
+	else if (e.key === 'Enter') { chooseSuggestion(suggestions[activeIdx]); }
 	}
 </script>
 
@@ -481,54 +510,103 @@
 		white-space: nowrap;
 		border: 0;
 	}
+
+	.suggest-box {
+		position: absolute;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		max-height: 160px;
+		overflow-y: auto;
+		background: #222;
+		border: 1px solid #444;
+		width: 100%;
+		z-index: 200;
+	}
+	.suggest-box li {
+		padding: .4rem .6rem;
+		cursor: pointer;
+		font-size: .85rem;
+	}
+	.suggest-box li:hover,
+	.suggest-box li.i-active {
+		background: #cc5200;
+		color: #fff;
+	}
+	label { position: relative; }   
 </style>
   
 <main id="main" tabindex="-1">
 	{#if $isAuthenticated}
-		<!-- Sidebar de navigation -->
 		<Sidebar />
-		
-		<!-- Afficher la page en fonction de currentPage -->
+
 		{#if currentPage === 'carte'}
 			<div class="content-auth">
 				<div id="carte" class="card" transition:fly={{ y: -20, duration: 600 }}>
 					<h1>{t('map_generator', $locale)}</h1>
+
 					<form on:submit|preventDefault={generateMap}>
-						<label>
-						  {t('latitude', $locale)} :
-						  <input type="number" step="0.000001" bind:value={latitude} required />
+						<!-- ⌕ Recherche nom/adresse -->
+						<label style="position:relative">
+							Rechercher un lieu / adresse :
+							<input
+								type="text"
+								bind:value={query}
+								on:input={onQueryInput}
+								on:keydown={handleKeydownSuggest}
+								autocomplete="off"
+							/>
+							{#if suggestions.length}
+								<ul class="suggest-box">
+									{#each suggestions as s, i}
+										<li
+											class:i-active={i === activeIdx}
+											on:click={() => chooseSuggestion(s)}
+										>
+											{s.display_name}
+										</li>
+									{/each}
+								</ul>
+							{/if}
 						</label>
+
 						<label>
-						  {t('longitude', $locale)} :
-						  <input type="number" step="0.000001" bind:value={longitude} required />
+							{t('latitude', $locale)} :
+							<input type="number" step="0.000001" bind:value={latitude} required />
 						</label>
+
 						<label>
-						  {t('distance', $locale)} :
-						  <input type="number" bind:value={distance} required />
+							{t('longitude', $locale)} :
+							<input type="number" step="0.000001" bind:value={longitude} required />
 						</label>
-					  
-						<!-- 🌍 carte interactive -->
-						<MapSelector bind:lat={latitude}
-									 bind:lon={longitude}
-									 bind:radius={distance} />
-					  
+
+						<label>
+							{t('distance', $locale)} :
+							<input type="number" bind:value={distance} required />
+						</label>
+
+						<MapSelector
+							bind:lat={latitude}
+							bind:lon={longitude}
+							bind:radius={distance}
+						/>
+
 						<button type="submit">{t('generate_map', $locale)}</button>
-					  </form>
-					
+					</form>
+
 					{#if loading}
 						<div class="loading-spinner"></div>
-						<p style="text-align: center;">Génération en cours...</p>
+						<p style="text-align:center">Génération en cours...</p>
 					{/if}
+
 					{#if error}
 						<p class="error">{error}</p>
 					{/if}
 				</div>
 
-				
 				{#if svgUrl}
-					<h2 transition:fade style="text-align: center;">{t('generated_map', $locale)}</h2>
+					<h2 transition:fade style="text-align:center">{t('generated_map', $locale)}</h2>
 					<div class="card" transition:fly={{ y: 20, duration: 600 }}>
-						<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 						<div
 							class="svg-container"
 							role="application"
@@ -547,10 +625,20 @@
 								<button on:click={zoomOut} aria-label="Zoom Out">–</button>
 								<button on:click={rotateMap} aria-label="Rotate">⟳</button>
 							</div>
-							<img src={svgUrl} alt="Carte stylisée" style:transform={transformValue} transition:scaleTransition={{ duration: 400 }}/>
+
+							<img
+								src={svgUrl}
+								alt="Carte stylisée"
+								style:transform={transformValue}
+								transition:scaleTransition={{ duration: 400 }}
+							/>
 						</div>
-						<p id="map-instructions" class="sr-only">Utilisez les flèches pour déplacer la carte, les touches plus et moins pour zoomer et la touche R pour faire pivoter.</p>
+						<p id="map-instructions" class="sr-only">
+							Utilisez les flèches pour déplacer la carte, les touches plus et moins
+							pour zoomer et la touche R pour faire pivoter.
+						</p>
 					</div>
+
 					<div class="download-container">
 						<a download="carte.svg" href={svgUrl}>
 							<button>{t('download_svg', $locale)}</button>
@@ -558,6 +646,7 @@
 					</div>
 				{/if}
 			</div>
+
 		{:else if currentPage === 'statistique'}
 			<Statistique />
 		{:else if currentPage === 'parametre'}
@@ -579,6 +668,7 @@
 		{:else if currentPage === 'privacy'}
 			<Privacy />
 		{/if}
+
 	{:else}
 		{#if currentPage === 'invite'}
 			<AcceptInvite />
@@ -593,7 +683,6 @@
 		{:else if currentPage === 'privacy'}
 			<Privacy />
 		{:else}
-			<!-- Page de connexion -->
 			<div class="card" transition:fly={{ y: -20, duration: 600 }}>
 				<h1>ActivMap</h1>
 				<Login on:login-success={handleLoginSuccess} />
@@ -602,5 +691,4 @@
 	{/if}
 </main>
 
-<!-- Bandeau cookies toujours présent -->
 <CookieBanner />

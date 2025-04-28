@@ -259,6 +259,9 @@ var app = (function () {
         const selected_option = select.querySelector(':checked');
         return selected_option && selected_option.__value;
     }
+    function toggle_class(element, name, toggle) {
+        element.classList[toggle ? 'add' : 'remove'](name);
+    }
     function custom_event(type, detail, { bubbles = false, cancelable = false } = {}) {
         const e = document.createEvent('CustomEvent');
         e.initCustomEvent(type, bubbles, cancelable, detail);
@@ -6221,14 +6224,14 @@ var app = (function () {
 
     const file$d = "src/components/Sidebar.svelte";
 
-    function get_each_context$2(ctx, list, i) {
+    function get_each_context$3(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[7] = list[i];
     	return child_ctx;
     }
 
     // (53:3) {#each menu as item (item.id)}
-    function create_each_block$2(key_1, ctx) {
+    function create_each_block$3(key_1, ctx) {
     	let a;
     	let t0_value = /*item*/ ctx[7].label() + "";
     	let t0;
@@ -6279,7 +6282,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block$2.name,
+    		id: create_each_block$3.name,
     		type: "each",
     		source: "(53:3) {#each menu as item (item.id)}",
     		ctx
@@ -6313,12 +6316,12 @@ var app = (function () {
     	let each_value = /*menu*/ ctx[2];
     	validate_each_argument(each_value);
     	const get_key = ctx => /*item*/ ctx[7].id;
-    	validate_each_keys(ctx, each_value, get_each_context$2, get_key);
+    	validate_each_keys(ctx, each_value, get_each_context$3, get_key);
 
     	for (let i = 0; i < each_value.length; i += 1) {
-    		let child_ctx = get_each_context$2(ctx, each_value, i);
+    		let child_ctx = get_each_context$3(ctx, each_value, i);
     		let key = get_key(child_ctx);
-    		each_1_lookup.set(key, each_blocks[i] = create_each_block$2(key, child_ctx));
+    		each_1_lookup.set(key, each_blocks[i] = create_each_block$3(key, child_ctx));
     	}
 
     	const block = {
@@ -6401,8 +6404,8 @@ var app = (function () {
     			if (dirty & /*menu, activeId, undefined*/ 6) {
     				each_value = /*menu*/ ctx[2];
     				validate_each_argument(each_value);
-    				validate_each_keys(ctx, each_value, get_each_context$2, get_key);
-    				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, nav, destroy_block, create_each_block$2, null, get_each_context$2);
+    				validate_each_keys(ctx, each_value, get_each_context$3, get_key);
+    				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, nav, destroy_block, create_each_block$3, null, get_each_context$3);
     			}
     		},
     		i: noop$1,
@@ -6539,6 +6542,15 @@ var app = (function () {
     		});
     	}
     }
+
+    // services/geocode.js
+    async function geocode(query) {
+        if (!query.trim()) return [];
+        const url = `https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(query)}`;
+        const r = await fetch(url, { headers: { 'User-Agent': 'ActivMap/1.0 (+https://example.com)' } });
+        if (!r.ok) return [];
+        return await r.json();          // [{display_name, lat, lon, type, ...}, …]
+      }
 
     const BASE$2 = '/stats';
 
@@ -21360,7 +21372,7 @@ var app = (function () {
     const { Object: Object_1 } = globals;
     const file$a = "src/pages/Equipe.svelte";
 
-    function get_each_context$1(ctx, list, i) {
+    function get_each_context$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[16] = list[i];
     	return child_ctx;
@@ -21711,7 +21723,7 @@ var app = (function () {
     }
 
     // (137:12) {#each Object.keys(roleLabels) as r}
-    function create_each_block$1(ctx) {
+    function create_each_block$2(ctx) {
     	let option;
     	let t_value = /*roleLabels*/ ctx[4][/*r*/ ctx[16]] + "";
     	let t;
@@ -21736,7 +21748,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block$1.name,
+    		id: create_each_block$2.name,
     		type: "each",
     		source: "(137:12) {#each Object.keys(roleLabels) as r}",
     		ctx
@@ -21790,7 +21802,7 @@ var app = (function () {
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
-    		each_blocks[i] = create_each_block$1(get_each_context$1(ctx, each_value, i));
+    		each_blocks[i] = create_each_block$2(get_each_context$2(ctx, each_value, i));
     	}
 
     	const block = {
@@ -21970,12 +21982,12 @@ var app = (function () {
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
-    					const child_ctx = get_each_context$1(ctx, each_value, i);
+    					const child_ctx = get_each_context$2(ctx, each_value, i);
 
     					if (each_blocks[i]) {
     						each_blocks[i].p(child_ctx, dirty);
     					} else {
-    						each_blocks[i] = create_each_block$1(child_ctx);
+    						each_blocks[i] = create_each_block$2(child_ctx);
     						each_blocks[i].c();
     						each_blocks[i].m(select, null);
     					}
@@ -22267,7 +22279,7 @@ var app = (function () {
     const { console: console_1$1 } = globals;
     const file$9 = "src/pages/Historique.svelte";
 
-    function get_each_context(ctx, list, i) {
+    function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[11] = list[i];
     	return child_ctx;
@@ -22316,7 +22328,7 @@ var app = (function () {
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
-    		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
+    		each_blocks[i] = create_each_block$1(get_each_context$1(ctx, each_value, i));
     	}
 
     	const block = {
@@ -22343,12 +22355,12 @@ var app = (function () {
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
-    					const child_ctx = get_each_context(ctx, each_value, i);
+    					const child_ctx = get_each_context$1(ctx, each_value, i);
 
     					if (each_blocks[i]) {
     						each_blocks[i].p(child_ctx, dirty);
     					} else {
-    						each_blocks[i] = create_each_block(child_ctx);
+    						each_blocks[i] = create_each_block$1(child_ctx);
     						each_blocks[i].c();
     						each_blocks[i].m(each_1_anchor.parentNode, each_1_anchor);
     					}
@@ -22379,7 +22391,7 @@ var app = (function () {
     }
 
     // (102:8) {#each filteredHistory as item}
-    function create_each_block(ctx) {
+    function create_each_block$1(ctx) {
     	let div2;
     	let img;
     	let img_src_value;
@@ -22535,7 +22547,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_each_block.name,
+    		id: create_each_block$1.name,
     		type: "each",
     		source: "(102:8) {#each filteredHistory as item}",
     		ctx
@@ -43594,7 +43606,14 @@ var app = (function () {
     const { console: console_1 } = globals;
     const file = "src/App.svelte";
 
-    // (595:2) {:else}
+    function get_each_context(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[47] = list[i];
+    	child_ctx[49] = i;
+    	return child_ctx;
+    }
+
+    // (685:2) {:else}
     function create_else_block(ctx) {
     	let div;
     	let h1;
@@ -43603,7 +43622,7 @@ var app = (function () {
     	let div_transition;
     	let current;
     	login = new Login({ $$inline: true });
-    	login.$on("login-success", /*handleLoginSuccess*/ ctx[19]);
+    	login.$on("login-success", /*handleLoginSuccess*/ ctx[22]);
 
     	const block = {
     		c: function create() {
@@ -43612,10 +43631,10 @@ var app = (function () {
     			h1.textContent = "ActivMap";
     			t1 = space();
     			create_component(login.$$.fragment);
-    			attr_dev(h1, "class", "svelte-tdsx0s");
-    			add_location(h1, file, 597, 4, 14378);
-    			attr_dev(div, "class", "card svelte-tdsx0s");
-    			add_location(div, file, 596, 3, 14312);
+    			attr_dev(h1, "class", "svelte-a5rmlg");
+    			add_location(h1, file, 686, 4, 16134);
+    			attr_dev(div, "class", "card svelte-a5rmlg");
+    			add_location(div, file, 685, 3, 16068);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -43654,15 +43673,15 @@ var app = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(595:2) {:else}",
+    		source: "(685:2) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (593:38) 
-    function create_if_block_20(ctx) {
+    // (683:38) 
+    function create_if_block_21(ctx) {
     	let privacy;
     	let current;
     	privacy = new Privacy({ $$inline: true });
@@ -43692,17 +43711,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_20.name,
+    		id: create_if_block_21.name,
     		type: "if",
-    		source: "(593:38) ",
+    		source: "(683:38) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (591:36) 
-    function create_if_block_19(ctx) {
+    // (681:36) 
+    function create_if_block_20(ctx) {
     	let resetpassword;
     	let current;
     	resetpassword = new ResetPassword({ $$inline: true });
@@ -43732,17 +43751,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_19.name,
+    		id: create_if_block_20.name,
     		type: "if",
-    		source: "(591:36) ",
+    		source: "(681:36) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (589:37) 
-    function create_if_block_18(ctx) {
+    // (679:37) 
+    function create_if_block_19(ctx) {
     	let forgotpassword;
     	let current;
     	forgotpassword = new ForgotPassword({ $$inline: true });
@@ -43772,17 +43791,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_18.name,
+    		id: create_if_block_19.name,
     		type: "if",
-    		source: "(589:37) ",
+    		source: "(679:37) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (587:37) 
-    function create_if_block_17(ctx) {
+    // (677:37) 
+    function create_if_block_18(ctx) {
     	let resendconfirmation;
     	let current;
     	resendconfirmation = new ResendConfirmation({ $$inline: true });
@@ -43812,17 +43831,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_17.name,
+    		id: create_if_block_18.name,
     		type: "if",
-    		source: "(587:37) ",
+    		source: "(677:37) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (585:38) 
-    function create_if_block_16(ctx) {
+    // (675:38) 
+    function create_if_block_17(ctx) {
     	let confirmemail;
     	let current;
     	confirmemail = new ConfirmEmail({ $$inline: true });
@@ -43852,17 +43871,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_16.name,
+    		id: create_if_block_17.name,
     		type: "if",
-    		source: "(585:38) ",
+    		source: "(675:38) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (583:2) {#if currentPage === 'invite'}
-    function create_if_block_15(ctx) {
+    // (673:2) {#if currentPage === 'invite'}
+    function create_if_block_16(ctx) {
     	let acceptinvite;
     	let current;
     	acceptinvite = new AcceptInvite({ $$inline: true });
@@ -43892,16 +43911,16 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_15.name,
+    		id: create_if_block_16.name,
     		type: "if",
-    		source: "(583:2) {#if currentPage === 'invite'}",
+    		source: "(673:2) {#if currentPage === 'invite'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (487:1) {#if $isAuthenticated}
+    // (540:1) {#if $isAuthenticated}
     function create_if_block(ctx) {
     	let sidebar;
     	let t_1;
@@ -43913,7 +43932,6 @@ var app = (function () {
 
     	const if_block_creators = [
     		create_if_block_1,
-    		create_if_block_5,
     		create_if_block_6,
     		create_if_block_7,
     		create_if_block_8,
@@ -43922,7 +43940,8 @@ var app = (function () {
     		create_if_block_11,
     		create_if_block_12,
     		create_if_block_13,
-    		create_if_block_14
+    		create_if_block_14,
+    		create_if_block_15
     	];
 
     	const if_blocks = [];
@@ -44027,15 +44046,15 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(487:1) {#if $isAuthenticated}",
+    		source: "(540:1) {#if $isAuthenticated}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (579:38) 
-    function create_if_block_14(ctx) {
+    // (668:38) 
+    function create_if_block_15(ctx) {
     	let privacy;
     	let current;
     	privacy = new Privacy({ $$inline: true });
@@ -44065,17 +44084,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_14.name,
+    		id: create_if_block_15.name,
     		type: "if",
-    		source: "(579:38) ",
+    		source: "(668:38) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (577:36) 
-    function create_if_block_13(ctx) {
+    // (666:36) 
+    function create_if_block_14(ctx) {
     	let resetpassword;
     	let current;
     	resetpassword = new ResetPassword({ $$inline: true });
@@ -44105,17 +44124,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_13.name,
+    		id: create_if_block_14.name,
     		type: "if",
-    		source: "(577:36) ",
+    		source: "(666:36) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (575:37) 
-    function create_if_block_12(ctx) {
+    // (664:37) 
+    function create_if_block_13(ctx) {
     	let forgotpassword;
     	let current;
     	forgotpassword = new ForgotPassword({ $$inline: true });
@@ -44145,17 +44164,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_12.name,
+    		id: create_if_block_13.name,
     		type: "if",
-    		source: "(575:37) ",
+    		source: "(664:37) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (573:37) 
-    function create_if_block_11(ctx) {
+    // (662:37) 
+    function create_if_block_12(ctx) {
     	let resendconfirmation;
     	let current;
     	resendconfirmation = new ResendConfirmation({ $$inline: true });
@@ -44185,17 +44204,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_11.name,
+    		id: create_if_block_12.name,
     		type: "if",
-    		source: "(573:37) ",
+    		source: "(662:37) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (571:38) 
-    function create_if_block_10(ctx) {
+    // (660:38) 
+    function create_if_block_11(ctx) {
     	let confirmemail;
     	let current;
     	confirmemail = new ConfirmEmail({ $$inline: true });
@@ -44225,17 +44244,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_10.name,
+    		id: create_if_block_11.name,
     		type: "if",
-    		source: "(571:38) ",
+    		source: "(660:38) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (569:37) 
-    function create_if_block_9(ctx) {
+    // (658:37) 
+    function create_if_block_10(ctx) {
     	let acceptinvite;
     	let current;
     	acceptinvite = new AcceptInvite({ $$inline: true });
@@ -44265,17 +44284,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_9.name,
+    		id: create_if_block_10.name,
     		type: "if",
-    		source: "(569:37) ",
+    		source: "(658:37) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (567:41) 
-    function create_if_block_8(ctx) {
+    // (656:41) 
+    function create_if_block_9(ctx) {
     	let historique;
     	let current;
     	historique = new Historique({ $$inline: true });
@@ -44305,17 +44324,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_8.name,
+    		id: create_if_block_9.name,
     		type: "if",
-    		source: "(567:41) ",
+    		source: "(656:41) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (565:37) 
-    function create_if_block_7(ctx) {
+    // (654:37) 
+    function create_if_block_8(ctx) {
     	let equipe;
     	let current;
     	equipe = new Equipe({ $$inline: true });
@@ -44345,17 +44364,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_7.name,
+    		id: create_if_block_8.name,
     		type: "if",
-    		source: "(565:37) ",
+    		source: "(654:37) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (563:40) 
-    function create_if_block_6(ctx) {
+    // (652:40) 
+    function create_if_block_7(ctx) {
     	let parametre;
     	let current;
     	parametre = new Parametre({ $$inline: true });
@@ -44385,17 +44404,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_6.name,
+    		id: create_if_block_7.name,
     		type: "if",
-    		source: "(563:40) ",
+    		source: "(652:40) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (561:42) 
-    function create_if_block_5(ctx) {
+    // (650:42) 
+    function create_if_block_6(ctx) {
     	let statistique;
     	let current;
     	statistique = new Statistique({ $$inline: true });
@@ -44425,68 +44444,74 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_5.name,
+    		id: create_if_block_6.name,
     		type: "if",
-    		source: "(561:42) ",
+    		source: "(650:42) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (492:2) {#if currentPage === 'carte'}
+    // (543:2) {#if currentPage === 'carte'}
     function create_if_block_1(ctx) {
     	let div1;
     	let div0;
     	let h1;
-    	let t0_value = t('map_generator', /*$locale*/ ctx[9]) + "";
+    	let t0_value = t('map_generator', /*$locale*/ ctx[12]) + "";
     	let t0;
     	let t1;
     	let form;
     	let label0;
-    	let t2_value = t('latitude', /*$locale*/ ctx[9]) + "";
     	let t2;
-    	let t3;
     	let input0;
+    	let t3;
     	let t4;
     	let label1;
-    	let t5_value = t('longitude', /*$locale*/ ctx[9]) + "";
+    	let t5_value = t('latitude', /*$locale*/ ctx[12]) + "";
     	let t5;
     	let t6;
     	let input1;
     	let t7;
     	let label2;
-    	let t8_value = t('distance', /*$locale*/ ctx[9]) + "";
+    	let t8_value = t('longitude', /*$locale*/ ctx[12]) + "";
     	let t8;
     	let t9;
     	let input2;
     	let t10;
+    	let label3;
+    	let t11_value = t('distance', /*$locale*/ ctx[12]) + "";
+    	let t11;
+    	let t12;
+    	let input3;
+    	let t13;
     	let mapselector;
     	let updating_lat;
     	let updating_lon;
     	let updating_radius;
-    	let t11;
-    	let button;
-    	let t12_value = t('generate_map', /*$locale*/ ctx[9]) + "";
-    	let t12;
-    	let t13;
     	let t14;
-    	let div0_transition;
+    	let button;
+    	let t15_value = t('generate_map', /*$locale*/ ctx[12]) + "";
     	let t15;
+    	let t16;
+    	let t17;
+    	let div0_transition;
+    	let t18;
     	let current;
     	let mounted;
     	let dispose;
+    	let if_block0 = /*suggestions*/ ctx[9].length && create_if_block_5(ctx);
 
     	function mapselector_lat_binding(value) {
-    		/*mapselector_lat_binding*/ ctx[27](value);
+    		/*mapselector_lat_binding*/ ctx[35](value);
     	}
 
     	function mapselector_lon_binding(value) {
-    		/*mapselector_lon_binding*/ ctx[28](value);
+    		/*mapselector_lon_binding*/ ctx[36](value);
     	}
 
     	function mapselector_radius_binding(value) {
-    		/*mapselector_radius_binding*/ ctx[29](value);
+    		/*mapselector_radius_binding*/ ctx[37](value);
     	}
 
     	let mapselector_props = {};
@@ -44507,9 +44532,9 @@ var app = (function () {
     	binding_callbacks.push(() => bind(mapselector, 'lat', mapselector_lat_binding));
     	binding_callbacks.push(() => bind(mapselector, 'lon', mapselector_lon_binding));
     	binding_callbacks.push(() => bind(mapselector, 'radius', mapselector_radius_binding));
-    	let if_block0 = /*loading*/ ctx[6] && create_if_block_4(ctx);
-    	let if_block1 = /*error*/ ctx[7] && create_if_block_3(ctx);
-    	let if_block2 = /*svgUrl*/ ctx[5] && create_if_block_2(ctx);
+    	let if_block1 = /*loading*/ ctx[6] && create_if_block_4(ctx);
+    	let if_block2 = /*error*/ ctx[7] && create_if_block_3(ctx);
+    	let if_block3 = /*svgUrl*/ ctx[5] && create_if_block_2(ctx);
 
     	const block = {
     		c: function create() {
@@ -44520,62 +44545,75 @@ var app = (function () {
     			t1 = space();
     			form = element("form");
     			label0 = element("label");
-    			t2 = text$1(t2_value);
-    			t3 = text$1(" :\n\t\t\t\t\t\t  ");
+    			t2 = text$1("Rechercher un lieu / adresse :\n\t\t\t\t\t\t\t");
     			input0 = element("input");
+    			t3 = space();
+    			if (if_block0) if_block0.c();
     			t4 = space();
     			label1 = element("label");
     			t5 = text$1(t5_value);
-    			t6 = text$1(" :\n\t\t\t\t\t\t  ");
+    			t6 = text$1(" :\n\t\t\t\t\t\t\t");
     			input1 = element("input");
     			t7 = space();
     			label2 = element("label");
     			t8 = text$1(t8_value);
-    			t9 = text$1(" :\n\t\t\t\t\t\t  ");
+    			t9 = text$1(" :\n\t\t\t\t\t\t\t");
     			input2 = element("input");
     			t10 = space();
-    			create_component(mapselector.$$.fragment);
-    			t11 = space();
-    			button = element("button");
-    			t12 = text$1(t12_value);
+    			label3 = element("label");
+    			t11 = text$1(t11_value);
+    			t12 = text$1(" :\n\t\t\t\t\t\t\t");
+    			input3 = element("input");
     			t13 = space();
-    			if (if_block0) if_block0.c();
+    			create_component(mapselector.$$.fragment);
     			t14 = space();
+    			button = element("button");
+    			t15 = text$1(t15_value);
+    			t16 = space();
     			if (if_block1) if_block1.c();
-    			t15 = space();
+    			t17 = space();
     			if (if_block2) if_block2.c();
-    			attr_dev(h1, "class", "svelte-tdsx0s");
-    			add_location(h1, file, 494, 5, 10985);
-    			attr_dev(input0, "type", "number");
-    			attr_dev(input0, "step", "0.000001");
-    			input0.required = true;
-    			attr_dev(input0, "class", "svelte-tdsx0s");
-    			add_location(input0, file, 498, 8, 11132);
-    			attr_dev(label0, "class", "svelte-tdsx0s");
-    			add_location(label0, file, 496, 6, 11081);
+    			t18 = space();
+    			if (if_block3) if_block3.c();
+    			attr_dev(h1, "class", "svelte-a5rmlg");
+    			add_location(h1, file, 545, 5, 12226);
+    			attr_dev(input0, "type", "text");
+    			attr_dev(input0, "autocomplete", "off");
+    			attr_dev(input0, "class", "svelte-a5rmlg");
+    			add_location(input0, file, 551, 7, 12441);
+    			set_style(label0, "position", "relative");
+    			attr_dev(label0, "class", "svelte-a5rmlg");
+    			add_location(label0, file, 549, 6, 12362);
     			attr_dev(input1, "type", "number");
     			attr_dev(input1, "step", "0.000001");
     			input1.required = true;
-    			attr_dev(input1, "class", "svelte-tdsx0s");
-    			add_location(input1, file, 502, 8, 11276);
-    			attr_dev(label1, "class", "svelte-tdsx0s");
-    			add_location(label1, file, 500, 6, 11224);
+    			attr_dev(input1, "class", "svelte-a5rmlg");
+    			add_location(input1, file, 574, 7, 12985);
+    			attr_dev(label1, "class", "svelte-a5rmlg");
+    			add_location(label1, file, 572, 6, 12936);
     			attr_dev(input2, "type", "number");
+    			attr_dev(input2, "step", "0.000001");
     			input2.required = true;
-    			attr_dev(input2, "class", "svelte-tdsx0s");
-    			add_location(input2, file, 506, 8, 11420);
-    			attr_dev(label2, "class", "svelte-tdsx0s");
-    			add_location(label2, file, 504, 6, 11369);
+    			attr_dev(input2, "class", "svelte-a5rmlg");
+    			add_location(input2, file, 579, 7, 13128);
+    			attr_dev(label2, "class", "svelte-a5rmlg");
+    			add_location(label2, file, 577, 6, 13078);
+    			attr_dev(input3, "type", "number");
+    			input3.required = true;
+    			attr_dev(input3, "class", "svelte-a5rmlg");
+    			add_location(input3, file, 584, 7, 13271);
+    			attr_dev(label3, "class", "svelte-a5rmlg");
+    			add_location(label3, file, 582, 6, 13222);
     			attr_dev(button, "type", "submit");
-    			attr_dev(button, "class", "svelte-tdsx0s");
-    			add_location(button, file, 514, 6, 11654);
-    			attr_dev(form, "class", "svelte-tdsx0s");
-    			add_location(form, file, 495, 5, 11029);
+    			attr_dev(button, "class", "svelte-a5rmlg");
+    			add_location(button, file, 593, 6, 13462);
+    			attr_dev(form, "class", "svelte-a5rmlg");
+    			add_location(form, file, 547, 5, 12271);
     			attr_dev(div0, "id", "carte");
-    			attr_dev(div0, "class", "card svelte-tdsx0s");
-    			add_location(div0, file, 493, 4, 10907);
-    			attr_dev(div1, "class", "content-auth svelte-tdsx0s");
-    			add_location(div1, file, 492, 3, 10876);
+    			attr_dev(div0, "class", "card svelte-a5rmlg");
+    			add_location(div0, file, 544, 4, 12148);
+    			attr_dev(div1, "class", "content-auth svelte-a5rmlg");
+    			add_location(div1, file, 543, 3, 12117);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -44586,63 +44624,91 @@ var app = (function () {
     			append_dev(div0, form);
     			append_dev(form, label0);
     			append_dev(label0, t2);
-    			append_dev(label0, t3);
     			append_dev(label0, input0);
-    			set_input_value(input0, /*latitude*/ ctx[2]);
+    			set_input_value(input0, /*query*/ ctx[8]);
+    			append_dev(label0, t3);
+    			if (if_block0) if_block0.m(label0, null);
     			append_dev(form, t4);
     			append_dev(form, label1);
     			append_dev(label1, t5);
     			append_dev(label1, t6);
     			append_dev(label1, input1);
-    			set_input_value(input1, /*longitude*/ ctx[3]);
+    			set_input_value(input1, /*latitude*/ ctx[2]);
     			append_dev(form, t7);
     			append_dev(form, label2);
     			append_dev(label2, t8);
     			append_dev(label2, t9);
     			append_dev(label2, input2);
-    			set_input_value(input2, /*distance*/ ctx[4]);
+    			set_input_value(input2, /*longitude*/ ctx[3]);
     			append_dev(form, t10);
+    			append_dev(form, label3);
+    			append_dev(label3, t11);
+    			append_dev(label3, t12);
+    			append_dev(label3, input3);
+    			set_input_value(input3, /*distance*/ ctx[4]);
+    			append_dev(form, t13);
     			mount_component(mapselector, form, null);
-    			append_dev(form, t11);
+    			append_dev(form, t14);
     			append_dev(form, button);
-    			append_dev(button, t12);
-    			append_dev(div0, t13);
-    			if (if_block0) if_block0.m(div0, null);
-    			append_dev(div0, t14);
+    			append_dev(button, t15);
+    			append_dev(div0, t16);
     			if (if_block1) if_block1.m(div0, null);
-    			append_dev(div1, t15);
-    			if (if_block2) if_block2.m(div1, null);
+    			append_dev(div0, t17);
+    			if (if_block2) if_block2.m(div0, null);
+    			append_dev(div1, t18);
+    			if (if_block3) if_block3.m(div1, null);
     			current = true;
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[24]),
-    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[25]),
-    					listen_dev(input2, "input", /*input2_input_handler*/ ctx[26]),
-    					listen_dev(form, "submit", prevent_default(/*generateMap*/ ctx[10]), false, true, false, false)
+    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[30]),
+    					listen_dev(input0, "input", /*onQueryInput*/ ctx[23], false, false, false, false),
+    					listen_dev(input0, "keydown", /*handleKeydownSuggest*/ ctx[25], false, false, false, false),
+    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[32]),
+    					listen_dev(input2, "input", /*input2_input_handler*/ ctx[33]),
+    					listen_dev(input3, "input", /*input3_input_handler*/ ctx[34]),
+    					listen_dev(form, "submit", prevent_default(/*generateMap*/ ctx[13]), false, true, false, false)
     				];
 
     				mounted = true;
     			}
     		},
     		p: function update(ctx, dirty) {
-    			if ((!current || dirty[0] & /*$locale*/ 512) && t0_value !== (t0_value = t('map_generator', /*$locale*/ ctx[9]) + "")) set_data_dev(t0, t0_value);
-    			if ((!current || dirty[0] & /*$locale*/ 512) && t2_value !== (t2_value = t('latitude', /*$locale*/ ctx[9]) + "")) set_data_dev(t2, t2_value);
+    			if ((!current || dirty[0] & /*$locale*/ 4096) && t0_value !== (t0_value = t('map_generator', /*$locale*/ ctx[12]) + "")) set_data_dev(t0, t0_value);
 
-    			if (dirty[0] & /*latitude*/ 4 && to_number(input0.value) !== /*latitude*/ ctx[2]) {
-    				set_input_value(input0, /*latitude*/ ctx[2]);
+    			if (dirty[0] & /*query*/ 256 && input0.value !== /*query*/ ctx[8]) {
+    				set_input_value(input0, /*query*/ ctx[8]);
     			}
 
-    			if ((!current || dirty[0] & /*$locale*/ 512) && t5_value !== (t5_value = t('longitude', /*$locale*/ ctx[9]) + "")) set_data_dev(t5, t5_value);
-
-    			if (dirty[0] & /*longitude*/ 8 && to_number(input1.value) !== /*longitude*/ ctx[3]) {
-    				set_input_value(input1, /*longitude*/ ctx[3]);
+    			if (/*suggestions*/ ctx[9].length) {
+    				if (if_block0) {
+    					if_block0.p(ctx, dirty);
+    				} else {
+    					if_block0 = create_if_block_5(ctx);
+    					if_block0.c();
+    					if_block0.m(label0, null);
+    				}
+    			} else if (if_block0) {
+    				if_block0.d(1);
+    				if_block0 = null;
     			}
 
-    			if ((!current || dirty[0] & /*$locale*/ 512) && t8_value !== (t8_value = t('distance', /*$locale*/ ctx[9]) + "")) set_data_dev(t8, t8_value);
+    			if ((!current || dirty[0] & /*$locale*/ 4096) && t5_value !== (t5_value = t('latitude', /*$locale*/ ctx[12]) + "")) set_data_dev(t5, t5_value);
 
-    			if (dirty[0] & /*distance*/ 16 && to_number(input2.value) !== /*distance*/ ctx[4]) {
-    				set_input_value(input2, /*distance*/ ctx[4]);
+    			if (dirty[0] & /*latitude*/ 4 && to_number(input1.value) !== /*latitude*/ ctx[2]) {
+    				set_input_value(input1, /*latitude*/ ctx[2]);
+    			}
+
+    			if ((!current || dirty[0] & /*$locale*/ 4096) && t8_value !== (t8_value = t('longitude', /*$locale*/ ctx[12]) + "")) set_data_dev(t8, t8_value);
+
+    			if (dirty[0] & /*longitude*/ 8 && to_number(input2.value) !== /*longitude*/ ctx[3]) {
+    				set_input_value(input2, /*longitude*/ ctx[3]);
+    			}
+
+    			if ((!current || dirty[0] & /*$locale*/ 4096) && t11_value !== (t11_value = t('distance', /*$locale*/ ctx[12]) + "")) set_data_dev(t11, t11_value);
+
+    			if (dirty[0] & /*distance*/ 16 && to_number(input3.value) !== /*distance*/ ctx[4]) {
+    				set_input_value(input3, /*distance*/ ctx[4]);
     			}
 
     			const mapselector_changes = {};
@@ -44666,50 +44732,50 @@ var app = (function () {
     			}
 
     			mapselector.$set(mapselector_changes);
-    			if ((!current || dirty[0] & /*$locale*/ 512) && t12_value !== (t12_value = t('generate_map', /*$locale*/ ctx[9]) + "")) set_data_dev(t12, t12_value);
+    			if ((!current || dirty[0] & /*$locale*/ 4096) && t15_value !== (t15_value = t('generate_map', /*$locale*/ ctx[12]) + "")) set_data_dev(t15, t15_value);
 
     			if (/*loading*/ ctx[6]) {
-    				if (if_block0) ; else {
-    					if_block0 = create_if_block_4(ctx);
-    					if_block0.c();
-    					if_block0.m(div0, t14);
-    				}
-    			} else if (if_block0) {
-    				if_block0.d(1);
-    				if_block0 = null;
-    			}
-
-    			if (/*error*/ ctx[7]) {
-    				if (if_block1) {
-    					if_block1.p(ctx, dirty);
-    				} else {
-    					if_block1 = create_if_block_3(ctx);
+    				if (if_block1) ; else {
+    					if_block1 = create_if_block_4(ctx);
     					if_block1.c();
-    					if_block1.m(div0, null);
+    					if_block1.m(div0, t17);
     				}
     			} else if (if_block1) {
     				if_block1.d(1);
     				if_block1 = null;
     			}
 
-    			if (/*svgUrl*/ ctx[5]) {
+    			if (/*error*/ ctx[7]) {
     				if (if_block2) {
     					if_block2.p(ctx, dirty);
-
-    					if (dirty[0] & /*svgUrl*/ 32) {
-    						transition_in(if_block2, 1);
-    					}
     				} else {
-    					if_block2 = create_if_block_2(ctx);
+    					if_block2 = create_if_block_3(ctx);
     					if_block2.c();
-    					transition_in(if_block2, 1);
-    					if_block2.m(div1, null);
+    					if_block2.m(div0, null);
     				}
     			} else if (if_block2) {
+    				if_block2.d(1);
+    				if_block2 = null;
+    			}
+
+    			if (/*svgUrl*/ ctx[5]) {
+    				if (if_block3) {
+    					if_block3.p(ctx, dirty);
+
+    					if (dirty[0] & /*svgUrl*/ 32) {
+    						transition_in(if_block3, 1);
+    					}
+    				} else {
+    					if_block3 = create_if_block_2(ctx);
+    					if_block3.c();
+    					transition_in(if_block3, 1);
+    					if_block3.m(div1, null);
+    				}
+    			} else if (if_block3) {
     				group_outros();
 
-    				transition_out(if_block2, 1, 1, () => {
-    					if_block2 = null;
+    				transition_out(if_block3, 1, 1, () => {
+    					if_block3 = null;
     				});
 
     				check_outros();
@@ -44725,23 +44791,24 @@ var app = (function () {
     				div0_transition.run(1);
     			});
 
-    			transition_in(if_block2);
+    			transition_in(if_block3);
     			current = true;
     		},
     		o: function outro(local) {
     			transition_out(mapselector.$$.fragment, local);
     			if (!div0_transition) div0_transition = create_bidirectional_transition(div0, fly, { y: -20, duration: 600 }, false);
     			div0_transition.run(0);
-    			transition_out(if_block2);
+    			transition_out(if_block3);
     			current = false;
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div1);
-    			destroy_component(mapselector);
     			if (if_block0) if_block0.d();
+    			destroy_component(mapselector);
     			if (if_block1) if_block1.d();
-    			if (detaching && div0_transition) div0_transition.end();
     			if (if_block2) if_block2.d();
+    			if (detaching && div0_transition) div0_transition.end();
+    			if (if_block3) if_block3.d();
     			mounted = false;
     			run_all(dispose);
     		}
@@ -44751,14 +44818,145 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(492:2) {#if currentPage === 'carte'}",
+    		source: "(543:2) {#if currentPage === 'carte'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (518:5) {#if loading}
+    // (559:7) {#if suggestions.length}
+    function create_if_block_5(ctx) {
+    	let ul;
+    	let each_value = /*suggestions*/ ctx[9];
+    	validate_each_argument(each_value);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
+    	}
+
+    	const block = {
+    		c: function create() {
+    			ul = element("ul");
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			attr_dev(ul, "class", "suggest-box svelte-a5rmlg");
+    			add_location(ul, file, 559, 8, 12646);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, ul, anchor);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				if (each_blocks[i]) {
+    					each_blocks[i].m(ul, null);
+    				}
+    			}
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty[0] & /*activeIdx, chooseSuggestion, suggestions*/ 16778752) {
+    				each_value = /*suggestions*/ ctx[9];
+    				validate_each_argument(each_value);
+    				let i;
+
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(ul, null);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(ul);
+    			destroy_each(each_blocks, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_5.name,
+    		type: "if",
+    		source: "(559:7) {#if suggestions.length}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (561:9) {#each suggestions as s, i}
+    function create_each_block(ctx) {
+    	let li;
+    	let t0_value = /*s*/ ctx[47].display_name + "";
+    	let t0;
+    	let t1;
+    	let mounted;
+    	let dispose;
+
+    	function click_handler() {
+    		return /*click_handler*/ ctx[31](/*s*/ ctx[47]);
+    	}
+
+    	const block = {
+    		c: function create() {
+    			li = element("li");
+    			t0 = text$1(t0_value);
+    			t1 = space();
+    			attr_dev(li, "class", "svelte-a5rmlg");
+    			toggle_class(li, "i-active", /*i*/ ctx[49] === /*activeIdx*/ ctx[10]);
+    			add_location(li, file, 561, 10, 12718);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, li, anchor);
+    			append_dev(li, t0);
+    			append_dev(li, t1);
+
+    			if (!mounted) {
+    				dispose = listen_dev(li, "click", click_handler, false, false, false, false);
+    				mounted = true;
+    			}
+    		},
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+    			if (dirty[0] & /*suggestions*/ 512 && t0_value !== (t0_value = /*s*/ ctx[47].display_name + "")) set_data_dev(t0, t0_value);
+
+    			if (dirty[0] & /*activeIdx*/ 1024) {
+    				toggle_class(li, "i-active", /*i*/ ctx[49] === /*activeIdx*/ ctx[10]);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(li);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block.name,
+    		type: "each",
+    		source: "(561:9) {#each suggestions as s, i}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (597:5) {#if loading}
     function create_if_block_4(ctx) {
     	let div;
     	let t0;
@@ -44770,10 +44968,10 @@ var app = (function () {
     			t0 = space();
     			p = element("p");
     			p.textContent = "Génération en cours...";
-    			attr_dev(div, "class", "loading-spinner svelte-tdsx0s");
-    			add_location(div, file, 518, 6, 11760);
+    			attr_dev(div, "class", "loading-spinner svelte-a5rmlg");
+    			add_location(div, file, 597, 6, 13561);
     			set_style(p, "text-align", "center");
-    			add_location(p, file, 519, 6, 11802);
+    			add_location(p, file, 598, 6, 13603);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -44791,14 +44989,14 @@ var app = (function () {
     		block,
     		id: create_if_block_4.name,
     		type: "if",
-    		source: "(518:5) {#if loading}",
+    		source: "(597:5) {#if loading}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (522:5) {#if error}
+    // (602:5) {#if error}
     function create_if_block_3(ctx) {
     	let p;
     	let t_1;
@@ -44807,8 +45005,8 @@ var app = (function () {
     		c: function create() {
     			p = element("p");
     			t_1 = text$1(/*error*/ ctx[7]);
-    			attr_dev(p, "class", "error svelte-tdsx0s");
-    			add_location(p, file, 522, 6, 11894);
+    			attr_dev(p, "class", "error svelte-a5rmlg");
+    			add_location(p, file, 602, 6, 13694);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -44826,17 +45024,17 @@ var app = (function () {
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(522:5) {#if error}",
+    		source: "(602:5) {#if error}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (528:4) {#if svgUrl}
+    // (607:4) {#if svgUrl}
     function create_if_block_2(ctx) {
     	let h2;
-    	let t0_value = t('generated_map', /*$locale*/ ctx[9]) + "";
+    	let t0_value = t('generated_map', /*$locale*/ ctx[12]) + "";
     	let t0;
     	let h2_transition;
     	let t1;
@@ -44859,7 +45057,7 @@ var app = (function () {
     	let div3;
     	let a;
     	let button3;
-    	let t11_value = t('download_svg', /*$locale*/ ctx[9]) + "";
+    	let t11_value = t('download_svg', /*$locale*/ ctx[12]) + "";
     	let t11;
     	let current;
     	let mounted;
@@ -44885,49 +45083,49 @@ var app = (function () {
     			img = element("img");
     			t8 = space();
     			p = element("p");
-    			p.textContent = "Utilisez les flèches pour déplacer la carte, les touches plus et moins pour zoomer et la touche R pour faire pivoter.";
+    			p.textContent = "Utilisez les flèches pour déplacer la carte, les touches plus et moins\n\t\t\t\t\t\t\tpour zoomer et la touche R pour faire pivoter.";
     			t10 = space();
     			div3 = element("div");
     			a = element("a");
     			button3 = element("button");
     			t11 = text$1(t11_value);
     			set_style(h2, "text-align", "center");
-    			attr_dev(h2, "class", "svelte-tdsx0s");
-    			add_location(h2, file, 528, 5, 11973);
+    			attr_dev(h2, "class", "svelte-a5rmlg");
+    			add_location(h2, file, 607, 5, 13768);
     			attr_dev(button0, "aria-label", "Zoom In");
-    			attr_dev(button0, "class", "svelte-tdsx0s");
-    			add_location(button0, file, 545, 8, 12610);
+    			attr_dev(button0, "class", "svelte-a5rmlg");
+    			add_location(button0, file, 623, 8, 14330);
     			attr_dev(button1, "aria-label", "Zoom Out");
-    			attr_dev(button1, "class", "svelte-tdsx0s");
-    			add_location(button1, file, 546, 8, 12676);
+    			attr_dev(button1, "class", "svelte-a5rmlg");
+    			add_location(button1, file, 624, 8, 14396);
     			attr_dev(button2, "aria-label", "Rotate");
-    			attr_dev(button2, "class", "svelte-tdsx0s");
-    			add_location(button2, file, 547, 8, 12744);
-    			attr_dev(div0, "class", "zoom-controls svelte-tdsx0s");
-    			add_location(div0, file, 544, 7, 12574);
+    			attr_dev(button2, "class", "svelte-a5rmlg");
+    			add_location(button2, file, 625, 8, 14464);
+    			attr_dev(div0, "class", "zoom-controls svelte-a5rmlg");
+    			add_location(div0, file, 622, 7, 14294);
     			if (!src_url_equal(img.src, img_src_value = /*svgUrl*/ ctx[5])) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Carte stylisée");
-    			attr_dev(img, "class", "svelte-tdsx0s");
-    			set_style(img, "transform", /*transformValue*/ ctx[8]);
-    			add_location(img, file, 549, 7, 12825);
-    			attr_dev(div1, "class", "svg-container svelte-tdsx0s");
+    			attr_dev(img, "class", "svelte-a5rmlg");
+    			set_style(img, "transform", /*transformValue*/ ctx[11]);
+    			add_location(img, file, 628, 7, 14546);
+    			attr_dev(div1, "class", "svg-container svelte-a5rmlg");
     			attr_dev(div1, "role", "application");
     			attr_dev(div1, "aria-label", "Carte stylisée");
     			attr_dev(div1, "aria-describedby", "map-instructions");
     			attr_dev(div1, "tabindex", "0");
-    			add_location(div1, file, 531, 6, 12201);
+    			add_location(div1, file, 609, 6, 13921);
     			attr_dev(p, "id", "map-instructions");
-    			attr_dev(p, "class", "sr-only svelte-tdsx0s");
-    			add_location(p, file, 551, 6, 12965);
-    			attr_dev(div2, "class", "card svelte-tdsx0s");
-    			add_location(div2, file, 529, 5, 12061);
-    			attr_dev(button3, "class", "svelte-tdsx0s");
-    			add_location(button3, file, 555, 7, 13230);
+    			attr_dev(p, "class", "sr-only svelte-a5rmlg");
+    			add_location(p, file, 635, 6, 14726);
+    			attr_dev(div2, "class", "card svelte-a5rmlg");
+    			add_location(div2, file, 608, 5, 13854);
+    			attr_dev(button3, "class", "svelte-a5rmlg");
+    			add_location(button3, file, 643, 7, 15014);
     			attr_dev(a, "download", "carte.svg");
     			attr_dev(a, "href", /*svgUrl*/ ctx[5]);
-    			add_location(a, file, 554, 6, 13184);
-    			attr_dev(div3, "class", "download-container svelte-tdsx0s");
-    			add_location(div3, file, 553, 5, 13145);
+    			add_location(a, file, 642, 6, 14968);
+    			attr_dev(div3, "class", "download-container svelte-a5rmlg");
+    			add_location(div3, file, 641, 5, 14929);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, h2, anchor);
@@ -44954,32 +45152,32 @@ var app = (function () {
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(button0, "click", /*zoomIn*/ ctx[12], false, false, false, false),
-    					listen_dev(button1, "click", /*zoomOut*/ ctx[13], false, false, false, false),
-    					listen_dev(button2, "click", /*rotateMap*/ ctx[14], false, false, false, false),
-    					listen_dev(div1, "wheel", prevent_default(/*handleWheel*/ ctx[11]), false, true, false, false),
-    					listen_dev(div1, "mousedown", /*startDrag*/ ctx[16], false, false, false, false),
-    					listen_dev(div1, "mousemove", /*drag*/ ctx[17], false, false, false, false),
-    					listen_dev(div1, "mouseup", /*endDrag*/ ctx[18], false, false, false, false),
-    					listen_dev(div1, "mouseleave", /*endDrag*/ ctx[18], false, false, false, false),
-    					listen_dev(div1, "keydown", /*handleKeydownMap*/ ctx[15], false, false, false, false)
+    					listen_dev(button0, "click", /*zoomIn*/ ctx[15], false, false, false, false),
+    					listen_dev(button1, "click", /*zoomOut*/ ctx[16], false, false, false, false),
+    					listen_dev(button2, "click", /*rotateMap*/ ctx[17], false, false, false, false),
+    					listen_dev(div1, "wheel", prevent_default(/*handleWheel*/ ctx[14]), false, true, false, false),
+    					listen_dev(div1, "mousedown", /*startDrag*/ ctx[19], false, false, false, false),
+    					listen_dev(div1, "mousemove", /*drag*/ ctx[20], false, false, false, false),
+    					listen_dev(div1, "mouseup", /*endDrag*/ ctx[21], false, false, false, false),
+    					listen_dev(div1, "mouseleave", /*endDrag*/ ctx[21], false, false, false, false),
+    					listen_dev(div1, "keydown", /*handleKeydownMap*/ ctx[18], false, false, false, false)
     				];
 
     				mounted = true;
     			}
     		},
     		p: function update(ctx, dirty) {
-    			if ((!current || dirty[0] & /*$locale*/ 512) && t0_value !== (t0_value = t('generated_map', /*$locale*/ ctx[9]) + "")) set_data_dev(t0, t0_value);
+    			if ((!current || dirty[0] & /*$locale*/ 4096) && t0_value !== (t0_value = t('generated_map', /*$locale*/ ctx[12]) + "")) set_data_dev(t0, t0_value);
 
     			if (!current || dirty[0] & /*svgUrl*/ 32 && !src_url_equal(img.src, img_src_value = /*svgUrl*/ ctx[5])) {
     				attr_dev(img, "src", img_src_value);
     			}
 
-    			if (dirty[0] & /*transformValue*/ 256) {
-    				set_style(img, "transform", /*transformValue*/ ctx[8]);
+    			if (dirty[0] & /*transformValue*/ 2048) {
+    				set_style(img, "transform", /*transformValue*/ ctx[11]);
     			}
 
-    			if ((!current || dirty[0] & /*$locale*/ 512) && t11_value !== (t11_value = t('download_svg', /*$locale*/ ctx[9]) + "")) set_data_dev(t11, t11_value);
+    			if ((!current || dirty[0] & /*$locale*/ 4096) && t11_value !== (t11_value = t('download_svg', /*$locale*/ ctx[12]) + "")) set_data_dev(t11, t11_value);
 
     			if (!current || dirty[0] & /*svgUrl*/ 32) {
     				attr_dev(a, "href", /*svgUrl*/ ctx[5]);
@@ -45035,7 +45233,7 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(528:4) {#if svgUrl}",
+    		source: "(607:4) {#if svgUrl}",
     		ctx
     	});
 
@@ -45052,12 +45250,12 @@ var app = (function () {
 
     	const if_block_creators = [
     		create_if_block,
-    		create_if_block_15,
     		create_if_block_16,
     		create_if_block_17,
     		create_if_block_18,
     		create_if_block_19,
     		create_if_block_20,
+    		create_if_block_21,
     		create_else_block
     	];
 
@@ -45086,8 +45284,8 @@ var app = (function () {
     			create_component(cookiebanner.$$.fragment);
     			attr_dev(main, "id", "main");
     			attr_dev(main, "tabindex", "-1");
-    			attr_dev(main, "class", "svelte-tdsx0s");
-    			add_location(main, file, 485, 0, 10681);
+    			attr_dev(main, "class", "svelte-a5rmlg");
+    			add_location(main, file, 538, 0, 12012);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -45167,7 +45365,7 @@ var app = (function () {
     	validate_store(isAuthenticated, 'isAuthenticated');
     	component_subscribe($$self, isAuthenticated, $$value => $$invalidate(0, $isAuthenticated = $$value));
     	validate_store(locale, 'locale');
-    	component_subscribe($$self, locale, $$value => $$invalidate(9, $locale = $$value));
+    	component_subscribe($$self, locale, $$value => $$invalidate(12, $locale = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('App', slots, []);
     	let currentPage = 'carte';
@@ -45191,6 +45389,11 @@ var app = (function () {
 
     	// Flag pour utiliser l'endpoint public (non-protégé)
     	let usePublicEndpoint = false;
+
+    	let query = '';
+    	let suggestions = [];
+    	let activeIdx = -1;
+    	let suggestTimer;
 
     	// Variables pour le panning
     	let translateX = 0;
@@ -45250,11 +45453,11 @@ var app = (function () {
     		$$invalidate(5, svgUrl = "");
 
     		// Réinitialise zoom, rotation et panning
-    		$$invalidate(20, scale$1 = 1.0);
+    		$$invalidate(26, scale$1 = 1.0);
 
-    		$$invalidate(21, rotate = 0);
-    		$$invalidate(22, translateX = 0);
-    		$$invalidate(23, translateY = 0);
+    		$$invalidate(27, rotate = 0);
+    		$$invalidate(28, translateX = 0);
+    		$$invalidate(29, translateY = 0);
 
     		try {
     			// Choisir l'endpoint en fonction du flag
@@ -45293,39 +45496,39 @@ var app = (function () {
     		e.preventDefault();
 
     		if (e.deltaY < 0) {
-    			$$invalidate(20, scale$1 = Math.min(maxScale, scale$1 * 1.1));
+    			$$invalidate(26, scale$1 = Math.min(maxScale, scale$1 * 1.1));
     		} else {
-    			$$invalidate(20, scale$1 = Math.max(minScale, scale$1 / 1.1));
+    			$$invalidate(26, scale$1 = Math.max(minScale, scale$1 / 1.1));
     		}
     	}
 
     	function zoomIn() {
-    		$$invalidate(20, scale$1 = Math.min(maxScale, scale$1 * 1.1));
+    		$$invalidate(26, scale$1 = Math.min(maxScale, scale$1 * 1.1));
     	}
 
     	function zoomOut() {
-    		$$invalidate(20, scale$1 = Math.max(minScale, scale$1 / 1.1));
+    		$$invalidate(26, scale$1 = Math.max(minScale, scale$1 / 1.1));
     	}
 
     	// Incrémente la rotation de 15 degrés à chaque clic
     	function rotateMap() {
-    		$$invalidate(21, rotate = rotate + 15);
+    		$$invalidate(27, rotate = rotate + 15);
     	}
 
     	// Contrôles clavier pour la carte
     	function handleKeydownMap(e) {
     		switch (e.key) {
     			case 'ArrowUp':
-    				$$invalidate(23, translateY += 20);
+    				$$invalidate(29, translateY += 20);
     				break;
     			case 'ArrowDown':
-    				$$invalidate(23, translateY -= 20);
+    				$$invalidate(29, translateY -= 20);
     				break;
     			case 'ArrowLeft':
-    				$$invalidate(22, translateX += 20);
+    				$$invalidate(28, translateX += 20);
     				break;
     			case 'ArrowRight':
-    				$$invalidate(22, translateX -= 20);
+    				$$invalidate(28, translateX -= 20);
     				break;
     			case '+':
     			case '=':
@@ -45357,8 +45560,8 @@ var app = (function () {
     		if (isDragging) {
     			const dx = e.clientX - initialDragX;
     			const dy = e.clientY - initialDragY;
-    			$$invalidate(22, translateX = initialTranslateX + dx);
-    			$$invalidate(23, translateY = initialTranslateY + dy);
+    			$$invalidate(28, translateX = initialTranslateX + dx);
+    			$$invalidate(29, translateY = initialTranslateY + dy);
     		}
     	}
 
@@ -45378,6 +45581,40 @@ var app = (function () {
     		initSocket();
     	}
 
+    	function onQueryInput(e) {
+    		$$invalidate(8, query = e.target.value);
+    		clearTimeout(suggestTimer);
+
+    		suggestTimer = setTimeout(
+    			async () => {
+    				$$invalidate(9, suggestions = await geocode(query));
+    				$$invalidate(10, activeIdx = -1);
+    			},
+    			300
+    		); // debounce 300 ms
+    	}
+
+    	function chooseSuggestion(s) {
+    		$$invalidate(2, latitude = parseFloat(s.lat));
+    		$$invalidate(3, longitude = parseFloat(s.lon));
+    		$$invalidate(9, suggestions = []);
+    		$$invalidate(8, query = s.display_name); // garde le texte
+    	}
+
+    	function handleKeydownSuggest(e) {
+    		if (!suggestions.length) return;
+
+    		if (e.key === 'ArrowDown') {
+    			$$invalidate(10, activeIdx = (activeIdx + 1) % suggestions.length);
+    			e.preventDefault();
+    		} else if (e.key === 'ArrowUp') {
+    			$$invalidate(10, activeIdx = (activeIdx - 1 + suggestions.length) % suggestions.length);
+    			e.preventDefault();
+    		} else if (e.key === 'Enter') {
+    			chooseSuggestion(suggestions[activeIdx]);
+    		}
+    	}
+
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
@@ -45385,16 +45622,23 @@ var app = (function () {
     	});
 
     	function input0_input_handler() {
+    		query = this.value;
+    		$$invalidate(8, query);
+    	}
+
+    	const click_handler = s => chooseSuggestion(s);
+
+    	function input1_input_handler() {
     		latitude = to_number(this.value);
     		$$invalidate(2, latitude);
     	}
 
-    	function input1_input_handler() {
+    	function input2_input_handler() {
     		longitude = to_number(this.value);
     		$$invalidate(3, longitude);
     	}
 
-    	function input2_input_handler() {
+    	function input3_input_handler() {
     		distance = to_number(this.value);
     		$$invalidate(4, distance);
     	}
@@ -45430,6 +45674,7 @@ var app = (function () {
     		t,
     		locale,
     		initSocket,
+    		geocode,
     		Statistique,
     		Parametre,
     		Equipe,
@@ -45456,6 +45701,10 @@ var app = (function () {
     		maxScale,
     		rotate,
     		usePublicEndpoint,
+    		query,
+    		suggestions,
+    		activeIdx,
+    		suggestTimer,
     		translateX,
     		translateY,
     		isDragging,
@@ -45474,6 +45723,9 @@ var app = (function () {
     		endDrag,
     		handleLogout,
     		handleLoginSuccess,
+    		onQueryInput,
+    		chooseSuggestion,
+    		handleKeydownSuggest,
     		transformValue,
     		$isAuthenticated,
     		$locale
@@ -45487,17 +45739,21 @@ var app = (function () {
     		if ('svgUrl' in $$props) $$invalidate(5, svgUrl = $$props.svgUrl);
     		if ('loading' in $$props) $$invalidate(6, loading = $$props.loading);
     		if ('error' in $$props) $$invalidate(7, error = $$props.error);
-    		if ('scale' in $$props) $$invalidate(20, scale$1 = $$props.scale);
-    		if ('rotate' in $$props) $$invalidate(21, rotate = $$props.rotate);
+    		if ('scale' in $$props) $$invalidate(26, scale$1 = $$props.scale);
+    		if ('rotate' in $$props) $$invalidate(27, rotate = $$props.rotate);
     		if ('usePublicEndpoint' in $$props) usePublicEndpoint = $$props.usePublicEndpoint;
-    		if ('translateX' in $$props) $$invalidate(22, translateX = $$props.translateX);
-    		if ('translateY' in $$props) $$invalidate(23, translateY = $$props.translateY);
+    		if ('query' in $$props) $$invalidate(8, query = $$props.query);
+    		if ('suggestions' in $$props) $$invalidate(9, suggestions = $$props.suggestions);
+    		if ('activeIdx' in $$props) $$invalidate(10, activeIdx = $$props.activeIdx);
+    		if ('suggestTimer' in $$props) suggestTimer = $$props.suggestTimer;
+    		if ('translateX' in $$props) $$invalidate(28, translateX = $$props.translateX);
+    		if ('translateY' in $$props) $$invalidate(29, translateY = $$props.translateY);
     		if ('isDragging' in $$props) isDragging = $$props.isDragging;
     		if ('initialDragX' in $$props) initialDragX = $$props.initialDragX;
     		if ('initialDragY' in $$props) initialDragY = $$props.initialDragY;
     		if ('initialTranslateX' in $$props) initialTranslateX = $$props.initialTranslateX;
     		if ('initialTranslateY' in $$props) initialTranslateY = $$props.initialTranslateY;
-    		if ('transformValue' in $$props) $$invalidate(8, transformValue = $$props.transformValue);
+    		if ('transformValue' in $$props) $$invalidate(11, transformValue = $$props.transformValue);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -45510,9 +45766,9 @@ var app = (function () {
     			console.log("État d'authentification:", $isAuthenticated);
     		}
 
-    		if ($$self.$$.dirty[0] & /*translateX, translateY, rotate, scale*/ 15728640) {
+    		if ($$self.$$.dirty[0] & /*translateX, translateY, rotate, scale*/ 1006632960) {
     			// Transformation combinée : translation, rotation et zoom
-    			$$invalidate(8, transformValue = `translate(${translateX}px, ${translateY}px) rotate(${rotate}deg) scale(${scale$1})`);
+    			$$invalidate(11, transformValue = `translate(${translateX}px, ${translateY}px) rotate(${rotate}deg) scale(${scale$1})`);
     		}
     	};
 
@@ -45525,6 +45781,9 @@ var app = (function () {
     		svgUrl,
     		loading,
     		error,
+    		query,
+    		suggestions,
+    		activeIdx,
     		transformValue,
     		$locale,
     		generateMap,
@@ -45537,13 +45796,18 @@ var app = (function () {
     		drag,
     		endDrag,
     		handleLoginSuccess,
+    		onQueryInput,
+    		chooseSuggestion,
+    		handleKeydownSuggest,
     		scale$1,
     		rotate,
     		translateX,
     		translateY,
     		input0_input_handler,
+    		click_handler,
     		input1_input_handler,
     		input2_input_handler,
+    		input3_input_handler,
     		mapselector_lat_binding,
     		mapselector_lon_binding,
     		mapselector_radius_binding
