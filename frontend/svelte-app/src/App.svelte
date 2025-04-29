@@ -21,6 +21,11 @@
 	import Privacy from './pages/Privacy.svelte';
 	import CookieBanner from './components/CookieBanner.svelte';
 	
+	// Import des pages Report
+	import Report from './pages/Report.svelte';
+	import ReportsAdmin from './pages/ReportsAdmin.svelte';
+	import ThreadChat from './pages/ThreadChat.svelte';
+	
 	// Configuration du backend
 	const API_URL = 'http://localhost:5000';
 	
@@ -569,6 +574,12 @@
 			<ResetPassword />
 		{:else if currentPage === 'privacy'}
 			<Privacy />
+		{:else if currentPage === 'report'}
+			<Report />
+		{:else if currentPage === 'reports'}
+			<ReportsAdmin />
+		{:else if currentPage === 'thread'}
+			<ThreadChat />
 		{/if}
 	{:else}
 		{#if currentPage === 'invite'}

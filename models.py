@@ -121,4 +121,55 @@ class RevokedToken(db.Model):
     revoked_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
-        return f'<RevokedToken {self.jti}>' 
+        return f'<RevokedToken {self.jti}>'
+
+# Ajout du modèle Report pour les signalements
+class Report(db.Model):
+    __tablename__ = 'reports'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    # Stocke les noms de fichiers joints séparés par des virgules
+    attachments = db.Column(db.String(1000), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relation vers l'utilisateur
+    user = db.relationship('User', backref=db.backref('reports', lazy=True))
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'description': self.description,
+            'attachments': self.attachments.split(',') if self.attachments else [],
+            'created_at': self.created_at.isoformat()
+        }
+
+class ReportThread(db.Model):
+    __tablename__ = 'report_threads'
+    id = db.Column(db.Integer, primary_key=True)
+    report_id = db.Column(db.Integer, db.ForeignKey('reports.id'), nullable=False, unique=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    report = db.relationship('Report', backref=db.backref('thread', uselist=False))
+
+class ReportMessage(db.Model):
+    __tablename__ = 'report_messages'
+    id = db.Column(db.Integer, primary_key=True)
+    thread_id = db.Column(db.Integer, db.ForeignKey('report_threads.id'), nullable=False)
+    sender_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    sender = db.relationship('User')
+    thread = db.relationship('ReportThread', backref=db.backref('messages', cascade='all,delete', lazy='dynamic'))
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'thread_id': self.thread_id,
+            'sender_id': self.sender_id,
+            'body': self.body,
+            'created_at': self.created_at.isoformat()
+        } 

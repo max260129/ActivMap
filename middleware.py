@@ -19,6 +19,7 @@ def role_required(*allowed_roles):
 
             # Étape 1 : validation JWT et rôle
             try:
+                # Validation JWT via header ou cookie (configuration par défaut)
                 verify_jwt_in_request()
                 user_id = get_jwt_identity()
                 user = User.query.get(int(user_id))
@@ -58,6 +59,7 @@ def protect_route(fn):
             return response # Renvoie 200 OK
             
         try:
+            # Validation JWT via header ou cookie (configuration par défaut)
             verify_jwt_in_request()
             # Exécuter la fonction originale pour les autres méthodes
             return fn(*args, **kwargs)

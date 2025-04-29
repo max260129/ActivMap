@@ -38,6 +38,17 @@ const dict = {
     sidebar_team: 'Équipe',
     sidebar_history: 'Historique',
     logout: 'Déconnexion',
+    sidebar_report: 'Signaler un bug',
+    sidebar_reports: 'Signalements',
+    report_title: 'Signaler un bug ou un manque',
+    report_description: 'Description',
+    report_attachments: 'Pièces jointes',
+    report_success: 'Signalement envoyé avec succès',
+    submit: 'Envoyer',
+    saving: 'Envoi',
+    reports_admin_title: 'Signalements reçus',
+    reports_empty: "Aucun signalement pour l'instant",
+    loading: 'Chargement'
   },
   en: {
     map_generator: 'Stylized Map Generator',
@@ -67,6 +78,17 @@ const dict = {
     sidebar_team: 'Team',
     sidebar_history: 'History',
     logout: 'Logout',
+    sidebar_report: 'Report an issue',
+    sidebar_reports: 'Reports',
+    report_title: 'Report a bug or missing feature',
+    report_description: 'Description',
+    report_attachments: 'Attachments',
+    report_success: 'Report sent successfully',
+    submit: 'Submit',
+    saving: 'Sending',
+    reports_admin_title: 'Reports received',
+    reports_empty: 'No reports yet',
+    loading: 'Loading'
   }
 };
 

@@ -86,27 +86,24 @@ export function getToken() {
 // Intercepteur pour les requêtes API
 export async function fetchWithAuth(url, options = {}) {
     const token = getToken();
-    
-    // Adapter l'URL en fonction du type de requête
     let apiUrl = url;
-    
-    // Si l'URL ne contient pas déjà http:// et ne commence pas par /api, ajuster le format
     if (!url.includes('http://') && !url.startsWith('/api')) {
         apiUrl = `${API_URL}/api${url.startsWith('/') ? url : `/${url}`}`;
     } else if (url.startsWith('/api')) {
         apiUrl = `${API_URL}${url}`;
     }
     
-    console.log("URL modifiée pour fetch:", apiUrl);
-    
+    // Préparer headers
+    options.headers = options.headers || {};
     if (token) {
-        options.headers = {
-            ...options.headers || {},
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        };
-        console.log("Envoi requête avec token:", `Bearer ${token}`);
+        options.headers['Authorization'] = `Bearer ${token}`;
     }
+    // Si le body n'est pas un FormData, on fixe le Content-Type JSON
+    if (!(options.body instanceof FormData)) {
+        options.headers['Content-Type'] = 'application/json';
+    }
+    // Toujours inclure les credentials pour cookie si besoin
+    options.credentials = options.credentials || 'include';
     
     try {
         const response = await fetch(apiUrl, {

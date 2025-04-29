@@ -1,5 +1,6 @@
 from flask_socketio import emit, join_room
 from flask_jwt_extended import decode_token, exceptions as jwt_exceptions
+from models import User
 
 # L'instance SocketIO est crée dans app.run
 from app.run import socketio
@@ -27,6 +28,11 @@ def ws_connect(auth):
 
         # On place l'utilisateur dans sa room dédiée
         join_room(f"user:{user_id}")
+        # Si l'utilisateur est admin, l'ajouter à la room 'admin'
+        user = User.query.get(int(user_id))
+        if user and user.role == 'ADMIN':
+            join_room('admin')
+
         emit('connected', {'msg': 'ok'})
     except (jwt_exceptions.JWTDecodeError, Exception):
         # Token invalide
@@ -36,4 +42,10 @@ def ws_connect(auth):
 @socketio.on('disconnect')
 def ws_disconnect():
     # Pas besoin de logique spéciale pour l'instant
-    pass 
+    pass
+
+@socketio.on('join_thread')
+def join_thread(data):
+    thread_id = data.get('thread_id')
+    if thread_id:
+        join_room(f"thread:{thread_id}") 

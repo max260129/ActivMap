@@ -72,19 +72,19 @@ from models import db, User, RevokedToken
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Configuration JWT
+# Configuration JWT (header uniquement)
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
-app.config['JWT_TOKEN_LOCATION'] = ['headers', 'cookies']
+app.config['JWT_TOKEN_LOCATION'] = ['headers']
 app.config['JWT_HEADER_NAME'] = 'Authorization'
 app.config['JWT_HEADER_TYPE'] = 'Bearer'
-app.config['JWT_ACCESS_COOKIE_NAME'] = 'access_token'
-app.config['JWT_COOKIE_SECURE'] = False  # True en production (HTTPS)
-app.config['JWT_COOKIE_SAMESITE'] = 'Lax'
-app.config['JWT_COOKIE_CSRF_PROTECT'] = True
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600     # 1 heure
 
 # Configuration globale Flask
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'CHANGE_ME_SECRET')
+
+# Configuration du dossier pour les fichiers de report
+app.config['UPLOAD_FOLDER_REPORTS'] = os.path.join(os.getcwd(), 'uploads', 'reports')
+os.makedirs(app.config['UPLOAD_FOLDER_REPORTS'], exist_ok=True)
 
 # Initialisation des extensions
 db.init_app(app)
@@ -143,6 +143,14 @@ app.register_blueprint(auth.auth_bp, url_prefix='/api/auth')
 # Blueprint équipe
 from app.api.team import team_bp
 app.register_blueprint(team_bp)
+
+# Blueprint report
+from app.api.report import report_bp
+app.register_blueprint(report_bp)
+
+# Blueprint chat report
+from app.api.report_chat import chat_bp
+app.register_blueprint(chat_bp)
 
 # Pour le développement, attendre que la base de données soit prête
 print("Attente de la base de données...")

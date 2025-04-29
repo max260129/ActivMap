@@ -10,7 +10,9 @@
 	  { id: "statistique", label: () => t('sidebar_stats'), show: role => role !== 'EMPLOYE' },
 	  { id: "parametre", label: () => t('sidebar_settings'), show: role => true },
 	  { id: "equipe", label: () => t('sidebar_team'), show: role => role === 'ADMIN' },
-	  { id: "historique", label: () => t('sidebar_history'), show: role => true }
+	  { id: "historique", label: () => t('sidebar_history'), show: role => true },
+	  { id: "report", label: () => t('sidebar_report'), show: role => true },
+	  { id: "reports", label: () => t('sidebar_reports'), show: role => true }
 	];
   
 	$: userRole = ($currentUser)?.role || 'EMPLOYE';

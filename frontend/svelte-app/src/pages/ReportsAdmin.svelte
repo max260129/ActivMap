@@ -1,0 +1,88 @@
+<script>
+  import Sidebar from '../components/Sidebar.svelte';
+  import { onMount } from 'svelte';
+  import { fetchReports } from '../services/report.js';
+  import { t, locale } from '../i18n.js';
+  import { API_URL } from '../services/constants.js';
+
+  let reports = [];
+  let loading = true;
+
+  async function loadReports() {
+    loading = true;
+    try {
+      const data = await fetchReports();
+      if (!data.error) {
+        reports = data;
+      }
+    } catch (e) {
+      console.error('Erreur chargement signalements', e);
+    } finally {
+      loading = false;
+    }
+  }
+
+  onMount(loadReports);
+</script>
+
+<div class="content-auth">
+  <Sidebar />
+  <h1>{t('reports_admin_title', $locale)}</h1>
+
+  {#if loading}
+    <p>{t('loading', $locale)}…</p>
+  {:else if reports.length === 0}
+    <p>{t('reports_empty', $locale)}</p>
+  {:else}
+    <ul class="report-list">
+      {#each reports as r}
+        <li class="report-item" on:click={() => location.hash = `thread?tid=${r.thread_id}` }>
+          <div class="report-meta">
+            <strong>Utilisateur {r.user_id}</strong> • {new Date(r.created_at).toLocaleString($locale)}
+          </div>
+          <p class="report-desc">{r.description}</p>
+          {#if r.attachments.length}
+            <div class="report-attachments">
+              {#each r.attachments as file}
+                <a href={`${API_URL}/api/report/attachments/${file}`} target="_blank">
+                  📎 {file}
+                </a>
+              {/each}
+            </div>
+          {/if}
+        </li>
+      {/each}
+    </ul>
+  {/if}
+</div>
+
+<style>
+  .report-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .report-item {
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+  }
+  .report-meta {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    color: #ccc;
+  }
+  .report-desc {
+    margin-bottom: 0.75rem;
+  }
+  .report-attachments a {
+    margin-right: 0.5rem;
+    color: #cc5200;
+    text-decoration: none;
+  }
+  .report-attachments a:hover {
+    text-decoration: underline;
+  }
+</style> 
