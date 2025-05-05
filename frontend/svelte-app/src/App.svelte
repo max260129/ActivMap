@@ -89,12 +89,13 @@
 		setActivePage();
 		window.addEventListener('hashchange', setActivePage);
 		
+		// Initialiser la connexion WebSocket
+		initSocket();
+		
 		// Nettoyage lors du démontage du composant
 		return () => {
 			window.removeEventListener('hashchange', setActivePage);
 		};
-		
-		initSocket();
 	});
 
 	// Mettre à jour la distance par défaut selon les préférences

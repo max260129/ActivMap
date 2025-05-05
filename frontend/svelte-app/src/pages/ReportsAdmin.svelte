@@ -1,12 +1,14 @@
 <script>
   import Sidebar from '../components/Sidebar.svelte';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { fetchReports } from '../services/report.js';
   import { t, locale } from '../i18n.js';
   import { API_URL } from '../services/constants.js';
+  import { socket } from '../services/socket.js';
 
   let reports = [];
   let loading = true;
+  let socketInstance;
 
   async function loadReports() {
     loading = true;
@@ -22,7 +24,18 @@
     }
   }
 
-  onMount(loadReports);
+  onMount(() => {
+    loadReports();
+    socketInstance = socket.subscribe(s => {
+      if (!s) return;
+      s.on('new_report', report => {
+        reports = [report, ...reports];
+      });
+    });
+  });
+  onDestroy(() => {
+    if (socketInstance) socketInstance();
+  });
 </script>
 
 <div class="content-auth">

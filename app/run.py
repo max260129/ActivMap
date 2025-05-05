@@ -87,9 +87,15 @@ app.config['UPLOAD_FOLDER_REPORTS'] = os.path.join(os.getcwd(), 'uploads', 'repo
 os.makedirs(app.config['UPLOAD_FOLDER_REPORTS'], exist_ok=True)
 
 # Initialisation des extensions
-db.init_app(app)
+try:
+    db.init_app(app)
+except Exception as e:
+    logger.debug(f"Ignorer initialisation de SQLAlchemy: {e}")
 jwt = JWTManager(app)
-migrate = Migrate(app, db)
+try:
+    migrate = Migrate(app, db)
+except Exception as e:
+    logger.debug(f"Ignorer initialisation de Migrate: {e}")
 
 @jwt.user_identity_loader
 def user_identity_lookup(user):

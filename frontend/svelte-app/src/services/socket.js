@@ -2,6 +2,7 @@ import { writable, get } from 'svelte/store';
 import { io } from 'socket.io-client';
 import { getToken } from './auth.js';
 import { currentThread } from '../components/socketStore.js';
+import { API_URL } from './constants.js';
 
 // Store Svelte exposant l'instance socket ou null si non connecté
 export const socket = writable(null);
@@ -9,11 +10,11 @@ export const socket = writable(null);
 export function initSocket() {
   const token = getToken();
   if (!token) {
-    console.warn('initSocket : pas de token, connexion WS ignorée');
+    console.warn('initSocket : pas de token, connexion WS ignorée');
     return;
   }
 
-  const s = io('http://localhost:5000', {
+  const s = io(API_URL, {
     transports: ['websocket'],
     auth: {
       token
@@ -26,6 +27,8 @@ export function initSocket() {
   });
 
   socket.set(s);
+  // Dès l'init, rejoindre le salon admin pour les signalements
+  s.emit('join_admin');
 }
 
 export function joinThread(threadId){

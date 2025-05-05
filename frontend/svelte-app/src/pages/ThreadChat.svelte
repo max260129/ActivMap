@@ -3,7 +3,7 @@
   import Sidebar from '../components/Sidebar.svelte';
   import { currentThread } from '../components/socketStore.js';
   import { fetchThread, sendMessage, deleteThread } from '../services/reportChat.js';
-  import { socket } from '../services/socket.js';
+  import { socket, initSocket } from '../services/socket.js';
   import { currentUser } from '../services/auth.js';
   import { t, locale } from '../i18n.js';
   import { derived, get } from 'svelte/store';
@@ -54,9 +54,12 @@
   let unsubSocket;
   onMount(()=>{
     load();
-    unsubSocket = socket.subscribe(s=>{}); // just keep reactive
+    // initSocket pour établir la connexion WS et gérer les events
+    initSocket();
   });
-  onDestroy(()=>{ if(unsubSocket) unsubSocket(); });
+  onDestroy(()=>{
+    // aucune action nécessaire, le store de socket se gère seul
+  });
 
   const messages = derived(currentThread, th=> th ? th.messages : []);
 </script>

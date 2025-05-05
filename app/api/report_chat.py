@@ -6,6 +6,7 @@ from sqlalchemy.orm import joinedload
 from models import db, ReportThread, ReportMessage, Report, User
 from middleware import role_required
 from app.run import socketio
+from flask_socketio import join_room
 
 chat_bp = Blueprint('report_chat', __name__, url_prefix='/api/report')
 
@@ -72,4 +73,19 @@ def delete_thread(thread_id):
     db.session.commit()
 
     socketio.emit('thread_deleted', {'thread_id': thread_id}, room=f"thread:{thread_id}")
-    return jsonify({'message': 'Thread supprimé'}), 200 
+    return jsonify({'message': 'Thread supprimé'}), 200
+
+# --------------------------------------------------
+# Handlers Socket.IO pour les salons
+# --------------------------------------------------
+@socketio.on('join_admin')
+def handle_join_admin():
+    """Place le client dans la room 'admin' pour recevoir les nouveaux signalements."""
+    join_room('admin')
+
+@socketio.on('join_thread')
+def handle_join_thread(data):
+    """Place le client dans la room du thread spécifié."""
+    thread_id = data.get('thread_id')
+    if thread_id is not None:
+        join_room(f"thread:{thread_id}") 
