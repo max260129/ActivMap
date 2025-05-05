@@ -1374,7 +1374,7 @@ var app = (function () {
     const file$g = "src/components/Login.svelte";
 
     // (216:8) {#if loading}
-    function create_if_block_3$2(ctx) {
+    function create_if_block_3$3(ctx) {
     	let div;
 
     	const block = {
@@ -1393,7 +1393,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_3$2.name,
+    		id: create_if_block_3$3.name,
     		type: "if",
     		source: "(216:8) {#if loading}",
     		ctx
@@ -1650,7 +1650,7 @@ var app = (function () {
     	let div4_intro;
     	let mounted;
     	let dispose;
-    	let if_block0 = /*loading*/ ctx[3] && create_if_block_3$2(ctx);
+    	let if_block0 = /*loading*/ ctx[3] && create_if_block_3$3(ctx);
     	let if_block1 = /*error*/ ctx[2] && create_if_block_2$4(ctx);
     	let if_block2 = /*isRegisterMode*/ ctx[4] && create_if_block_1$9(ctx);
 
@@ -1830,7 +1830,7 @@ var app = (function () {
 
     			if (/*loading*/ ctx[3]) {
     				if (if_block0) ; else {
-    					if_block0 = create_if_block_3$2(ctx);
+    					if_block0 = create_if_block_3$3(ctx);
     					if_block0.c();
     					if_block0.m(form, t10);
     				}
@@ -29372,7 +29372,7 @@ var app = (function () {
     			}
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*location, reports, confirm, t, $locale, deleteThread, console, alert, API_URL, Date*/ 5) {
+    			if (dirty & /*reports, location, confirm, t, $locale, deleteThread, console, alert, API_URL, Date*/ 5) {
     				each_value = /*reports*/ ctx[0];
     				validate_each_argument(each_value);
     				let i;
@@ -29487,7 +29487,7 @@ var app = (function () {
     }
 
     // (58:10) {#if r.attachments.length}
-    function create_if_block_2$2(ctx) {
+    function create_if_block_3$2(ctx) {
     	let div;
     	let each_value_1 = /*r*/ ctx[7].attachments;
     	validate_each_argument(each_value_1);
@@ -29506,7 +29506,7 @@ var app = (function () {
     			}
 
     			attr_dev(div, "class", "report-attachments svelte-1m7qbbl");
-    			add_location(div, file$2, 58, 12, 1645);
+    			add_location(div, file$2, 58, 12, 1661);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -29550,7 +29550,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_2$2.name,
+    		id: create_if_block_3$2.name,
     		type: "if",
     		source: "(58:10) {#if r.attachments.length}",
     		ctx
@@ -29577,7 +29577,7 @@ var app = (function () {
     			attr_dev(a, "href", a_href_value = `${API_URL$1}/api/report/attachments/${/*file*/ ctx[10]}`);
     			attr_dev(a, "target", "_blank");
     			attr_dev(a, "class", "svelte-1m7qbbl");
-    			add_location(a, file$2, 60, 16, 1738);
+    			add_location(a, file$2, 60, 16, 1754);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, a, anchor);
@@ -29608,6 +29608,56 @@ var app = (function () {
     	return block;
     }
 
+    // (67:10) {#if r.thread_id != null}
+    function create_if_block_2$2(ctx) {
+    	let button;
+    	let t_1_value = t('delete', /*$locale*/ ctx[2]) + "";
+    	let t_1;
+    	let mounted;
+    	let dispose;
+
+    	function click_handler() {
+    		return /*click_handler*/ ctx[3](/*r*/ ctx[7]);
+    	}
+
+    	const block = {
+    		c: function create() {
+    			button = element("button");
+    			t_1 = text$1(t_1_value);
+    			attr_dev(button, "class", "delete-btn svelte-1m7qbbl");
+    			add_location(button, file$2, 67, 12, 1979);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    			append_dev(button, t_1);
+
+    			if (!mounted) {
+    				dispose = listen_dev(button, "click", stop_propagation(click_handler), false, false, true, false);
+    				mounted = true;
+    			}
+    		},
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+    			if (dirty & /*$locale*/ 4 && t_1_value !== (t_1_value = t('delete', /*$locale*/ ctx[2]) + "")) set_data_dev(t_1, t_1_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_2$2.name,
+    		type: "if",
+    		source: "(67:10) {#if r.thread_id != null}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
     // (52:6) {#each reports as r}
     function create_each_block$1(ctx) {
     	let li;
@@ -29625,17 +29675,11 @@ var app = (function () {
     	let t5;
     	let t6;
     	let t7;
-    	let button;
-    	let t8_value = t('delete', /*$locale*/ ctx[2]) + "";
     	let t8;
-    	let t9;
     	let mounted;
     	let dispose;
-    	let if_block = /*r*/ ctx[7].attachments.length && create_if_block_2$2(ctx);
-
-    	function click_handler() {
-    		return /*click_handler*/ ctx[3](/*r*/ ctx[7]);
-    	}
+    	let if_block0 = /*r*/ ctx[7].attachments.length && create_if_block_3$2(ctx);
+    	let if_block1 = /*r*/ ctx[7].thread_id != null && create_if_block_2$2(ctx);
 
     	function click_handler_1() {
     		return /*click_handler_1*/ ctx[4](/*r*/ ctx[7]);
@@ -29654,18 +29698,15 @@ var app = (function () {
     			p = element("p");
     			t5 = text$1(t5_value);
     			t6 = space();
-    			if (if_block) if_block.c();
+    			if (if_block0) if_block0.c();
     			t7 = space();
-    			button = element("button");
-    			t8 = text$1(t8_value);
-    			t9 = space();
-    			add_location(strong, file$2, 54, 12, 1434);
+    			if (if_block1) if_block1.c();
+    			t8 = space();
+    			add_location(strong, file$2, 54, 12, 1450);
     			attr_dev(div, "class", "report-meta svelte-1m7qbbl");
-    			add_location(div, file$2, 53, 10, 1396);
+    			add_location(div, file$2, 53, 10, 1412);
     			attr_dev(p, "class", "report-desc svelte-1m7qbbl");
-    			add_location(p, file$2, 56, 10, 1553);
-    			attr_dev(button, "class", "delete-btn svelte-1m7qbbl");
-    			add_location(button, file$2, 66, 10, 1925);
+    			add_location(p, file$2, 56, 10, 1569);
     			attr_dev(li, "class", "report-item svelte-1m7qbbl");
     			add_location(li, file$2, 52, 8, 1299);
     		},
@@ -29681,18 +29722,13 @@ var app = (function () {
     			append_dev(li, p);
     			append_dev(p, t5);
     			append_dev(li, t6);
-    			if (if_block) if_block.m(li, null);
+    			if (if_block0) if_block0.m(li, null);
     			append_dev(li, t7);
-    			append_dev(li, button);
-    			append_dev(button, t8);
-    			append_dev(li, t9);
+    			if (if_block1) if_block1.m(li, null);
+    			append_dev(li, t8);
 
     			if (!mounted) {
-    				dispose = [
-    					listen_dev(button, "click", stop_propagation(click_handler), false, false, true, false),
-    					listen_dev(li, "click", click_handler_1, false, false, false, false)
-    				];
-
+    				dispose = listen_dev(li, "click", click_handler_1, false, false, false, false);
     				mounted = true;
     			}
     		},
@@ -29703,25 +29739,37 @@ var app = (function () {
     			if (dirty & /*reports*/ 1 && t5_value !== (t5_value = /*r*/ ctx[7].description + "")) set_data_dev(t5, t5_value);
 
     			if (/*r*/ ctx[7].attachments.length) {
-    				if (if_block) {
-    					if_block.p(ctx, dirty);
+    				if (if_block0) {
+    					if_block0.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block_2$2(ctx);
-    					if_block.c();
-    					if_block.m(li, t7);
+    					if_block0 = create_if_block_3$2(ctx);
+    					if_block0.c();
+    					if_block0.m(li, t7);
     				}
-    			} else if (if_block) {
-    				if_block.d(1);
-    				if_block = null;
+    			} else if (if_block0) {
+    				if_block0.d(1);
+    				if_block0 = null;
     			}
 
-    			if (dirty & /*$locale*/ 4 && t8_value !== (t8_value = t('delete', /*$locale*/ ctx[2]) + "")) set_data_dev(t8, t8_value);
+    			if (/*r*/ ctx[7].thread_id != null) {
+    				if (if_block1) {
+    					if_block1.p(ctx, dirty);
+    				} else {
+    					if_block1 = create_if_block_2$2(ctx);
+    					if_block1.c();
+    					if_block1.m(li, t8);
+    				}
+    			} else if (if_block1) {
+    				if_block1.d(1);
+    				if_block1 = null;
+    			}
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(li);
-    			if (if_block) if_block.d();
+    			if (if_block0) if_block0.d();
+    			if (if_block1) if_block1.d();
     			mounted = false;
-    			run_all(dispose);
+    			dispose();
     		}
     	};
 
@@ -29884,7 +29932,7 @@ var app = (function () {
     		}
     	};
 
-    	const click_handler_1 = r => location.hash = `thread?tid=${r.thread_id}`;
+    	const click_handler_1 = r => r.thread_id && (location.hash = `thread?tid=${r.thread_id}`);
 
     	$$self.$capture_state = () => ({
     		Sidebar,

@@ -65,9 +65,9 @@ class User(db.Model):
             'role': self.role,
             'reset_required': self.reset_required,
             'email_confirmed': self.email_confirmed,
-            'created_at': self.created_at,
-            'joined_at': self.joined_at,
-            'deleted_at': self.deleted_at
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'joined_at': self.joined_at.isoformat() if self.joined_at else None,
+            'deleted_at': self.deleted_at.isoformat() if self.deleted_at else None
         }
 
 # Ajout du modèle pour l'historique des cartes

@@ -299,6 +299,8 @@ def update_settings():
         socketio.emit('settings_changed', user.to_dict(), room=f"user:{user_id}")
         return jsonify({'message': 'Préférences mises à jour'}), 200
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 

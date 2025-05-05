@@ -50,7 +50,7 @@
   {:else}
     <ul class="report-list">
       {#each reports as r}
-        <li class="report-item" on:click={() => location.hash = `thread?tid=${r.thread_id}` }>
+        <li class="report-item" on:click={() => r.thread_id && (location.hash = `thread?tid=${r.thread_id}`)}>
           <div class="report-meta">
             <strong>Utilisateur {r.user_id}</strong> • {new Date(r.created_at).toLocaleString($locale)}
           </div>
@@ -64,19 +64,21 @@
               {/each}
             </div>
           {/if}
-          <button class="delete-btn" on:click|stopPropagation={async () => {
-            if (confirm(t('confirm_delete_thread', $locale))) {
-              try {
-                await deleteThread(r.thread_id);
-                reports = reports.filter(item => item.thread_id !== r.thread_id);
-              } catch (e) {
-                console.error(e);
-                alert(t('delete_error', $locale));
+          {#if r.thread_id != null}
+            <button class="delete-btn" on:click|stopPropagation={async () => {
+              if (confirm(t('confirm_delete_thread', $locale))) {
+                try {
+                  await deleteThread(r.thread_id);
+                  reports = reports.filter(item => item.thread_id !== r.thread_id);
+                } catch (e) {
+                  console.error(e);
+                  alert(t('delete_error', $locale));
+                }
               }
-            }
-          }}>
-            {t('delete', $locale)}
-          </button>
+            }}>
+              {t('delete', $locale)}
+            </button>
+          {/if}
         </li>
       {/each}
     </ul>
