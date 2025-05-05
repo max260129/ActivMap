@@ -48,7 +48,10 @@ const dict = {
     saving: 'Envoi',
     reports_admin_title: 'Signalements reçus',
     reports_empty: "Aucun signalement pour l'instant",
-    loading: 'Chargement'
+    loading: 'Chargement',
+    delete: 'Supprimer',
+    confirm_delete_thread: 'Voulez-vous vraiment supprimer cette conversation ?',
+    delete_error: 'Erreur lors de la suppression de la conversation'
   },
   en: {
     map_generator: 'Stylized Map Generator',
@@ -88,7 +91,10 @@ const dict = {
     saving: 'Sending',
     reports_admin_title: 'Reports received',
     reports_empty: 'No reports yet',
-    loading: 'Loading'
+    loading: 'Loading',
+    delete: 'Delete',
+    confirm_delete_thread: 'Are you sure you want to delete this conversation?',
+    delete_error: 'Error deleting the conversation'
   }
 };
 

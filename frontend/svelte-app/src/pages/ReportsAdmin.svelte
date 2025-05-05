@@ -5,6 +5,7 @@
   import { t, locale } from '../i18n.js';
   import { API_URL } from '../services/constants.js';
   import { socket } from '../services/socket.js';
+  import { deleteThread } from '../services/reportChat.js';
 
   let reports = [];
   let loading = true;
@@ -63,6 +64,19 @@
               {/each}
             </div>
           {/if}
+          <button class="delete-btn" on:click|stopPropagation={async () => {
+            if (confirm(t('confirm_delete_thread', $locale))) {
+              try {
+                await deleteThread(r.thread_id);
+                reports = reports.filter(item => item.thread_id !== r.thread_id);
+              } catch (e) {
+                console.error(e);
+                alert(t('delete_error', $locale));
+              }
+            }
+          }}>
+            {t('delete', $locale)}
+          </button>
         </li>
       {/each}
     </ul>
@@ -97,5 +111,18 @@
   }
   .report-attachments a:hover {
     text-decoration: underline;
+  }
+  .delete-btn {
+    background: #e63946;
+    border: none;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+  .delete-btn:hover {
+    background: #d62828;
   }
 </style> 
