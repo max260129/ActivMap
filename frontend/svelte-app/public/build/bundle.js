@@ -6230,6 +6230,7 @@ var app = (function () {
         generate_map: 'Générer la carte',
         generated_map: 'Carte générée :',
         download_svg: "Télécharger l'image SVG",
+        download_png: "Télécharger l'image PNG",
         settings: 'Paramètres',
         map_settings: 'Paramètres de carte',
         map_style: 'Style de carte',
@@ -6273,6 +6274,7 @@ var app = (function () {
         generate_map: 'Generate Map',
         generated_map: 'Generated Map:',
         download_svg: 'Download SVG image',
+        download_png: 'Download PNG image',
         settings: 'Settings',
         map_settings: 'Map settings',
         map_style: 'Map style',
@@ -30540,7 +30542,7 @@ var app = (function () {
     const { console: console_1 } = globals;
     const file = "src/App.svelte";
 
-    // (598:2) {:else}
+    // (632:2) {:else}
     function create_else_block(ctx) {
     	let div;
     	let h1;
@@ -30558,10 +30560,10 @@ var app = (function () {
     			h1.textContent = "ActivMap";
     			t1 = space();
     			create_component(login.$$.fragment);
-    			attr_dev(h1, "class", "svelte-tdsx0s");
-    			add_location(h1, file, 600, 4, 14543);
-    			attr_dev(div, "class", "card svelte-tdsx0s");
-    			add_location(div, file, 599, 3, 14477);
+    			attr_dev(h1, "class", "svelte-1hwjclo");
+    			add_location(h1, file, 634, 4, 15534);
+    			attr_dev(div, "class", "card svelte-1hwjclo");
+    			add_location(div, file, 633, 3, 15468);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -30600,14 +30602,14 @@ var app = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(598:2) {:else}",
+    		source: "(632:2) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (596:38) 
+    // (630:38) 
     function create_if_block_23(ctx) {
     	let privacy;
     	let current;
@@ -30640,14 +30642,14 @@ var app = (function () {
     		block,
     		id: create_if_block_23.name,
     		type: "if",
-    		source: "(596:38) ",
+    		source: "(630:38) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (594:36) 
+    // (628:36) 
     function create_if_block_22(ctx) {
     	let resetpassword;
     	let current;
@@ -30680,14 +30682,14 @@ var app = (function () {
     		block,
     		id: create_if_block_22.name,
     		type: "if",
-    		source: "(594:36) ",
+    		source: "(628:36) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (592:37) 
+    // (626:37) 
     function create_if_block_21(ctx) {
     	let forgotpassword;
     	let current;
@@ -30720,14 +30722,14 @@ var app = (function () {
     		block,
     		id: create_if_block_21.name,
     		type: "if",
-    		source: "(592:37) ",
+    		source: "(626:37) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (590:37) 
+    // (624:37) 
     function create_if_block_20(ctx) {
     	let resendconfirmation;
     	let current;
@@ -30760,14 +30762,14 @@ var app = (function () {
     		block,
     		id: create_if_block_20.name,
     		type: "if",
-    		source: "(590:37) ",
+    		source: "(624:37) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (588:38) 
+    // (622:38) 
     function create_if_block_19(ctx) {
     	let confirmemail;
     	let current;
@@ -30800,14 +30802,14 @@ var app = (function () {
     		block,
     		id: create_if_block_19.name,
     		type: "if",
-    		source: "(588:38) ",
+    		source: "(622:38) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (586:2) {#if currentPage === 'invite'}
+    // (620:2) {#if currentPage === 'invite'}
     function create_if_block_18(ctx) {
     	let acceptinvite;
     	let current;
@@ -30840,14 +30842,14 @@ var app = (function () {
     		block,
     		id: create_if_block_18.name,
     		type: "if",
-    		source: "(586:2) {#if currentPage === 'invite'}",
+    		source: "(620:2) {#if currentPage === 'invite'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (491:1) {#if $isAuthenticated}
+    // (522:1) {#if $isAuthenticated}
     function create_if_block(ctx) {
     	let sidebar;
     	let t_1;
@@ -30979,14 +30981,14 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(491:1) {#if $isAuthenticated}",
+    		source: "(522:1) {#if $isAuthenticated}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (582:37) 
+    // (616:37) 
     function create_if_block_17(ctx) {
     	let threadchat;
     	let current;
@@ -31019,14 +31021,14 @@ var app = (function () {
     		block,
     		id: create_if_block_17.name,
     		type: "if",
-    		source: "(582:37) ",
+    		source: "(616:37) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (580:38) 
+    // (614:38) 
     function create_if_block_16(ctx) {
     	let reportsadmin;
     	let current;
@@ -31059,14 +31061,14 @@ var app = (function () {
     		block,
     		id: create_if_block_16.name,
     		type: "if",
-    		source: "(580:38) ",
+    		source: "(614:38) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (578:37) 
+    // (612:37) 
     function create_if_block_15(ctx) {
     	let report;
     	let current;
@@ -31099,14 +31101,14 @@ var app = (function () {
     		block,
     		id: create_if_block_15.name,
     		type: "if",
-    		source: "(578:37) ",
+    		source: "(612:37) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (576:38) 
+    // (610:38) 
     function create_if_block_14(ctx) {
     	let privacy;
     	let current;
@@ -31139,14 +31141,14 @@ var app = (function () {
     		block,
     		id: create_if_block_14.name,
     		type: "if",
-    		source: "(576:38) ",
+    		source: "(610:38) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (574:36) 
+    // (608:36) 
     function create_if_block_13(ctx) {
     	let resetpassword;
     	let current;
@@ -31179,14 +31181,14 @@ var app = (function () {
     		block,
     		id: create_if_block_13.name,
     		type: "if",
-    		source: "(574:36) ",
+    		source: "(608:36) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (572:37) 
+    // (606:37) 
     function create_if_block_12(ctx) {
     	let forgotpassword;
     	let current;
@@ -31219,14 +31221,14 @@ var app = (function () {
     		block,
     		id: create_if_block_12.name,
     		type: "if",
-    		source: "(572:37) ",
+    		source: "(606:37) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (570:37) 
+    // (604:37) 
     function create_if_block_11(ctx) {
     	let resendconfirmation;
     	let current;
@@ -31259,14 +31261,14 @@ var app = (function () {
     		block,
     		id: create_if_block_11.name,
     		type: "if",
-    		source: "(570:37) ",
+    		source: "(604:37) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (568:38) 
+    // (602:38) 
     function create_if_block_10(ctx) {
     	let confirmemail;
     	let current;
@@ -31299,14 +31301,14 @@ var app = (function () {
     		block,
     		id: create_if_block_10.name,
     		type: "if",
-    		source: "(568:38) ",
+    		source: "(602:38) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (566:37) 
+    // (600:37) 
     function create_if_block_9(ctx) {
     	let acceptinvite;
     	let current;
@@ -31339,14 +31341,14 @@ var app = (function () {
     		block,
     		id: create_if_block_9.name,
     		type: "if",
-    		source: "(566:37) ",
+    		source: "(600:37) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (564:41) 
+    // (598:41) 
     function create_if_block_8(ctx) {
     	let historique;
     	let current;
@@ -31379,14 +31381,14 @@ var app = (function () {
     		block,
     		id: create_if_block_8.name,
     		type: "if",
-    		source: "(564:41) ",
+    		source: "(598:41) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (562:37) 
+    // (596:37) 
     function create_if_block_7(ctx) {
     	let equipe;
     	let current;
@@ -31419,14 +31421,14 @@ var app = (function () {
     		block,
     		id: create_if_block_7.name,
     		type: "if",
-    		source: "(562:37) ",
+    		source: "(596:37) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (560:40) 
+    // (594:40) 
     function create_if_block_6(ctx) {
     	let parametre;
     	let current;
@@ -31459,14 +31461,14 @@ var app = (function () {
     		block,
     		id: create_if_block_6.name,
     		type: "if",
-    		source: "(560:40) ",
+    		source: "(594:40) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (558:42) 
+    // (592:42) 
     function create_if_block_5(ctx) {
     	let statistique;
     	let current;
@@ -31499,14 +31501,14 @@ var app = (function () {
     		block,
     		id: create_if_block_5.name,
     		type: "if",
-    		source: "(558:42) ",
+    		source: "(592:42) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (496:2) {#if currentPage === 'carte'}
+    // (527:2) {#if currentPage === 'carte'}
     function create_if_block_1(ctx) {
     	let div1;
     	let div0;
@@ -31578,38 +31580,38 @@ var app = (function () {
     			if (if_block1) if_block1.c();
     			t14 = space();
     			if (if_block2) if_block2.c();
-    			attr_dev(h1, "class", "svelte-tdsx0s");
-    			add_location(h1, file, 498, 5, 11149);
+    			attr_dev(h1, "class", "svelte-1hwjclo");
+    			add_location(h1, file, 529, 5, 12014);
     			attr_dev(input0, "type", "number");
     			attr_dev(input0, "step", "0.000001");
     			input0.required = true;
-    			attr_dev(input0, "class", "svelte-tdsx0s");
-    			add_location(input0, file, 502, 7, 11294);
-    			attr_dev(label0, "class", "svelte-tdsx0s");
-    			add_location(label0, file, 500, 6, 11245);
+    			attr_dev(input0, "class", "svelte-1hwjclo");
+    			add_location(input0, file, 533, 7, 12159);
+    			attr_dev(label0, "class", "svelte-1hwjclo");
+    			add_location(label0, file, 531, 6, 12110);
     			attr_dev(input1, "type", "number");
     			attr_dev(input1, "step", "0.000001");
     			input1.required = true;
-    			attr_dev(input1, "class", "svelte-tdsx0s");
-    			add_location(input1, file, 506, 7, 11436);
-    			attr_dev(label1, "class", "svelte-tdsx0s");
-    			add_location(label1, file, 504, 6, 11386);
+    			attr_dev(input1, "class", "svelte-1hwjclo");
+    			add_location(input1, file, 537, 7, 12301);
+    			attr_dev(label1, "class", "svelte-1hwjclo");
+    			add_location(label1, file, 535, 6, 12251);
     			attr_dev(input2, "type", "number");
     			input2.required = true;
-    			attr_dev(input2, "class", "svelte-tdsx0s");
-    			add_location(input2, file, 510, 7, 11578);
-    			attr_dev(label2, "class", "svelte-tdsx0s");
-    			add_location(label2, file, 508, 6, 11529);
+    			attr_dev(input2, "class", "svelte-1hwjclo");
+    			add_location(input2, file, 541, 7, 12443);
+    			attr_dev(label2, "class", "svelte-1hwjclo");
+    			add_location(label2, file, 539, 6, 12394);
     			attr_dev(button, "type", "submit");
-    			attr_dev(button, "class", "svelte-tdsx0s");
-    			add_location(button, file, 513, 6, 11661);
-    			attr_dev(form, "class", "svelte-tdsx0s");
-    			add_location(form, file, 499, 5, 11193);
+    			attr_dev(button, "class", "svelte-1hwjclo");
+    			add_location(button, file, 544, 6, 12526);
+    			attr_dev(form, "class", "svelte-1hwjclo");
+    			add_location(form, file, 530, 5, 12058);
     			attr_dev(div0, "id", "carte");
-    			attr_dev(div0, "class", "card svelte-tdsx0s");
-    			add_location(div0, file, 497, 4, 11071);
-    			attr_dev(div1, "class", "content-auth svelte-tdsx0s");
-    			add_location(div1, file, 496, 3, 11040);
+    			attr_dev(div0, "class", "card svelte-1hwjclo");
+    			add_location(div0, file, 528, 4, 11936);
+    			attr_dev(div1, "class", "content-auth svelte-1hwjclo");
+    			add_location(div1, file, 527, 3, 11905);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -31648,9 +31650,9 @@ var app = (function () {
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[24]),
-    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[25]),
-    					listen_dev(input2, "input", /*input2_input_handler*/ ctx[26]),
+    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[25]),
+    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[26]),
+    					listen_dev(input2, "input", /*input2_input_handler*/ ctx[27]),
     					listen_dev(form, "submit", prevent_default(/*generateMap*/ ctx[10]), false, true, false, false)
     				];
 
@@ -31759,14 +31761,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(496:2) {#if currentPage === 'carte'}",
+    		source: "(527:2) {#if currentPage === 'carte'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (516:5) {#if loading}
+    // (547:5) {#if loading}
     function create_if_block_4(ctx) {
     	let div;
     	let t0;
@@ -31778,10 +31780,10 @@ var app = (function () {
     			t0 = space();
     			p = element("p");
     			p.textContent = "Génération en cours...";
-    			attr_dev(div, "class", "loading-spinner svelte-tdsx0s");
-    			add_location(div, file, 516, 6, 11759);
+    			attr_dev(div, "class", "loading-spinner svelte-1hwjclo");
+    			add_location(div, file, 547, 6, 12624);
     			set_style(p, "text-align", "center");
-    			add_location(p, file, 517, 6, 11801);
+    			add_location(p, file, 548, 6, 12666);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -31799,14 +31801,14 @@ var app = (function () {
     		block,
     		id: create_if_block_4.name,
     		type: "if",
-    		source: "(516:5) {#if loading}",
+    		source: "(547:5) {#if loading}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (520:5) {#if error}
+    // (551:5) {#if error}
     function create_if_block_3(ctx) {
     	let p;
     	let t_1;
@@ -31815,8 +31817,8 @@ var app = (function () {
     		c: function create() {
     			p = element("p");
     			t_1 = text$1(/*error*/ ctx[7]);
-    			attr_dev(p, "class", "error svelte-tdsx0s");
-    			add_location(p, file, 520, 6, 11893);
+    			attr_dev(p, "class", "error svelte-1hwjclo");
+    			add_location(p, file, 551, 6, 12758);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -31834,14 +31836,14 @@ var app = (function () {
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(520:5) {#if error}",
+    		source: "(551:5) {#if error}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (525:4) {#if svgUrl}
+    // (556:4) {#if svgUrl}
     function create_if_block_2(ctx) {
     	let h2;
     	let t0_value = t('generated_map', /*$locale*/ ctx[9]) + "";
@@ -31869,6 +31871,10 @@ var app = (function () {
     	let button3;
     	let t11_value = t('download_svg', /*$locale*/ ctx[9]) + "";
     	let t11;
+    	let t12;
+    	let button4;
+    	let t13_value = t('download_png', /*$locale*/ ctx[9]) + "";
+    	let t13;
     	let current;
     	let mounted;
     	let dispose;
@@ -31899,43 +31905,48 @@ var app = (function () {
     			a = element("a");
     			button3 = element("button");
     			t11 = text$1(t11_value);
+    			t12 = space();
+    			button4 = element("button");
+    			t13 = text$1(t13_value);
     			set_style(h2, "text-align", "center");
-    			attr_dev(h2, "class", "svelte-tdsx0s");
-    			add_location(h2, file, 525, 5, 11971);
+    			attr_dev(h2, "class", "svelte-1hwjclo");
+    			add_location(h2, file, 556, 5, 12836);
     			attr_dev(button0, "aria-label", "Zoom In");
-    			attr_dev(button0, "class", "svelte-tdsx0s");
-    			add_location(button0, file, 542, 8, 12608);
+    			attr_dev(button0, "class", "svelte-1hwjclo");
+    			add_location(button0, file, 573, 8, 13473);
     			attr_dev(button1, "aria-label", "Zoom Out");
-    			attr_dev(button1, "class", "svelte-tdsx0s");
-    			add_location(button1, file, 543, 8, 12674);
+    			attr_dev(button1, "class", "svelte-1hwjclo");
+    			add_location(button1, file, 574, 8, 13539);
     			attr_dev(button2, "aria-label", "Rotate");
-    			attr_dev(button2, "class", "svelte-tdsx0s");
-    			add_location(button2, file, 544, 8, 12742);
-    			attr_dev(div0, "class", "zoom-controls svelte-tdsx0s");
-    			add_location(div0, file, 541, 7, 12572);
+    			attr_dev(button2, "class", "svelte-1hwjclo");
+    			add_location(button2, file, 575, 8, 13607);
+    			attr_dev(div0, "class", "zoom-controls svelte-1hwjclo");
+    			add_location(div0, file, 572, 7, 13437);
     			if (!src_url_equal(img.src, img_src_value = /*svgUrl*/ ctx[5])) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Carte stylisée");
-    			attr_dev(img, "class", "svelte-tdsx0s");
+    			attr_dev(img, "class", "svelte-1hwjclo");
     			set_style(img, "transform", /*transformValue*/ ctx[8]);
-    			add_location(img, file, 546, 7, 12823);
-    			attr_dev(div1, "class", "svg-container svelte-tdsx0s");
+    			add_location(img, file, 577, 7, 13688);
+    			attr_dev(div1, "class", "svg-container svelte-1hwjclo");
     			attr_dev(div1, "role", "application");
     			attr_dev(div1, "aria-label", "Carte stylisée");
     			attr_dev(div1, "aria-describedby", "map-instructions");
     			attr_dev(div1, "tabindex", "0");
-    			add_location(div1, file, 528, 6, 12199);
+    			add_location(div1, file, 559, 6, 13064);
     			attr_dev(p, "id", "map-instructions");
-    			attr_dev(p, "class", "sr-only svelte-tdsx0s");
-    			add_location(p, file, 548, 6, 12963);
-    			attr_dev(div2, "class", "card svelte-tdsx0s");
-    			add_location(div2, file, 526, 5, 12059);
-    			attr_dev(button3, "class", "svelte-tdsx0s");
-    			add_location(button3, file, 552, 7, 13228);
+    			attr_dev(p, "class", "sr-only svelte-1hwjclo");
+    			add_location(p, file, 579, 6, 13828);
+    			attr_dev(div2, "class", "card svelte-1hwjclo");
+    			add_location(div2, file, 557, 5, 12924);
+    			attr_dev(button3, "class", "svelte-1hwjclo");
+    			add_location(button3, file, 583, 7, 14093);
     			attr_dev(a, "download", "carte.svg");
     			attr_dev(a, "href", /*svgUrl*/ ctx[5]);
-    			add_location(a, file, 551, 6, 13182);
-    			attr_dev(div3, "class", "download-container svelte-tdsx0s");
-    			add_location(div3, file, 550, 5, 13143);
+    			add_location(a, file, 582, 6, 14047);
+    			attr_dev(button4, "class", "svelte-1hwjclo");
+    			add_location(button4, file, 587, 6, 14201);
+    			attr_dev(div3, "class", "download-container svelte-1hwjclo");
+    			add_location(div3, file, 581, 5, 14008);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, h2, anchor);
@@ -31958,6 +31969,9 @@ var app = (function () {
     			append_dev(div3, a);
     			append_dev(a, button3);
     			append_dev(button3, t11);
+    			append_dev(div3, t12);
+    			append_dev(div3, button4);
+    			append_dev(button4, t13);
     			current = true;
 
     			if (!mounted) {
@@ -31970,7 +31984,8 @@ var app = (function () {
     					listen_dev(div1, "mousemove", /*drag*/ ctx[17], false, false, false, false),
     					listen_dev(div1, "mouseup", /*endDrag*/ ctx[18], false, false, false, false),
     					listen_dev(div1, "mouseleave", /*endDrag*/ ctx[18], false, false, false, false),
-    					listen_dev(div1, "keydown", /*handleKeydownMap*/ ctx[15], false, false, false, false)
+    					listen_dev(div1, "keydown", /*handleKeydownMap*/ ctx[15], false, false, false, false),
+    					listen_dev(button4, "click", /*handleDownloadPNG*/ ctx[20], false, false, false, false)
     				];
 
     				mounted = true;
@@ -31992,6 +32007,8 @@ var app = (function () {
     			if (!current || dirty[0] & /*svgUrl*/ 32) {
     				attr_dev(a, "href", /*svgUrl*/ ctx[5]);
     			}
+
+    			if ((!current || dirty[0] & /*$locale*/ 512) && t13_value !== (t13_value = t('download_png', /*$locale*/ ctx[9]) + "")) set_data_dev(t13, t13_value);
     		},
     		i: function intro(local) {
     			if (current) return;
@@ -32043,7 +32060,7 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(525:4) {#if svgUrl}",
+    		source: "(556:4) {#if svgUrl}",
     		ctx
     	});
 
@@ -32094,8 +32111,8 @@ var app = (function () {
     			create_component(cookiebanner.$$.fragment);
     			attr_dev(main, "id", "main");
     			attr_dev(main, "tabindex", "-1");
-    			attr_dev(main, "class", "svelte-tdsx0s");
-    			add_location(main, file, 489, 0, 10845);
+    			attr_dev(main, "class", "svelte-1hwjclo");
+    			add_location(main, file, 520, 0, 11710);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -32261,11 +32278,11 @@ var app = (function () {
     		$$invalidate(5, svgUrl = "");
 
     		// Réinitialise zoom, rotation et panning
-    		$$invalidate(20, scale$1 = 1.0);
+    		$$invalidate(21, scale$1 = 1.0);
 
-    		$$invalidate(21, rotate = 0);
-    		$$invalidate(22, translateX = 0);
-    		$$invalidate(23, translateY = 0);
+    		$$invalidate(22, rotate = 0);
+    		$$invalidate(23, translateX = 0);
+    		$$invalidate(24, translateY = 0);
 
     		try {
     			// Choisir l'endpoint en fonction du flag
@@ -32304,39 +32321,39 @@ var app = (function () {
     		e.preventDefault();
 
     		if (e.deltaY < 0) {
-    			$$invalidate(20, scale$1 = Math.min(maxScale, scale$1 * 1.1));
+    			$$invalidate(21, scale$1 = Math.min(maxScale, scale$1 * 1.1));
     		} else {
-    			$$invalidate(20, scale$1 = Math.max(minScale, scale$1 / 1.1));
+    			$$invalidate(21, scale$1 = Math.max(minScale, scale$1 / 1.1));
     		}
     	}
 
     	function zoomIn() {
-    		$$invalidate(20, scale$1 = Math.min(maxScale, scale$1 * 1.1));
+    		$$invalidate(21, scale$1 = Math.min(maxScale, scale$1 * 1.1));
     	}
 
     	function zoomOut() {
-    		$$invalidate(20, scale$1 = Math.max(minScale, scale$1 / 1.1));
+    		$$invalidate(21, scale$1 = Math.max(minScale, scale$1 / 1.1));
     	}
 
     	// Incrémente la rotation de 15 degrés à chaque clic
     	function rotateMap() {
-    		$$invalidate(21, rotate = rotate + 15);
+    		$$invalidate(22, rotate = rotate + 15);
     	}
 
     	// Contrôles clavier pour la carte
     	function handleKeydownMap(e) {
     		switch (e.key) {
     			case 'ArrowUp':
-    				$$invalidate(23, translateY += 20);
+    				$$invalidate(24, translateY += 20);
     				break;
     			case 'ArrowDown':
-    				$$invalidate(23, translateY -= 20);
+    				$$invalidate(24, translateY -= 20);
     				break;
     			case 'ArrowLeft':
-    				$$invalidate(22, translateX += 20);
+    				$$invalidate(23, translateX += 20);
     				break;
     			case 'ArrowRight':
-    				$$invalidate(22, translateX -= 20);
+    				$$invalidate(23, translateX -= 20);
     				break;
     			case '+':
     			case '=':
@@ -32368,8 +32385,8 @@ var app = (function () {
     		if (isDragging) {
     			const dx = e.clientX - initialDragX;
     			const dy = e.clientY - initialDragY;
-    			$$invalidate(22, translateX = initialTranslateX + dx);
-    			$$invalidate(23, translateY = initialTranslateY + dy);
+    			$$invalidate(23, translateX = initialTranslateX + dx);
+    			$$invalidate(24, translateY = initialTranslateY + dy);
     		}
     	}
 
@@ -32387,6 +32404,37 @@ var app = (function () {
     		checkAuth();
 
     		initSocket();
+    	}
+
+    	// J'ajoute la fonction handleDownloadPNG pour exporter la carte en PNG
+    	function handleDownloadPNG() {
+    		if (!svgUrl) return;
+    		const container = document.querySelector('.svg-container');
+    		const { width, height } = container.getBoundingClientRect();
+    		const img = new Image();
+    		img.crossOrigin = 'anonymous';
+
+    		img.onload = () => {
+    			const canvas = document.createElement('canvas');
+    			canvas.width = width;
+    			canvas.height = height;
+    			const ctx = canvas.getContext('2d');
+    			ctx.drawImage(img, 0, 0, width, height);
+
+    			canvas.toBlob(
+    				blob => {
+    					const url = URL.createObjectURL(blob);
+    					const a = document.createElement('a');
+    					a.href = url;
+    					a.download = 'carte.png';
+    					a.click();
+    					URL.revokeObjectURL(url);
+    				},
+    				'image/png'
+    			);
+    		};
+
+    		img.src = svgUrl;
     	}
 
     	const writable_props = [];
@@ -32472,6 +32520,7 @@ var app = (function () {
     		endDrag,
     		handleLogout,
     		handleLoginSuccess,
+    		handleDownloadPNG,
     		transformValue,
     		$isAuthenticated,
     		$locale
@@ -32485,11 +32534,11 @@ var app = (function () {
     		if ('svgUrl' in $$props) $$invalidate(5, svgUrl = $$props.svgUrl);
     		if ('loading' in $$props) $$invalidate(6, loading = $$props.loading);
     		if ('error' in $$props) $$invalidate(7, error = $$props.error);
-    		if ('scale' in $$props) $$invalidate(20, scale$1 = $$props.scale);
-    		if ('rotate' in $$props) $$invalidate(21, rotate = $$props.rotate);
+    		if ('scale' in $$props) $$invalidate(21, scale$1 = $$props.scale);
+    		if ('rotate' in $$props) $$invalidate(22, rotate = $$props.rotate);
     		if ('usePublicEndpoint' in $$props) usePublicEndpoint = $$props.usePublicEndpoint;
-    		if ('translateX' in $$props) $$invalidate(22, translateX = $$props.translateX);
-    		if ('translateY' in $$props) $$invalidate(23, translateY = $$props.translateY);
+    		if ('translateX' in $$props) $$invalidate(23, translateX = $$props.translateX);
+    		if ('translateY' in $$props) $$invalidate(24, translateY = $$props.translateY);
     		if ('isDragging' in $$props) isDragging = $$props.isDragging;
     		if ('initialDragX' in $$props) initialDragX = $$props.initialDragX;
     		if ('initialDragY' in $$props) initialDragY = $$props.initialDragY;
@@ -32508,7 +32557,7 @@ var app = (function () {
     			console.log("État d'authentification:", $isAuthenticated);
     		}
 
-    		if ($$self.$$.dirty[0] & /*translateX, translateY, rotate, scale*/ 15728640) {
+    		if ($$self.$$.dirty[0] & /*translateX, translateY, rotate, scale*/ 31457280) {
     			// Transformation combinée : translation, rotation et zoom
     			$$invalidate(8, transformValue = `translate(${translateX}px, ${translateY}px) rotate(${rotate}deg) scale(${scale$1})`);
     		}
@@ -32535,6 +32584,7 @@ var app = (function () {
     		drag,
     		endDrag,
     		handleLoginSuccess,
+    		handleDownloadPNG,
     		scale$1,
     		rotate,
     		translateX,

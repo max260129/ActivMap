@@ -236,6 +236,31 @@
 		checkAuth();
 		initSocket();
 	}
+
+	// J'ajoute la fonction handleDownloadPNG pour exporter la carte en PNG
+	function handleDownloadPNG() {
+		if (!svgUrl) return;
+		const container = document.querySelector('.svg-container');
+		const { width, height } = container.getBoundingClientRect();
+		const img = new Image();
+		img.crossOrigin = 'anonymous';
+		img.onload = () => {
+			const canvas = document.createElement('canvas');
+			canvas.width = width;
+			canvas.height = height;
+			const ctx = canvas.getContext('2d');
+			ctx.drawImage(img, 0, 0, width, height);
+			canvas.toBlob((blob) => {
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.href = url;
+				a.download = 'carte.png';
+				a.click();
+				URL.revokeObjectURL(url);
+			}, 'image/png');
+		};
+		img.src = svgUrl;
+	}
 </script>
 
 <style>
@@ -402,8 +427,14 @@
 
 	/* Style pour le bouton de téléchargement */
 	.download-container {
-		text-align: center;
-		margin: 1rem 0;
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+		margin-top: 1rem;
+	}
+
+	.download-container button {
+		margin: 0;
 	}
 
 	.checkbox-label {
@@ -552,6 +583,9 @@
 						<a download="carte.svg" href={svgUrl}>
 							<button>{t('download_svg', $locale)}</button>
 						</a>
+						
+						<!-- J'ajoute le bouton PNG -->
+						<button on:click={handleDownloadPNG}>{t('download_png', $locale)}</button>
 					</div>
 				{/if}
 			</div>
