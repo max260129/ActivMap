@@ -29937,7 +29937,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (74:4) {#if $currentThread}
+    // (81:4) {#if $currentThread}
     function create_if_block_2$1(ctx) {
     	let h2;
     	let t0;
@@ -29985,14 +29985,14 @@ var app = (function () {
     			t5 = space();
     			button = element("button");
     			t6 = text$1(t6_value);
-    			add_location(h2, file$1, 74, 6, 2027);
+    			add_location(h2, file$1, 81, 6, 2271);
     			attr_dev(div0, "class", "messages svelte-alysv7");
-    			add_location(div0, file$1, 75, 6, 2079);
+    			add_location(div0, file$1, 82, 6, 2323);
     			attr_dev(textarea, "class", "svelte-alysv7");
-    			add_location(textarea, file$1, 87, 8, 2574);
-    			add_location(button, file$1, 88, 8, 2624);
+    			add_location(textarea, file$1, 94, 8, 2818);
+    			add_location(button, file$1, 95, 8, 2868);
     			attr_dev(div1, "class", "composer svelte-alysv7");
-    			add_location(div1, file$1, 86, 6, 2543);
+    			add_location(div1, file$1, 93, 6, 2787);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, h2, anchor);
@@ -30090,14 +30090,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2$1.name,
     		type: "if",
-    		source: "(74:4) {#if $currentThread}",
+    		source: "(81:4) {#if $currentThread}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (71:18) 
+    // (78:18) 
     function create_if_block_1$1(ctx) {
     	let p;
     	let t_1;
@@ -30107,7 +30107,7 @@ var app = (function () {
     			p = element("p");
     			t_1 = text$1(/*error*/ ctx[1]);
     			attr_dev(p, "class", "error svelte-alysv7");
-    			add_location(p, file$1, 71, 4, 1957);
+    			add_location(p, file$1, 78, 4, 2201);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -30125,14 +30125,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1$1.name,
     		type: "if",
-    		source: "(71:18) ",
+    		source: "(78:18) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (69:2) {#if loading}
+    // (76:2) {#if loading}
     function create_if_block$1(ctx) {
     	let p;
     	let t0_value = t('loading', /*$locale*/ ctx[3]) + "";
@@ -30144,7 +30144,7 @@ var app = (function () {
     			p = element("p");
     			t0 = text$1(t0_value);
     			t1 = text$1("...");
-    			add_location(p, file$1, 69, 4, 1901);
+    			add_location(p, file$1, 76, 4, 2145);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -30163,14 +30163,14 @@ var app = (function () {
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(69:2) {#if loading}",
+    		source: "(76:2) {#if loading}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (77:8) {#each $currentThread.messages as m}
+    // (84:8) {#each $currentThread.messages as m}
     function create_each_block(ctx) {
     	let div2;
     	let div0;
@@ -30193,15 +30193,15 @@ var app = (function () {
     			t2 = text$1(t2_value);
     			t3 = space();
     			attr_dev(div0, "class", "body");
-    			add_location(div0, file$1, 78, 12, 2238);
+    			add_location(div0, file$1, 85, 12, 2482);
     			attr_dev(div1, "class", "meta");
-    			add_location(div1, file$1, 79, 12, 2283);
+    			add_location(div1, file$1, 86, 12, 2527);
 
     			attr_dev(div2, "class", div2_class_value = "msg " + (/*m*/ ctx[15].sender_id === /*$currentUser*/ ctx[5].id
     			? 'me'
     			: 'other') + " svelte-alysv7");
 
-    			add_location(div2, file$1, 77, 10, 2157);
+    			add_location(div2, file$1, 84, 10, 2401);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -30231,14 +30231,14 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(77:8) {#each $currentThread.messages as m}",
+    		source: "(84:8) {#each $currentThread.messages as m}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (84:6) {#if $currentUser.role === 'ADMIN'}
+    // (91:6) {#if $currentUser.role === 'ADMIN'}
     function create_if_block_3$1(ctx) {
     	let button;
     	let mounted;
@@ -30249,7 +30249,7 @@ var app = (function () {
     			button = element("button");
     			button.textContent = "🗑 Fermer la discussion";
     			attr_dev(button, "class", "danger svelte-alysv7");
-    			add_location(button, file$1, 84, 8, 2445);
+    			add_location(button, file$1, 91, 8, 2689);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -30271,7 +30271,7 @@ var app = (function () {
     		block,
     		id: create_if_block_3$1.name,
     		type: "if",
-    		source: "(84:6) {#if $currentUser.role === 'ADMIN'}",
+    		source: "(91:6) {#if $currentUser.role === 'ADMIN'}",
     		ctx
     	});
 
@@ -30301,7 +30301,7 @@ var app = (function () {
     			div = element("div");
     			if (if_block) if_block.c();
     			attr_dev(div, "class", "content-auth");
-    			add_location(div, file$1, 67, 0, 1854);
+    			add_location(div, file$1, 74, 0, 2098);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -30424,7 +30424,18 @@ var app = (function () {
 
     	async function removeThread() {
     		if (!confirm('Supprimer cette discussion ?')) return;
-    		await deleteThread(tid);
+
+    		// Récupérer l'ID du thread depuis le store pour éviter d'envoyer null
+    		const threadData = get_store_value(currentThread);
+
+    		const threadId = threadData?.id;
+
+    		if (!threadId) {
+    			$$invalidate(1, error = 'ID de discussion invalide');
+    			return;
+    		}
+
+    		await deleteThread(threadId);
     		location.hash = 'reports';
     	}
 

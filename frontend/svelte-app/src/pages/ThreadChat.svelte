@@ -46,7 +46,14 @@
 
   async function removeThread(){
     if(!confirm('Supprimer cette discussion ?')) return;
-    await deleteThread(tid);
+    // Récupérer l'ID du thread depuis le store pour éviter d'envoyer null
+    const threadData = get(currentThread);
+    const threadId = threadData?.id;
+    if (!threadId) {
+      error = 'ID de discussion invalide';
+      return;
+    }
+    await deleteThread(threadId);
     location.hash = 'reports';
   }
 
