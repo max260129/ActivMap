@@ -1,13 +1,14 @@
+version: "3.9"
+
 services:
+  # ───────── Backend Flask ─────────
   backend:
     build: .
+    command: flask run --host=0.0.0.0 --reload          # hot‑reload
     ports:
       - "5000:5000"
     volumes:
-      - ./:/app
-    restart: unless-stopped
-    depends_on:
-      - db
+      - ./:/app                                          # monte tout le repo
     env_file:
       - .env
     environment:
@@ -16,33 +17,39 @@ services:
       - FLASK_DEBUG=1
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/activmap
       - JWT_SECRET_KEY=votre_cle_secrete_a_changer_en_production
-    command: flask run --host=0.0.0.0 --reload
+    depends_on:
+      - db
+    restart: unless-stopped
 
+  # ───────── Frontend Svelte/Vite ─────────
   frontend:
     build:
       context: ./frontend/svelte-app
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.dev                         # installe les deps
+    command: npm run dev -- --host 0.0.0.0 --port 3000   # hot‑reload Vite
     ports:
-      - "3000:8080"
-      - "35729:35729"
+      - "3000:3000"          # appli (http://localhost:3000)
+      - "35729:35729"        # LiveReload éventuel
     volumes:
-      - ./frontend/svelte-app:/app
-      - /app/node_modules
-    restart: unless-stopped
+      - ./frontend/svelte-app:/app                       # code host → container
+      - /app/node_modules                                # préserve les deps
+    environment:
+      - CHOKIDAR_USEPOLLING=true     # fiabilise le watch sous Docker
     depends_on:
       - backend
-    command: npm run dev
-      
+    restart: unless-stopped
+
+  # ───────── Base de données PostgreSQL ─────────
   db:
     image: postgres:14-alpine
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=activmap
-    ports:
-      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -50,6 +57,7 @@ services:
       retries: 5
     restart: unless-stopped
 
+  # ───────── Cache Redis ─────────
   redis:
     image: redis:7-alpine
     ports:
@@ -58,6 +66,7 @@ services:
       - redis_data:/data
     restart: unless-stopped
 
+  # ───────── Proxy Nginx (optionnel en dev) ─────────
   proxy:
     image: nginx:stable-alpine
     ports:
@@ -65,11 +74,15 @@ services:
       - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./certs:/etc/ssl/certs:ro
+      # Certificats locaux générés par mkcert (facultatif)
+      - ./certs/activmap.crt:/etc/ssl/certs/activmap.crt:ro
+      - ./certs/activmap.key:/etc/ssl/private/activmap.key:ro
     depends_on:
       - backend
       - frontend
+    restart: unless-stopped
 
+# ───────── Volumes persistants ─────────
 volumes:
   postgres_data:
-  redis_data: 
+  redis_data:

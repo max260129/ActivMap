@@ -94,7 +94,7 @@ var app = (function () {
     }
 
     const is_client = typeof window !== 'undefined';
-    let now = is_client
+    let now$1 = is_client
         ? () => window.performance.now()
         : () => Date.now();
     let raf = is_client ? cb => requestAnimationFrame(cb) : noop$1;
@@ -591,7 +591,7 @@ var app = (function () {
             if (css)
                 animation_name = create_rule(node, 0, 1, duration, delay, easing, css, uid++);
             tick(0, 1);
-            const start_time = now() + delay;
+            const start_time = now$1() + delay;
             const end_time = start_time + duration;
             if (task)
                 task.abort();
@@ -666,7 +666,7 @@ var app = (function () {
         function go(b) {
             const { delay = 0, duration = 300, easing = identity, tick = noop$1, css } = config || null_transition;
             const program = {
-                start: now() + delay,
+                start: now$1() + delay,
                 b
             };
             if (!b) {
@@ -4524,7 +4524,7 @@ var app = (function () {
         }
     }
     // see https://stackoverflow.com/questions/8511281/check-if-a-value-is-an-object-in-javascript
-    function isObject$1(value) {
+    function isObject$2(value) {
         return Object.prototype.toString.call(value) === "[object Object]";
     }
     /**
@@ -4666,11 +4666,11 @@ var app = (function () {
         static isPayloadValid(type, payload) {
             switch (type) {
                 case PacketType.CONNECT:
-                    return isObject$1(payload);
+                    return isObject$2(payload);
                 case PacketType.DISCONNECT:
                     return payload === undefined;
                 case PacketType.CONNECT_ERROR:
-                    return typeof payload === "string" || isObject$1(payload);
+                    return typeof payload === "string" || isObject$2(payload);
                 case PacketType.EVENT:
                 case PacketType.BINARY_EVENT:
                     return (Array.isArray(payload) &&
@@ -6551,6 +6551,406 @@ var app = (function () {
         if (!r.ok) return [];
         return await r.json();          // [{display_name, lat, lon, type, ...}, …]
       }
+
+
+    // export async function reverseGeocode(lat, lon) {
+    //     try {
+    //       const r = await fetch(
+    //         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
+    //       );
+    //       if (!r.ok) return '';
+    //       const data = await r.json();
+    //       return data.display_name || '';
+    //     } catch {
+    //       return '';
+    //     }
+    // }
+
+    var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+    function getDefaultExportFromCjs (x) {
+    	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+    }
+
+    /**
+     * lodash (Custom Build) <https://lodash.com/>
+     * Build: `lodash modularize exports="npm" -o ./`
+     * Copyright jQuery Foundation and other contributors <https://jquery.org/>
+     * Released under MIT license <https://lodash.com/license>
+     * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+     * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+     */
+
+    /** Used as the `TypeError` message for "Functions" methods. */
+    var FUNC_ERROR_TEXT = 'Expected a function';
+
+    /** Used as references for various `Number` constants. */
+    var NAN = 0 / 0;
+
+    /** `Object#toString` result references. */
+    var symbolTag = '[object Symbol]';
+
+    /** Used to match leading and trailing whitespace. */
+    var reTrim = /^\s+|\s+$/g;
+
+    /** Used to detect bad signed hexadecimal string values. */
+    var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
+
+    /** Used to detect binary string values. */
+    var reIsBinary = /^0b[01]+$/i;
+
+    /** Used to detect octal string values. */
+    var reIsOctal = /^0o[0-7]+$/i;
+
+    /** Built-in method references without a dependency on `root`. */
+    var freeParseInt = parseInt;
+
+    /** Detect free variable `global` from Node.js. */
+    var freeGlobal = typeof commonjsGlobal == 'object' && commonjsGlobal && commonjsGlobal.Object === Object && commonjsGlobal;
+
+    /** Detect free variable `self`. */
+    var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
+
+    /** Used as a reference to the global object. */
+    var root = freeGlobal || freeSelf || Function('return this')();
+
+    /** Used for built-in method references. */
+    var objectProto = Object.prototype;
+
+    /**
+     * Used to resolve the
+     * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+     * of values.
+     */
+    var objectToString = objectProto.toString;
+
+    /* Built-in method references for those with the same name as other `lodash` methods. */
+    var nativeMax = Math.max,
+        nativeMin = Math.min;
+
+    /**
+     * Gets the timestamp of the number of milliseconds that have elapsed since
+     * the Unix epoch (1 January 1970 00:00:00 UTC).
+     *
+     * @static
+     * @memberOf _
+     * @since 2.4.0
+     * @category Date
+     * @returns {number} Returns the timestamp.
+     * @example
+     *
+     * _.defer(function(stamp) {
+     *   console.log(_.now() - stamp);
+     * }, _.now());
+     * // => Logs the number of milliseconds it took for the deferred invocation.
+     */
+    var now = function() {
+      return root.Date.now();
+    };
+
+    /**
+     * Creates a debounced function that delays invoking `func` until after `wait`
+     * milliseconds have elapsed since the last time the debounced function was
+     * invoked. The debounced function comes with a `cancel` method to cancel
+     * delayed `func` invocations and a `flush` method to immediately invoke them.
+     * Provide `options` to indicate whether `func` should be invoked on the
+     * leading and/or trailing edge of the `wait` timeout. The `func` is invoked
+     * with the last arguments provided to the debounced function. Subsequent
+     * calls to the debounced function return the result of the last `func`
+     * invocation.
+     *
+     * **Note:** If `leading` and `trailing` options are `true`, `func` is
+     * invoked on the trailing edge of the timeout only if the debounced function
+     * is invoked more than once during the `wait` timeout.
+     *
+     * If `wait` is `0` and `leading` is `false`, `func` invocation is deferred
+     * until to the next tick, similar to `setTimeout` with a timeout of `0`.
+     *
+     * See [David Corbacho's article](https://css-tricks.com/debouncing-throttling-explained-examples/)
+     * for details over the differences between `_.debounce` and `_.throttle`.
+     *
+     * @static
+     * @memberOf _
+     * @since 0.1.0
+     * @category Function
+     * @param {Function} func The function to debounce.
+     * @param {number} [wait=0] The number of milliseconds to delay.
+     * @param {Object} [options={}] The options object.
+     * @param {boolean} [options.leading=false]
+     *  Specify invoking on the leading edge of the timeout.
+     * @param {number} [options.maxWait]
+     *  The maximum time `func` is allowed to be delayed before it's invoked.
+     * @param {boolean} [options.trailing=true]
+     *  Specify invoking on the trailing edge of the timeout.
+     * @returns {Function} Returns the new debounced function.
+     * @example
+     *
+     * // Avoid costly calculations while the window size is in flux.
+     * jQuery(window).on('resize', _.debounce(calculateLayout, 150));
+     *
+     * // Invoke `sendMail` when clicked, debouncing subsequent calls.
+     * jQuery(element).on('click', _.debounce(sendMail, 300, {
+     *   'leading': true,
+     *   'trailing': false
+     * }));
+     *
+     * // Ensure `batchLog` is invoked once after 1 second of debounced calls.
+     * var debounced = _.debounce(batchLog, 250, { 'maxWait': 1000 });
+     * var source = new EventSource('/stream');
+     * jQuery(source).on('message', debounced);
+     *
+     * // Cancel the trailing debounced invocation.
+     * jQuery(window).on('popstate', debounced.cancel);
+     */
+    function debounce$1(func, wait, options) {
+      var lastArgs,
+          lastThis,
+          maxWait,
+          result,
+          timerId,
+          lastCallTime,
+          lastInvokeTime = 0,
+          leading = false,
+          maxing = false,
+          trailing = true;
+
+      if (typeof func != 'function') {
+        throw new TypeError(FUNC_ERROR_TEXT);
+      }
+      wait = toNumber(wait) || 0;
+      if (isObject$1(options)) {
+        leading = !!options.leading;
+        maxing = 'maxWait' in options;
+        maxWait = maxing ? nativeMax(toNumber(options.maxWait) || 0, wait) : maxWait;
+        trailing = 'trailing' in options ? !!options.trailing : trailing;
+      }
+
+      function invokeFunc(time) {
+        var args = lastArgs,
+            thisArg = lastThis;
+
+        lastArgs = lastThis = undefined;
+        lastInvokeTime = time;
+        result = func.apply(thisArg, args);
+        return result;
+      }
+
+      function leadingEdge(time) {
+        // Reset any `maxWait` timer.
+        lastInvokeTime = time;
+        // Start the timer for the trailing edge.
+        timerId = setTimeout(timerExpired, wait);
+        // Invoke the leading edge.
+        return leading ? invokeFunc(time) : result;
+      }
+
+      function remainingWait(time) {
+        var timeSinceLastCall = time - lastCallTime,
+            timeSinceLastInvoke = time - lastInvokeTime,
+            result = wait - timeSinceLastCall;
+
+        return maxing ? nativeMin(result, maxWait - timeSinceLastInvoke) : result;
+      }
+
+      function shouldInvoke(time) {
+        var timeSinceLastCall = time - lastCallTime,
+            timeSinceLastInvoke = time - lastInvokeTime;
+
+        // Either this is the first call, activity has stopped and we're at the
+        // trailing edge, the system time has gone backwards and we're treating
+        // it as the trailing edge, or we've hit the `maxWait` limit.
+        return (lastCallTime === undefined || (timeSinceLastCall >= wait) ||
+          (timeSinceLastCall < 0) || (maxing && timeSinceLastInvoke >= maxWait));
+      }
+
+      function timerExpired() {
+        var time = now();
+        if (shouldInvoke(time)) {
+          return trailingEdge(time);
+        }
+        // Restart the timer.
+        timerId = setTimeout(timerExpired, remainingWait(time));
+      }
+
+      function trailingEdge(time) {
+        timerId = undefined;
+
+        // Only invoke if we have `lastArgs` which means `func` has been
+        // debounced at least once.
+        if (trailing && lastArgs) {
+          return invokeFunc(time);
+        }
+        lastArgs = lastThis = undefined;
+        return result;
+      }
+
+      function cancel() {
+        if (timerId !== undefined) {
+          clearTimeout(timerId);
+        }
+        lastInvokeTime = 0;
+        lastArgs = lastCallTime = lastThis = timerId = undefined;
+      }
+
+      function flush() {
+        return timerId === undefined ? result : trailingEdge(now());
+      }
+
+      function debounced() {
+        var time = now(),
+            isInvoking = shouldInvoke(time);
+
+        lastArgs = arguments;
+        lastThis = this;
+        lastCallTime = time;
+
+        if (isInvoking) {
+          if (timerId === undefined) {
+            return leadingEdge(lastCallTime);
+          }
+          if (maxing) {
+            // Handle invocations in a tight loop.
+            timerId = setTimeout(timerExpired, wait);
+            return invokeFunc(lastCallTime);
+          }
+        }
+        if (timerId === undefined) {
+          timerId = setTimeout(timerExpired, wait);
+        }
+        return result;
+      }
+      debounced.cancel = cancel;
+      debounced.flush = flush;
+      return debounced;
+    }
+
+    /**
+     * Checks if `value` is the
+     * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
+     * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+     *
+     * @static
+     * @memberOf _
+     * @since 0.1.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+     * @example
+     *
+     * _.isObject({});
+     * // => true
+     *
+     * _.isObject([1, 2, 3]);
+     * // => true
+     *
+     * _.isObject(_.noop);
+     * // => true
+     *
+     * _.isObject(null);
+     * // => false
+     */
+    function isObject$1(value) {
+      var type = typeof value;
+      return !!value && (type == 'object' || type == 'function');
+    }
+
+    /**
+     * Checks if `value` is object-like. A value is object-like if it's not `null`
+     * and has a `typeof` result of "object".
+     *
+     * @static
+     * @memberOf _
+     * @since 4.0.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+     * @example
+     *
+     * _.isObjectLike({});
+     * // => true
+     *
+     * _.isObjectLike([1, 2, 3]);
+     * // => true
+     *
+     * _.isObjectLike(_.noop);
+     * // => false
+     *
+     * _.isObjectLike(null);
+     * // => false
+     */
+    function isObjectLike(value) {
+      return !!value && typeof value == 'object';
+    }
+
+    /**
+     * Checks if `value` is classified as a `Symbol` primitive or object.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.0.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+     * @example
+     *
+     * _.isSymbol(Symbol.iterator);
+     * // => true
+     *
+     * _.isSymbol('abc');
+     * // => false
+     */
+    function isSymbol(value) {
+      return typeof value == 'symbol' ||
+        (isObjectLike(value) && objectToString.call(value) == symbolTag);
+    }
+
+    /**
+     * Converts `value` to a number.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.0.0
+     * @category Lang
+     * @param {*} value The value to process.
+     * @returns {number} Returns the number.
+     * @example
+     *
+     * _.toNumber(3.2);
+     * // => 3.2
+     *
+     * _.toNumber(Number.MIN_VALUE);
+     * // => 5e-324
+     *
+     * _.toNumber(Infinity);
+     * // => Infinity
+     *
+     * _.toNumber('3.2');
+     * // => 3.2
+     */
+    function toNumber(value) {
+      if (typeof value == 'number') {
+        return value;
+      }
+      if (isSymbol(value)) {
+        return NAN;
+      }
+      if (isObject$1(value)) {
+        var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
+        value = isObject$1(other) ? (other + '') : other;
+      }
+      if (typeof value != 'string') {
+        return value === 0 ? value : +value;
+      }
+      value = value.replace(reTrim, '');
+      var isBinary = reIsBinary.test(value);
+      return (isBinary || reIsOctal.test(value))
+        ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
+        : (reIsBadHex.test(value) ? NAN : +value);
+    }
+
+    var lodash_debounce = debounce$1;
+
+    var debounce$2 = /*@__PURE__*/getDefaultExportFromCjs(lodash_debounce);
 
     const BASE$2 = '/stats';
 
@@ -28896,12 +29296,6 @@ var app = (function () {
     	}
     }
 
-    var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
-
-    function getDefaultExportFromCjs (x) {
-    	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
-    }
-
     var leafletSrc$1 = {exports: {}};
 
     /* @preserve
@@ -43434,7 +43828,7 @@ var app = (function () {
     		c: function create() {
     			div = element("div");
     			attr_dev(div, "class", "map-container svelte-62v0k9");
-    			add_location(div, file$1, 62, 0, 1582);
+    			add_location(div, file$1, 62, 0, 1590);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -43492,8 +43886,8 @@ var app = (function () {
 
     		// 1. Clic sur la carte → met à jour lat/lon
     		map.on('click', e => {
-    			$$invalidate(1, lat = Number(e.latlng.lat.toFixed(6)));
-    			$$invalidate(2, lon = Number(e.latlng.lng.toFixed(6)));
+    			$$invalidate(1, lat = parseFloat(e.latlng.lat.toFixed(6)));
+    			$$invalidate(2, lon = parseFloat(e.latlng.lng.toFixed(6)));
     		});
 
     		// 2. Molette (wheel) sur la carte avec Ctrl pour redimensionner
@@ -43608,12 +44002,12 @@ var app = (function () {
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[47] = list[i];
-    	child_ctx[49] = i;
+    	child_ctx[53] = list[i];
+    	child_ctx[55] = i;
     	return child_ctx;
     }
 
-    // (685:2) {:else}
+    // (734:2) {:else}
     function create_else_block(ctx) {
     	let div;
     	let h1;
@@ -43632,9 +44026,9 @@ var app = (function () {
     			t1 = space();
     			create_component(login.$$.fragment);
     			attr_dev(h1, "class", "svelte-a5rmlg");
-    			add_location(h1, file, 686, 4, 16134);
+    			add_location(h1, file, 735, 4, 17884);
     			attr_dev(div, "class", "card svelte-a5rmlg");
-    			add_location(div, file, 685, 3, 16068);
+    			add_location(div, file, 734, 3, 17818);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -43673,14 +44067,14 @@ var app = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(685:2) {:else}",
+    		source: "(734:2) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (683:38) 
+    // (732:38) 
     function create_if_block_21(ctx) {
     	let privacy;
     	let current;
@@ -43713,14 +44107,14 @@ var app = (function () {
     		block,
     		id: create_if_block_21.name,
     		type: "if",
-    		source: "(683:38) ",
+    		source: "(732:38) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (681:36) 
+    // (730:36) 
     function create_if_block_20(ctx) {
     	let resetpassword;
     	let current;
@@ -43753,14 +44147,14 @@ var app = (function () {
     		block,
     		id: create_if_block_20.name,
     		type: "if",
-    		source: "(681:36) ",
+    		source: "(730:36) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (679:37) 
+    // (728:37) 
     function create_if_block_19(ctx) {
     	let forgotpassword;
     	let current;
@@ -43793,14 +44187,14 @@ var app = (function () {
     		block,
     		id: create_if_block_19.name,
     		type: "if",
-    		source: "(679:37) ",
+    		source: "(728:37) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (677:37) 
+    // (726:37) 
     function create_if_block_18(ctx) {
     	let resendconfirmation;
     	let current;
@@ -43833,14 +44227,14 @@ var app = (function () {
     		block,
     		id: create_if_block_18.name,
     		type: "if",
-    		source: "(677:37) ",
+    		source: "(726:37) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (675:38) 
+    // (724:38) 
     function create_if_block_17(ctx) {
     	let confirmemail;
     	let current;
@@ -43873,14 +44267,14 @@ var app = (function () {
     		block,
     		id: create_if_block_17.name,
     		type: "if",
-    		source: "(675:38) ",
+    		source: "(724:38) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (673:2) {#if currentPage === 'invite'}
+    // (722:2) {#if currentPage === 'invite'}
     function create_if_block_16(ctx) {
     	let acceptinvite;
     	let current;
@@ -43913,14 +44307,14 @@ var app = (function () {
     		block,
     		id: create_if_block_16.name,
     		type: "if",
-    		source: "(673:2) {#if currentPage === 'invite'}",
+    		source: "(722:2) {#if currentPage === 'invite'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (540:1) {#if $isAuthenticated}
+    // (588:1) {#if $isAuthenticated}
     function create_if_block(ctx) {
     	let sidebar;
     	let t_1;
@@ -43947,17 +44341,17 @@ var app = (function () {
     	const if_blocks = [];
 
     	function select_block_type_1(ctx, dirty) {
-    		if (/*currentPage*/ ctx[1] === 'carte') return 0;
-    		if (/*currentPage*/ ctx[1] === 'statistique') return 1;
-    		if (/*currentPage*/ ctx[1] === 'parametre') return 2;
-    		if (/*currentPage*/ ctx[1] === 'equipe') return 3;
-    		if (/*currentPage*/ ctx[1] === 'historique') return 4;
-    		if (/*currentPage*/ ctx[1] === 'invite') return 5;
-    		if (/*currentPage*/ ctx[1] === 'confirm') return 6;
-    		if (/*currentPage*/ ctx[1] === 'resend') return 7;
-    		if (/*currentPage*/ ctx[1] === 'forgot') return 8;
-    		if (/*currentPage*/ ctx[1] === 'reset') return 9;
-    		if (/*currentPage*/ ctx[1] === 'privacy') return 10;
+    		if (/*currentPage*/ ctx[3] === 'carte') return 0;
+    		if (/*currentPage*/ ctx[3] === 'statistique') return 1;
+    		if (/*currentPage*/ ctx[3] === 'parametre') return 2;
+    		if (/*currentPage*/ ctx[3] === 'equipe') return 3;
+    		if (/*currentPage*/ ctx[3] === 'historique') return 4;
+    		if (/*currentPage*/ ctx[3] === 'invite') return 5;
+    		if (/*currentPage*/ ctx[3] === 'confirm') return 6;
+    		if (/*currentPage*/ ctx[3] === 'resend') return 7;
+    		if (/*currentPage*/ ctx[3] === 'forgot') return 8;
+    		if (/*currentPage*/ ctx[3] === 'reset') return 9;
+    		if (/*currentPage*/ ctx[3] === 'privacy') return 10;
     		return -1;
     	}
 
@@ -44046,14 +44440,14 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(540:1) {#if $isAuthenticated}",
+    		source: "(588:1) {#if $isAuthenticated}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (668:38) 
+    // (717:38) 
     function create_if_block_15(ctx) {
     	let privacy;
     	let current;
@@ -44086,14 +44480,14 @@ var app = (function () {
     		block,
     		id: create_if_block_15.name,
     		type: "if",
-    		source: "(668:38) ",
+    		source: "(717:38) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (666:36) 
+    // (715:36) 
     function create_if_block_14(ctx) {
     	let resetpassword;
     	let current;
@@ -44126,14 +44520,14 @@ var app = (function () {
     		block,
     		id: create_if_block_14.name,
     		type: "if",
-    		source: "(666:36) ",
+    		source: "(715:36) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (664:37) 
+    // (713:37) 
     function create_if_block_13(ctx) {
     	let forgotpassword;
     	let current;
@@ -44166,14 +44560,14 @@ var app = (function () {
     		block,
     		id: create_if_block_13.name,
     		type: "if",
-    		source: "(664:37) ",
+    		source: "(713:37) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (662:37) 
+    // (711:37) 
     function create_if_block_12(ctx) {
     	let resendconfirmation;
     	let current;
@@ -44206,14 +44600,14 @@ var app = (function () {
     		block,
     		id: create_if_block_12.name,
     		type: "if",
-    		source: "(662:37) ",
+    		source: "(711:37) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (660:38) 
+    // (709:38) 
     function create_if_block_11(ctx) {
     	let confirmemail;
     	let current;
@@ -44246,14 +44640,14 @@ var app = (function () {
     		block,
     		id: create_if_block_11.name,
     		type: "if",
-    		source: "(660:38) ",
+    		source: "(709:38) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (658:37) 
+    // (707:37) 
     function create_if_block_10(ctx) {
     	let acceptinvite;
     	let current;
@@ -44286,14 +44680,14 @@ var app = (function () {
     		block,
     		id: create_if_block_10.name,
     		type: "if",
-    		source: "(658:37) ",
+    		source: "(707:37) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (656:41) 
+    // (705:41) 
     function create_if_block_9(ctx) {
     	let historique;
     	let current;
@@ -44326,14 +44720,14 @@ var app = (function () {
     		block,
     		id: create_if_block_9.name,
     		type: "if",
-    		source: "(656:41) ",
+    		source: "(705:41) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (654:37) 
+    // (703:37) 
     function create_if_block_8(ctx) {
     	let equipe;
     	let current;
@@ -44366,14 +44760,14 @@ var app = (function () {
     		block,
     		id: create_if_block_8.name,
     		type: "if",
-    		source: "(654:37) ",
+    		source: "(703:37) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (652:40) 
+    // (701:40) 
     function create_if_block_7(ctx) {
     	let parametre;
     	let current;
@@ -44406,14 +44800,14 @@ var app = (function () {
     		block,
     		id: create_if_block_7.name,
     		type: "if",
-    		source: "(652:40) ",
+    		source: "(701:40) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (650:42) 
+    // (699:42) 
     function create_if_block_6(ctx) {
     	let statistique;
     	let current;
@@ -44446,14 +44840,14 @@ var app = (function () {
     		block,
     		id: create_if_block_6.name,
     		type: "if",
-    		source: "(650:42) ",
+    		source: "(699:42) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (543:2) {#if currentPage === 'carte'}
+    // (591:2) {#if currentPage === 'carte'}
     function create_if_block_1(ctx) {
     	let div1;
     	let div0;
@@ -44503,25 +44897,25 @@ var app = (function () {
     	let if_block0 = /*suggestions*/ ctx[9].length && create_if_block_5(ctx);
 
     	function mapselector_lat_binding(value) {
-    		/*mapselector_lat_binding*/ ctx[35](value);
+    		/*mapselector_lat_binding*/ ctx[38](value);
     	}
 
     	function mapselector_lon_binding(value) {
-    		/*mapselector_lon_binding*/ ctx[36](value);
+    		/*mapselector_lon_binding*/ ctx[39](value);
     	}
 
     	function mapselector_radius_binding(value) {
-    		/*mapselector_radius_binding*/ ctx[37](value);
+    		/*mapselector_radius_binding*/ ctx[40](value);
     	}
 
     	let mapselector_props = {};
 
-    	if (/*latitude*/ ctx[2] !== void 0) {
-    		mapselector_props.lat = /*latitude*/ ctx[2];
+    	if (/*latitude*/ ctx[0] !== void 0) {
+    		mapselector_props.lat = /*latitude*/ ctx[0];
     	}
 
-    	if (/*longitude*/ ctx[3] !== void 0) {
-    		mapselector_props.lon = /*longitude*/ ctx[3];
+    	if (/*longitude*/ ctx[1] !== void 0) {
+    		mapselector_props.lon = /*longitude*/ ctx[1];
     	}
 
     	if (/*distance*/ ctx[4] !== void 0) {
@@ -44552,7 +44946,7 @@ var app = (function () {
     			t4 = space();
     			label1 = element("label");
     			t5 = text$1(t5_value);
-    			t6 = text$1(" :\n\t\t\t\t\t\t\t");
+    			t6 = text$1(" :\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t");
     			input1 = element("input");
     			t7 = space();
     			label2 = element("label");
@@ -44576,44 +44970,44 @@ var app = (function () {
     			t18 = space();
     			if (if_block3) if_block3.c();
     			attr_dev(h1, "class", "svelte-a5rmlg");
-    			add_location(h1, file, 545, 5, 12226);
+    			add_location(h1, file, 593, 5, 13904);
     			attr_dev(input0, "type", "text");
     			attr_dev(input0, "autocomplete", "off");
     			attr_dev(input0, "class", "svelte-a5rmlg");
-    			add_location(input0, file, 551, 7, 12441);
+    			add_location(input0, file, 599, 7, 14119);
     			set_style(label0, "position", "relative");
     			attr_dev(label0, "class", "svelte-a5rmlg");
-    			add_location(label0, file, 549, 6, 12362);
+    			add_location(label0, file, 597, 6, 14040);
     			attr_dev(input1, "type", "number");
-    			attr_dev(input1, "step", "0.000001");
+    			attr_dev(input1, "step", "any");
     			input1.required = true;
     			attr_dev(input1, "class", "svelte-a5rmlg");
-    			add_location(input1, file, 574, 7, 12985);
+    			add_location(input1, file, 623, 7, 14739);
     			attr_dev(label1, "class", "svelte-a5rmlg");
-    			add_location(label1, file, 572, 6, 12936);
+    			add_location(label1, file, 620, 6, 14614);
     			attr_dev(input2, "type", "number");
-    			attr_dev(input2, "step", "0.000001");
+    			attr_dev(input2, "step", "any");
     			input2.required = true;
     			attr_dev(input2, "class", "svelte-a5rmlg");
-    			add_location(input2, file, 579, 7, 13128);
+    			add_location(input2, file, 628, 7, 14883);
     			attr_dev(label2, "class", "svelte-a5rmlg");
-    			add_location(label2, file, 577, 6, 13078);
+    			add_location(label2, file, 626, 6, 14833);
     			attr_dev(input3, "type", "number");
     			input3.required = true;
     			attr_dev(input3, "class", "svelte-a5rmlg");
-    			add_location(input3, file, 584, 7, 13271);
+    			add_location(input3, file, 633, 7, 15021);
     			attr_dev(label3, "class", "svelte-a5rmlg");
-    			add_location(label3, file, 582, 6, 13222);
+    			add_location(label3, file, 631, 6, 14972);
     			attr_dev(button, "type", "submit");
     			attr_dev(button, "class", "svelte-a5rmlg");
-    			add_location(button, file, 593, 6, 13462);
+    			add_location(button, file, 642, 6, 15212);
     			attr_dev(form, "class", "svelte-a5rmlg");
-    			add_location(form, file, 547, 5, 12271);
+    			add_location(form, file, 595, 5, 13949);
     			attr_dev(div0, "id", "carte");
     			attr_dev(div0, "class", "card svelte-a5rmlg");
-    			add_location(div0, file, 544, 4, 12148);
+    			add_location(div0, file, 592, 4, 13826);
     			attr_dev(div1, "class", "content-auth svelte-a5rmlg");
-    			add_location(div1, file, 543, 3, 12117);
+    			add_location(div1, file, 591, 3, 13795);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -44633,13 +45027,13 @@ var app = (function () {
     			append_dev(label1, t5);
     			append_dev(label1, t6);
     			append_dev(label1, input1);
-    			set_input_value(input1, /*latitude*/ ctx[2]);
+    			set_input_value(input1, /*latitude*/ ctx[0]);
     			append_dev(form, t7);
     			append_dev(form, label2);
     			append_dev(label2, t8);
     			append_dev(label2, t9);
     			append_dev(label2, input2);
-    			set_input_value(input2, /*longitude*/ ctx[3]);
+    			set_input_value(input2, /*longitude*/ ctx[1]);
     			append_dev(form, t10);
     			append_dev(form, label3);
     			append_dev(label3, t11);
@@ -44661,12 +45055,12 @@ var app = (function () {
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[30]),
+    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[33]),
     					listen_dev(input0, "input", /*onQueryInput*/ ctx[23], false, false, false, false),
     					listen_dev(input0, "keydown", /*handleKeydownSuggest*/ ctx[25], false, false, false, false),
-    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[32]),
-    					listen_dev(input2, "input", /*input2_input_handler*/ ctx[33]),
-    					listen_dev(input3, "input", /*input3_input_handler*/ ctx[34]),
+    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[35]),
+    					listen_dev(input2, "input", /*input2_input_handler*/ ctx[36]),
+    					listen_dev(input3, "input", /*input3_input_handler*/ ctx[37]),
     					listen_dev(form, "submit", prevent_default(/*generateMap*/ ctx[13]), false, true, false, false)
     				];
 
@@ -44695,14 +45089,14 @@ var app = (function () {
 
     			if ((!current || dirty[0] & /*$locale*/ 4096) && t5_value !== (t5_value = t('latitude', /*$locale*/ ctx[12]) + "")) set_data_dev(t5, t5_value);
 
-    			if (dirty[0] & /*latitude*/ 4 && to_number(input1.value) !== /*latitude*/ ctx[2]) {
-    				set_input_value(input1, /*latitude*/ ctx[2]);
+    			if (dirty[0] & /*latitude*/ 1 && to_number(input1.value) !== /*latitude*/ ctx[0]) {
+    				set_input_value(input1, /*latitude*/ ctx[0]);
     			}
 
     			if ((!current || dirty[0] & /*$locale*/ 4096) && t8_value !== (t8_value = t('longitude', /*$locale*/ ctx[12]) + "")) set_data_dev(t8, t8_value);
 
-    			if (dirty[0] & /*longitude*/ 8 && to_number(input2.value) !== /*longitude*/ ctx[3]) {
-    				set_input_value(input2, /*longitude*/ ctx[3]);
+    			if (dirty[0] & /*longitude*/ 2 && to_number(input2.value) !== /*longitude*/ ctx[1]) {
+    				set_input_value(input2, /*longitude*/ ctx[1]);
     			}
 
     			if ((!current || dirty[0] & /*$locale*/ 4096) && t11_value !== (t11_value = t('distance', /*$locale*/ ctx[12]) + "")) set_data_dev(t11, t11_value);
@@ -44713,15 +45107,15 @@ var app = (function () {
 
     			const mapselector_changes = {};
 
-    			if (!updating_lat && dirty[0] & /*latitude*/ 4) {
+    			if (!updating_lat && dirty[0] & /*latitude*/ 1) {
     				updating_lat = true;
-    				mapselector_changes.lat = /*latitude*/ ctx[2];
+    				mapselector_changes.lat = /*latitude*/ ctx[0];
     				add_flush_callback(() => updating_lat = false);
     			}
 
-    			if (!updating_lon && dirty[0] & /*longitude*/ 8) {
+    			if (!updating_lon && dirty[0] & /*longitude*/ 2) {
     				updating_lon = true;
-    				mapselector_changes.lon = /*longitude*/ ctx[3];
+    				mapselector_changes.lon = /*longitude*/ ctx[1];
     				add_flush_callback(() => updating_lon = false);
     			}
 
@@ -44818,14 +45212,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(543:2) {#if currentPage === 'carte'}",
+    		source: "(591:2) {#if currentPage === 'carte'}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (559:7) {#if suggestions.length}
+    // (607:7) {#if suggestions.length}
     function create_if_block_5(ctx) {
     	let ul;
     	let each_value = /*suggestions*/ ctx[9];
@@ -44845,7 +45239,7 @@ var app = (function () {
     			}
 
     			attr_dev(ul, "class", "suggest-box svelte-a5rmlg");
-    			add_location(ul, file, 559, 8, 12646);
+    			add_location(ul, file, 607, 8, 14324);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, ul, anchor);
@@ -44891,24 +45285,24 @@ var app = (function () {
     		block,
     		id: create_if_block_5.name,
     		type: "if",
-    		source: "(559:7) {#if suggestions.length}",
+    		source: "(607:7) {#if suggestions.length}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (561:9) {#each suggestions as s, i}
+    // (609:9) {#each suggestions as s, i}
     function create_each_block(ctx) {
     	let li;
-    	let t0_value = /*s*/ ctx[47].display_name + "";
+    	let t0_value = /*s*/ ctx[53].display_name + "";
     	let t0;
     	let t1;
     	let mounted;
     	let dispose;
 
     	function click_handler() {
-    		return /*click_handler*/ ctx[31](/*s*/ ctx[47]);
+    		return /*click_handler*/ ctx[34](/*s*/ ctx[53]);
     	}
 
     	const block = {
@@ -44917,8 +45311,8 @@ var app = (function () {
     			t0 = text$1(t0_value);
     			t1 = space();
     			attr_dev(li, "class", "svelte-a5rmlg");
-    			toggle_class(li, "i-active", /*i*/ ctx[49] === /*activeIdx*/ ctx[10]);
-    			add_location(li, file, 561, 10, 12718);
+    			toggle_class(li, "i-active", /*i*/ ctx[55] === /*activeIdx*/ ctx[10]);
+    			add_location(li, file, 609, 10, 14396);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, li, anchor);
@@ -44932,10 +45326,10 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty[0] & /*suggestions*/ 512 && t0_value !== (t0_value = /*s*/ ctx[47].display_name + "")) set_data_dev(t0, t0_value);
+    			if (dirty[0] & /*suggestions*/ 512 && t0_value !== (t0_value = /*s*/ ctx[53].display_name + "")) set_data_dev(t0, t0_value);
 
     			if (dirty[0] & /*activeIdx*/ 1024) {
-    				toggle_class(li, "i-active", /*i*/ ctx[49] === /*activeIdx*/ ctx[10]);
+    				toggle_class(li, "i-active", /*i*/ ctx[55] === /*activeIdx*/ ctx[10]);
     			}
     		},
     		d: function destroy(detaching) {
@@ -44949,14 +45343,14 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(561:9) {#each suggestions as s, i}",
+    		source: "(609:9) {#each suggestions as s, i}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (597:5) {#if loading}
+    // (646:5) {#if loading}
     function create_if_block_4(ctx) {
     	let div;
     	let t0;
@@ -44969,9 +45363,9 @@ var app = (function () {
     			p = element("p");
     			p.textContent = "Génération en cours...";
     			attr_dev(div, "class", "loading-spinner svelte-a5rmlg");
-    			add_location(div, file, 597, 6, 13561);
+    			add_location(div, file, 646, 6, 15311);
     			set_style(p, "text-align", "center");
-    			add_location(p, file, 598, 6, 13603);
+    			add_location(p, file, 647, 6, 15353);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -44989,14 +45383,14 @@ var app = (function () {
     		block,
     		id: create_if_block_4.name,
     		type: "if",
-    		source: "(597:5) {#if loading}",
+    		source: "(646:5) {#if loading}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (602:5) {#if error}
+    // (651:5) {#if error}
     function create_if_block_3(ctx) {
     	let p;
     	let t_1;
@@ -45006,7 +45400,7 @@ var app = (function () {
     			p = element("p");
     			t_1 = text$1(/*error*/ ctx[7]);
     			attr_dev(p, "class", "error svelte-a5rmlg");
-    			add_location(p, file, 602, 6, 13694);
+    			add_location(p, file, 651, 6, 15444);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -45024,14 +45418,14 @@ var app = (function () {
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(602:5) {#if error}",
+    		source: "(651:5) {#if error}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (607:4) {#if svgUrl}
+    // (656:4) {#if svgUrl}
     function create_if_block_2(ctx) {
     	let h2;
     	let t0_value = t('generated_map', /*$locale*/ ctx[12]) + "";
@@ -45091,41 +45485,41 @@ var app = (function () {
     			t11 = text$1(t11_value);
     			set_style(h2, "text-align", "center");
     			attr_dev(h2, "class", "svelte-a5rmlg");
-    			add_location(h2, file, 607, 5, 13768);
+    			add_location(h2, file, 656, 5, 15518);
     			attr_dev(button0, "aria-label", "Zoom In");
     			attr_dev(button0, "class", "svelte-a5rmlg");
-    			add_location(button0, file, 623, 8, 14330);
+    			add_location(button0, file, 672, 8, 16080);
     			attr_dev(button1, "aria-label", "Zoom Out");
     			attr_dev(button1, "class", "svelte-a5rmlg");
-    			add_location(button1, file, 624, 8, 14396);
+    			add_location(button1, file, 673, 8, 16146);
     			attr_dev(button2, "aria-label", "Rotate");
     			attr_dev(button2, "class", "svelte-a5rmlg");
-    			add_location(button2, file, 625, 8, 14464);
+    			add_location(button2, file, 674, 8, 16214);
     			attr_dev(div0, "class", "zoom-controls svelte-a5rmlg");
-    			add_location(div0, file, 622, 7, 14294);
+    			add_location(div0, file, 671, 7, 16044);
     			if (!src_url_equal(img.src, img_src_value = /*svgUrl*/ ctx[5])) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Carte stylisée");
     			attr_dev(img, "class", "svelte-a5rmlg");
     			set_style(img, "transform", /*transformValue*/ ctx[11]);
-    			add_location(img, file, 628, 7, 14546);
+    			add_location(img, file, 677, 7, 16296);
     			attr_dev(div1, "class", "svg-container svelte-a5rmlg");
     			attr_dev(div1, "role", "application");
     			attr_dev(div1, "aria-label", "Carte stylisée");
     			attr_dev(div1, "aria-describedby", "map-instructions");
     			attr_dev(div1, "tabindex", "0");
-    			add_location(div1, file, 609, 6, 13921);
+    			add_location(div1, file, 658, 6, 15671);
     			attr_dev(p, "id", "map-instructions");
     			attr_dev(p, "class", "sr-only svelte-a5rmlg");
-    			add_location(p, file, 635, 6, 14726);
+    			add_location(p, file, 684, 6, 16476);
     			attr_dev(div2, "class", "card svelte-a5rmlg");
-    			add_location(div2, file, 608, 5, 13854);
+    			add_location(div2, file, 657, 5, 15604);
     			attr_dev(button3, "class", "svelte-a5rmlg");
-    			add_location(button3, file, 643, 7, 15014);
+    			add_location(button3, file, 692, 7, 16764);
     			attr_dev(a, "download", "carte.svg");
     			attr_dev(a, "href", /*svgUrl*/ ctx[5]);
-    			add_location(a, file, 642, 6, 14968);
+    			add_location(a, file, 691, 6, 16718);
     			attr_dev(div3, "class", "download-container svelte-a5rmlg");
-    			add_location(div3, file, 641, 5, 14929);
+    			add_location(div3, file, 690, 5, 16679);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, h2, anchor);
@@ -45233,7 +45627,7 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(607:4) {#if svgUrl}",
+    		source: "(656:4) {#if svgUrl}",
     		ctx
     	});
 
@@ -45262,13 +45656,13 @@ var app = (function () {
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
-    		if (/*$isAuthenticated*/ ctx[0]) return 0;
-    		if (/*currentPage*/ ctx[1] === 'invite') return 1;
-    		if (/*currentPage*/ ctx[1] === 'confirm') return 2;
-    		if (/*currentPage*/ ctx[1] === 'resend') return 3;
-    		if (/*currentPage*/ ctx[1] === 'forgot') return 4;
-    		if (/*currentPage*/ ctx[1] === 'reset') return 5;
-    		if (/*currentPage*/ ctx[1] === 'privacy') return 6;
+    		if (/*$isAuthenticated*/ ctx[2]) return 0;
+    		if (/*currentPage*/ ctx[3] === 'invite') return 1;
+    		if (/*currentPage*/ ctx[3] === 'confirm') return 2;
+    		if (/*currentPage*/ ctx[3] === 'resend') return 3;
+    		if (/*currentPage*/ ctx[3] === 'forgot') return 4;
+    		if (/*currentPage*/ ctx[3] === 'reset') return 5;
+    		if (/*currentPage*/ ctx[3] === 'privacy') return 6;
     		return 7;
     	}
 
@@ -45285,7 +45679,7 @@ var app = (function () {
     			attr_dev(main, "id", "main");
     			attr_dev(main, "tabindex", "-1");
     			attr_dev(main, "class", "svelte-a5rmlg");
-    			add_location(main, file, 538, 0, 12012);
+    			add_location(main, file, 586, 0, 13690);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -45358,12 +45752,26 @@ var app = (function () {
     const minScale = 0.5;
     const maxScale = 3.0;
 
+    async function reverseGeocode(lat, lon) {
+    	const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
+
+    	const res = await fetch(url, {
+    		headers: {
+    			'Accept-Language': 'fr',
+    			'User-Agent': 'activmap-dev'
+    		}
+    	});
+
+    	if (!res.ok) return null;
+    	return await res.json(); // {display_name, address, ...}
+    }
+
     function instance($$self, $$props, $$invalidate) {
     	let transformValue;
     	let $isAuthenticated;
     	let $locale;
     	validate_store(isAuthenticated, 'isAuthenticated');
-    	component_subscribe($$self, isAuthenticated, $$value => $$invalidate(0, $isAuthenticated = $$value));
+    	component_subscribe($$self, isAuthenticated, $$value => $$invalidate(2, $isAuthenticated = $$value));
     	validate_store(locale, 'locale');
     	component_subscribe($$self, locale, $$value => $$invalidate(12, $locale = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
@@ -45373,7 +45781,7 @@ var app = (function () {
     	// Fonction pour définir la page active
     	function setActivePage() {
     		const hash = window.location.hash.replace('#', '').split('?')[0];
-    		$$invalidate(1, currentPage = hash || 'carte');
+    		$$invalidate(3, currentPage = hash || 'carte');
     	}
 
     	// Variables pour la carte
@@ -45386,10 +45794,7 @@ var app = (function () {
     	let error = "";
     	let scale$1 = 1.0;
     	let rotate = 0; // Angle de rotation en degrés
-
-    	// Flag pour utiliser l'endpoint public (non-protégé)
     	let usePublicEndpoint = false;
-
     	let query = '';
     	let suggestions = [];
     	let activeIdx = -1;
@@ -45404,6 +45809,9 @@ var app = (function () {
     	let initialDragY = 0;
     	let initialTranslateX = 0;
     	let initialTranslateY = 0;
+    	let isTypingQuery = false;
+    	let lastQuerySetFromCoords = '';
+    	let fromSuggest = false;
 
     	// Vérifier l'authentification au démarrage et configurer la navigation
     	onMount(() => {
@@ -45581,26 +45989,49 @@ var app = (function () {
     		initSocket();
     	}
 
-    	function onQueryInput(e) {
+    	function setCoords(lat, lon) {
+    		$$invalidate(0, latitude = parseFloat(parseFloat(lat).toFixed(6)));
+    		$$invalidate(1, longitude = parseFloat(parseFloat(lon).toFixed(6)));
+    	}
+
+    	/* ------------------ AUTOCOMPLETE → COORDS -------------------- */
+    	async function onQueryInput(e) {
+    		$$invalidate(30, isTypingQuery = true);
     		$$invalidate(8, query = e.target.value);
     		clearTimeout(suggestTimer);
 
     		suggestTimer = setTimeout(
     			async () => {
-    				$$invalidate(9, suggestions = await geocode(query));
+    				$$invalidate(9, suggestions = query.length > 2 ? await geocode(query) : []);
     				$$invalidate(10, activeIdx = -1);
     			},
     			300
-    		); // debounce 300 ms
+    		);
     	}
 
     	function chooseSuggestion(s) {
-    		$$invalidate(2, latitude = parseFloat(s.lat));
-    		$$invalidate(3, longitude = parseFloat(s.lon));
+    		$$invalidate(31, fromSuggest = true); // <─ on signale : “ça vient de la barre”
+    		$$invalidate(0, latitude = parseFloat(s.lat));
+    		$$invalidate(1, longitude = parseFloat(s.lon));
+    		$$invalidate(8, query = s.display_name);
     		$$invalidate(9, suggestions = []);
-    		$$invalidate(8, query = s.display_name); // garde le texte
+    		setTimeout(() => $$invalidate(31, fromSuggest = false), 500); // on rouvre après ½ s
     	}
 
+    	/* ------------------ COORDS → BARRE DE RECHERCHE -------------- */
+    	const debouncedReverse = debounce$2(
+    		async (lat, lon) => {
+    			const txt = await reverseGeocode(lat, lon);
+
+    			if (txt && txt !== lastQuerySetFromCoords) {
+    				$$invalidate(8, query = txt);
+    				lastQuerySetFromCoords = txt;
+    			}
+    		},
+    		500
+    	);
+
+    	/* ------------------ KEYBOARD NAV SUR SUGGESTIONS ------------- */
     	function handleKeydownSuggest(e) {
     		if (!suggestions.length) return;
 
@@ -45615,6 +46046,7 @@ var app = (function () {
     		}
     	}
 
+    	let revTimer;
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
@@ -45623,19 +46055,19 @@ var app = (function () {
 
     	function input0_input_handler() {
     		query = this.value;
-    		$$invalidate(8, query);
+    		(((($$invalidate(8, query), $$invalidate(31, fromSuggest)), $$invalidate(32, revTimer)), $$invalidate(0, latitude)), $$invalidate(1, longitude));
     	}
 
     	const click_handler = s => chooseSuggestion(s);
 
     	function input1_input_handler() {
     		latitude = to_number(this.value);
-    		$$invalidate(2, latitude);
+    		$$invalidate(0, latitude);
     	}
 
     	function input2_input_handler() {
     		longitude = to_number(this.value);
-    		$$invalidate(3, longitude);
+    		$$invalidate(1, longitude);
     	}
 
     	function input3_input_handler() {
@@ -45645,12 +46077,12 @@ var app = (function () {
 
     	function mapselector_lat_binding(value) {
     		latitude = value;
-    		$$invalidate(2, latitude);
+    		$$invalidate(0, latitude);
     	}
 
     	function mapselector_lon_binding(value) {
     		longitude = value;
-    		$$invalidate(3, longitude);
+    		$$invalidate(1, longitude);
     	}
 
     	function mapselector_radius_binding(value) {
@@ -45675,6 +46107,7 @@ var app = (function () {
     		locale,
     		initSocket,
     		geocode,
+    		debounce: debounce$2,
     		Statistique,
     		Parametre,
     		Equipe,
@@ -45712,6 +46145,9 @@ var app = (function () {
     		initialDragY,
     		initialTranslateX,
     		initialTranslateY,
+    		isTypingQuery,
+    		lastQuerySetFromCoords,
+    		fromSuggest,
     		generateMap,
     		handleWheel,
     		zoomIn,
@@ -45723,18 +46159,22 @@ var app = (function () {
     		endDrag,
     		handleLogout,
     		handleLoginSuccess,
+    		setCoords,
     		onQueryInput,
     		chooseSuggestion,
+    		debouncedReverse,
     		handleKeydownSuggest,
+    		reverseGeocode,
+    		revTimer,
     		transformValue,
     		$isAuthenticated,
     		$locale
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ('currentPage' in $$props) $$invalidate(1, currentPage = $$props.currentPage);
-    		if ('latitude' in $$props) $$invalidate(2, latitude = $$props.latitude);
-    		if ('longitude' in $$props) $$invalidate(3, longitude = $$props.longitude);
+    		if ('currentPage' in $$props) $$invalidate(3, currentPage = $$props.currentPage);
+    		if ('latitude' in $$props) $$invalidate(0, latitude = $$props.latitude);
+    		if ('longitude' in $$props) $$invalidate(1, longitude = $$props.longitude);
     		if ('distance' in $$props) $$invalidate(4, distance = $$props.distance);
     		if ('svgUrl' in $$props) $$invalidate(5, svgUrl = $$props.svgUrl);
     		if ('loading' in $$props) $$invalidate(6, loading = $$props.loading);
@@ -45753,6 +46193,10 @@ var app = (function () {
     		if ('initialDragY' in $$props) initialDragY = $$props.initialDragY;
     		if ('initialTranslateX' in $$props) initialTranslateX = $$props.initialTranslateX;
     		if ('initialTranslateY' in $$props) initialTranslateY = $$props.initialTranslateY;
+    		if ('isTypingQuery' in $$props) $$invalidate(30, isTypingQuery = $$props.isTypingQuery);
+    		if ('lastQuerySetFromCoords' in $$props) lastQuerySetFromCoords = $$props.lastQuerySetFromCoords;
+    		if ('fromSuggest' in $$props) $$invalidate(31, fromSuggest = $$props.fromSuggest);
+    		if ('revTimer' in $$props) $$invalidate(32, revTimer = $$props.revTimer);
     		if ('transformValue' in $$props) $$invalidate(11, transformValue = $$props.transformValue);
     	};
 
@@ -45761,7 +46205,7 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty[0] & /*$isAuthenticated*/ 1) {
+    		if ($$self.$$.dirty[0] & /*$isAuthenticated*/ 4) {
     			// État d'authentification forcé à false au démarrage
     			console.log("État d'authentification:", $isAuthenticated);
     		}
@@ -45770,13 +46214,36 @@ var app = (function () {
     			// Transformation combinée : translation, rotation et zoom
     			$$invalidate(11, transformValue = `translate(${translateX}px, ${translateY}px) rotate(${rotate}deg) scale(${scale$1})`);
     		}
+
+    		if ($$self.$$.dirty[0] & /*isTypingQuery, latitude, longitude*/ 1073741827) {
+    			/* déclenché par toute mise à jour de latitude OU longitude
+    	(mais seulement si l’utilisateur n’est pas en train de taper) */
+    			if (!isTypingQuery) {
+    				debouncedReverse(latitude, longitude);
+    			}
+    		}
+
+    		if ($$self.$$.dirty[0] & /*latitude, longitude*/ 3 | $$self.$$.dirty[1] & /*fromSuggest, revTimer*/ 3) {
+    			if (!fromSuggest) {
+    				// seulement si ça NE vient pas d’une suggestion
+    				clearTimeout(revTimer);
+
+    				$$invalidate(32, revTimer = setTimeout(
+    					async () => {
+    						const rev = await reverseGeocode(latitude, longitude);
+    						if (rev) $$invalidate(8, query = rev.display_name);
+    					},
+    					300
+    				));
+    			}
+    		}
     	};
 
     	return [
-    		$isAuthenticated,
-    		currentPage,
     		latitude,
     		longitude,
+    		$isAuthenticated,
+    		currentPage,
     		distance,
     		svgUrl,
     		loading,
@@ -45803,6 +46270,9 @@ var app = (function () {
     		rotate,
     		translateX,
     		translateY,
+    		isTypingQuery,
+    		fromSuggest,
+    		revTimer,
     		input0_input_handler,
     		click_handler,
     		input1_input_handler,

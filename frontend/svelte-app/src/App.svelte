@@ -8,6 +8,9 @@
 	import { t, locale } from './i18n.js';
 	import { initSocket } from './services/socket.js';
 	import { geocode } from './services/geocode.js';
+
+	import debounce          from 'lodash.debounce';
+	// import { reverseGeocode } from './services/geocode.js';
 	
 	// Import des nouvelles pages
 	import Statistique from './pages/Statistique.svelte';
@@ -49,7 +52,6 @@
 	const minScale = 0.5;
 	const maxScale = 3.0;
 	let rotate = 0; // Angle de rotation en degrés
-	// Flag pour utiliser l'endpoint public (non-protégé)
 	let usePublicEndpoint = false;
 
 	let query = '';
@@ -65,6 +67,11 @@
 	let initialDragY = 0;
 	let initialTranslateX = 0;
 	let initialTranslateY = 0;
+
+	let isTypingQuery = false;
+  	let lastQuerySetFromCoords = '';
+
+	let fromSuggest = false;
   
 	// Transformation combinée : translation, rotation et zoom
 	$: transformValue = `translate(${translateX}px, ${translateY}px) rotate(${rotate}deg) scale(${scale})`;
@@ -239,27 +246,68 @@
 		initSocket();
 	}
 
-	function onQueryInput(e) {
-	query = e.target.value;
-	clearTimeout(suggestTimer);
-	suggestTimer = setTimeout(async () => {
-		suggestions = await geocode(query);
+	function setCoords(lat, lon) {
+		latitude  = parseFloat(parseFloat(lat).toFixed(6));
+		longitude = parseFloat(parseFloat(lon).toFixed(6));
+	}
+
+	/* ------------------ AUTOCOMPLETE → COORDS -------------------- */
+	async function onQueryInput(e) {
+		isTypingQuery = true;
+		query = e.target.value;
+		clearTimeout(suggestTimer);
+		suggestTimer = setTimeout(async () => {
+		suggestions = query.length > 2 ? await geocode(query) : [];
 		activeIdx = -1;
-	}, 300);                       // debounce 300 ms
+		}, 300);
 	}
 
 	function chooseSuggestion(s) {
-	latitude  = parseFloat(s.lat);
-	longitude = parseFloat(s.lon);
-	suggestions = [];
-	query = s.display_name;        // garde le texte
+		fromSuggest = true;             // <─ on signale : “ça vient de la barre”
+		latitude  = parseFloat(s.lat);
+		longitude = parseFloat(s.lon);
+		query     = s.display_name;
+		suggestions = [];
+		setTimeout(() => fromSuggest = false, 500);   // on rouvre après ½ s
 	}
 
+	/* ------------------ COORDS → BARRE DE RECHERCHE -------------- */
+	const debouncedReverse = debounce(async (lat, lon) => {
+		const txt = await reverseGeocode(lat, lon);
+		if (txt && txt !== lastQuerySetFromCoords) {
+		query = txt;
+		lastQuerySetFromCoords = txt;
+		}
+	}, 500);
+
+	/* déclenché par toute mise à jour de latitude OU longitude
+		(mais seulement si l’utilisateur n’est pas en train de taper) */
+	$: if (!isTypingQuery) {
+		debouncedReverse(latitude, longitude);
+	}
+
+	/* ------------------ KEYBOARD NAV SUR SUGGESTIONS ------------- */
 	function handleKeydownSuggest(e) {
-	if (!suggestions.length) return;
-	if (e.key === 'ArrowDown') { activeIdx = (activeIdx + 1) % suggestions.length; e.preventDefault(); }
-	else if (e.key === 'ArrowUp') { activeIdx = (activeIdx - 1 + suggestions.length) % suggestions.length; e.preventDefault(); }
-	else if (e.key === 'Enter') { chooseSuggestion(suggestions[activeIdx]); }
+		if (!suggestions.length) return;
+		if (e.key === 'ArrowDown') { activeIdx = (activeIdx + 1) % suggestions.length; e.preventDefault(); }
+		else if (e.key === 'ArrowUp') { activeIdx = (activeIdx - 1 + suggestions.length) % suggestions.length; e.preventDefault(); }
+		else if (e.key === 'Enter') { chooseSuggestion(suggestions[activeIdx]); }
+	} 
+
+	async function reverseGeocode(lat, lon) {
+		const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
+		const res = await fetch(url, { headers: { 'Accept-Language': 'fr', 'User-Agent': 'activmap-dev' } });
+		if (!res.ok) return null;
+		return await res.json();        // {display_name, address, ...}
+	}
+
+	let revTimer;
+	$: if (!fromSuggest) {            // seulement si ça NE vient pas d’une suggestion
+		clearTimeout(revTimer);
+		revTimer = setTimeout(async () => {
+			const rev = await reverseGeocode(latitude, longitude);
+			if (rev) query = rev.display_name;
+		}, 300);
 	}
 </script>
 
@@ -572,12 +620,13 @@
 
 						<label>
 							{t('latitude', $locale)} :
-							<input type="number" step="0.000001" bind:value={latitude} required />
+							<!-- step="any" pour accepter n’importe quel nombre de décimales -->
+							<input type="number" step="any" bind:value={latitude} required />
 						</label>
-
+						
 						<label>
 							{t('longitude', $locale)} :
-							<input type="number" step="0.000001" bind:value={longitude} required />
+							<input type="number" step="any" bind:value={longitude} required />
 						</label>
 
 						<label>

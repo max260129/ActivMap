@@ -6,4 +6,17 @@ export async function geocode(query) {
     if (!r.ok) return [];
     return await r.json();          // [{display_name, lat, lon, type, ...}, …]
   }
-  
+
+
+// export async function reverseGeocode(lat, lon) {
+//     try {
+//       const r = await fetch(
+//         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
+//       );
+//       if (!r.ok) return '';
+//       const data = await r.json();
+//       return data.display_name || '';
+//     } catch {
+//       return '';
+//     }
+// }

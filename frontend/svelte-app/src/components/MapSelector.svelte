@@ -37,8 +37,8 @@
 
     // 1. Clic sur la carte → met à jour lat/lon
     map.on('click', (e) => {
-      lat = Number(e.latlng.lat.toFixed(6));
-      lon = Number(e.latlng.lng.toFixed(6));
+      lat = parseFloat(e.latlng.lat.toFixed(6));
+      lon = parseFloat(e.latlng.lng.toFixed(6));
     });
 
     // 2. Molette (wheel) sur la carte avec Ctrl pour redimensionner

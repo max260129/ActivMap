@@ -27,6 +27,7 @@ a:visited {
 
 label {
 	display: block;
+	position: relative;
 }
 
 input, button, select, textarea {
@@ -61,3 +62,36 @@ button:not(:disabled):active {
 button:focus {
 	border-color: #666;
 }
+
+.suggest-box{
+	position: absolute;
+	left: 0;
+	top: calc(100% + .25rem); 
+	width: 100%;
+	max-height: 200px;
+	overflow-y: auto;
+  
+	margin: 0;
+	padding: 0;
+	list-style: none;
+  
+	background: #222;
+	border: 1px solid #444;
+	z-index: 500;             
+  }
+
+  .suggest-box li{
+	padding: .45rem .65rem;
+	font-size: .85rem;
+	cursor: pointer;
+  }
+
+  .suggest-box li:hover,
+  .suggest-box li.i-active{
+	background:#cc5200;
+	color:#fff;
+   }
+
+   /* ───── DEBUG provisoire ───── */
+body{outline:4px solid lime !important;}
+
