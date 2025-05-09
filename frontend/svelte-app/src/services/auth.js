@@ -9,60 +9,59 @@ export const currentUser = writable(null);
 
 // Vérifier le token au démarrage
 export function checkAuth() {
-    // Initialiser l'état d'authentification à false par défaut
-    isAuthenticated.set(false);
-    currentUser.set(null);
-    
+    // Dans un premier temps, tenter de lire le token et l'utilisateur stockés
     if (typeof window === 'undefined' || !window.localStorage) {
         console.log("Environnement sans localStorage, authentification désactivée");
         return false;
     }
-    
+
     const token = localStorage.getItem('auth_token');
     const userStr = localStorage.getItem('user');
-    
+
+    // Si rien n'est stocké ⇒ pas authentifié
     if (!token || !userStr) {
-        console.log("Pas de token ou d'utilisateur en localStorage");
-        return false;
-    }
-    
-    try {
-        const user = JSON.parse(userStr);
-        
-        // Vérifier la validité du token avec le backend
-        fetch(`${API_URL}/api/auth/me`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        .then(response => {
-            console.log("Réponse du serveur pour /me:", response.status);
-            if (response.ok) {
-                console.log("Token validé par le backend");
-                isAuthenticated.set(true);
-                currentUser.set(user);
-                return true;
-            } else {
-                console.log("Token invalide, déconnexion");
-                // Token invalide, nettoyer le stockage
-                logout();
-                return false;
-            }
-        })
-        .catch((err) => {
-            console.log("Erreur de vérification du token:", err);
-            logout();
-            return false;
-        });
-    } catch (e) {
-        console.log("Erreur de parsing JSON:", e);
-        // En cas d'erreur de parsing, nettoyer le stockage
         logout();
         return false;
     }
-    return false;
+
+    let user;
+    try {
+        user = JSON.parse(userStr);
+    } catch (e) {
+        console.log("Erreur de parsing JSON de l'utilisateur :", e);
+        logout();
+        return false;
+    }
+
+    // On suppose l'utilisateur authentifié le temps de valider le token côté backend
+    isAuthenticated.set(true);
+    currentUser.set({ ...user });
+
+    // Vérification asynchrone de la validité du token auprès du backend
+    fetch(`${API_URL}/api/auth/me`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => {
+        console.log("Réponse du serveur pour /me:", response.status);
+        if (response.status === 401) {
+            // Token réellement invalide ou expiré ⇒ on déconnecte
+            console.log("Token invalide ou expiré, déconnexion");
+            logout();
+        } else if (!response.ok) {
+            // Autre erreur serveur : on conserve la session et on log uniquement
+            console.warn("Erreur lors de la validation du token (", response.status, ") – session conservée");
+        }
+    })
+    .catch(err => {
+        // Typiquement déclenché si la requête est annulée par un rafraîchissement ; ne pas déconnecter
+        console.warn("Erreur réseau ou requête annulée lors de la vérification du token : ", err);
+    });
+
+    return true;
 }
 
 // Fonction de déconnexion
@@ -87,27 +86,24 @@ export function getToken() {
 // Intercepteur pour les requêtes API
 export async function fetchWithAuth(url, options = {}) {
     const token = getToken();
-    
-    // Adapter l'URL en fonction du type de requête
     let apiUrl = url;
-    
-    // Si l'URL ne contient pas déjà http:// et ne commence pas par /api, ajuster le format
     if (!url.includes('http://') && !url.startsWith('/api')) {
         apiUrl = `${API_URL}/api${url.startsWith('/') ? url : `/${url}`}`;
     } else if (url.startsWith('/api')) {
         apiUrl = `${API_URL}${url}`;
     }
     
-    console.log("URL modifiée pour fetch:", apiUrl);
-    
+    // Préparer headers
+    options.headers = options.headers || {};
     if (token) {
-        options.headers = {
-            ...options.headers || {},
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        };
-        console.log("Envoi requête avec token:", `Bearer ${token}`);
+        options.headers['Authorization'] = `Bearer ${token}`;
     }
+    // Si le body n'est pas un FormData, on fixe le Content-Type JSON
+    if (!(options.body instanceof FormData)) {
+        options.headers['Content-Type'] = 'application/json';
+    }
+    // Toujours inclure les credentials pour cookie si besoin
+    options.credentials = options.credentials || 'include';
     
     try {
         const response = await fetch(apiUrl, {

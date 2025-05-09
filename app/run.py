@@ -4,9 +4,13 @@ import sys
 import time
 import logging
 from dotenv import load_dotenv
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, get_jwt
 from flask_migrate import Migrate
 from flask_cors import CORS
+from flask_socketio import SocketIO
+from flask import jsonify
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 # Chargement des variables d'environnement
 load_dotenv()
@@ -18,8 +22,43 @@ logger = logging.getLogger(__name__)
 # Importation de l'application Flask depuis le package app.api
 from app import app  # Cette ligne récupère l'instance Flask définie dans app/api/__init__.py
 
+# --- Protection sécurité/csp ---
+from flask_talisman import Talisman
+
+# Politique CSP de base (peut être ajustée)
+csp = {
+    'default-src': ["'self'"],
+    'img-src': ["'self'", 'data:'],
+    'style-src': ["'self'", "'unsafe-inline'"],
+    'script-src': ["'self'"]
+}
+
+# Activation de Talisman (sécurise aussi HSTS, nosniff, etc.)
+Talisman(app, content_security_policy=csp)
+
 # Initialisation globale de CORS (support des credentials)
 CORS(app, supports_credentials=True)
+
+# --- Rate Limiting ---
+limiter = Limiter(
+    key_func=get_remote_address,
+    storage_uri=os.environ.get('REDIS_URL', 'redis://redis:6379/0'),
+    default_limits=["200 per day", "50 per hour"]
+)
+limiter.init_app(app)
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return jsonify({'error': 'Trop de requêtes, réessayez plus tard.'}), 429
+
+# --- Ajout SocketIO ---
+# Crée une instance SocketIO réutilisable dans le reste de l'application
+socketio = SocketIO(
+    app,
+    cors_allowed_origins="*",  # En développement ; restreindre en prod
+    ping_interval=25,
+    ping_timeout=60
+)
 
 # Import des routes (elles s'enregistrent déjà via l'import dans app/api/__init__.py, 
 # mais ici on peut forcer leur chargement si besoin)
@@ -27,25 +66,36 @@ from app.api import routes
 
 # Ajout du chemin parent pour importer les modèles (si "models" se trouve à la racine)
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from models import db, User
+from models import db, User, RevokedToken
 
 # Configuration de la base de données
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Configuration JWT
+# Configuration JWT (header uniquement)
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
 app.config['JWT_TOKEN_LOCATION'] = ['headers']
 app.config['JWT_HEADER_NAME'] = 'Authorization'
 app.config['JWT_HEADER_TYPE'] = 'Bearer'
-app.config['JWT_COOKIE_SECURE'] = False         # À mettre à True en production (HTTPS)
-app.config['JWT_COOKIE_CSRF_PROTECT'] = False     # Désactivé pour simplifier les tests
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600     # 1 heure
 
+# Configuration globale Flask
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'CHANGE_ME_SECRET')
+
+# Configuration du dossier pour les fichiers de report
+app.config['UPLOAD_FOLDER_REPORTS'] = os.path.join(os.getcwd(), 'uploads', 'reports')
+os.makedirs(app.config['UPLOAD_FOLDER_REPORTS'], exist_ok=True)
+
 # Initialisation des extensions
-db.init_app(app)
+try:
+    db.init_app(app)
+except Exception as e:
+    logger.debug(f"Ignorer initialisation de SQLAlchemy: {e}")
 jwt = JWTManager(app)
-migrate = Migrate(app, db)
+try:
+    migrate = Migrate(app, db)
+except Exception as e:
+    logger.debug(f"Ignorer initialisation de Migrate: {e}")
 
 @jwt.user_identity_loader
 def user_identity_lookup(user):
@@ -62,7 +112,19 @@ def user_lookup_callback(_jwt_header, jwt_data):
 
 @jwt.token_in_blocklist_loader
 def check_if_token_revoked(jwt_header, jwt_payload):
-    logger.debug(f"Vérification du token: {jwt_payload}")
+    jti = jwt_payload["jti"]
+    if RevokedToken.query.filter_by(jti=jti).first():
+        logger.debug(f"Token {jti} révoqué (liste noire)")
+        return True
+    # Vérifier si l'utilisateur est supprimé
+    try:
+        user_id = int(jwt_payload["sub"])
+        user = User.query.get(user_id)
+        if user and user.deleted_at is not None:
+            logger.debug(f"Token refusé : utilisateur {user_id} supprimé")
+            return True
+    except Exception as e:
+        logger.error("Erreur vérif utilisateur supprimé", e)
     return False
 
 @jwt.expired_token_loader
@@ -84,6 +146,18 @@ def missing_token_callback(error_string):
 from app.api import auth
 app.register_blueprint(auth.auth_bp, url_prefix='/api/auth')
 
+# Blueprint équipe
+from app.api.team import team_bp
+app.register_blueprint(team_bp)
+
+# Blueprint report
+from app.api.report import report_bp
+app.register_blueprint(report_bp)
+
+# Blueprint chat report
+from app.api.report_chat import chat_bp
+app.register_blueprint(chat_bp)
+
 # Pour le développement, attendre que la base de données soit prête
 print("Attente de la base de données...")
 time.sleep(3)
@@ -99,4 +173,5 @@ with app.app_context():
         print(f"❌ Erreur lors de la création des tables: {str(e)}")
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    # Forcer HTTPS en production si derrière proxy — ici on part en debug False
+    socketio.run(app, host='0.0.0.0', debug=False, ssl_context='adhoc')
